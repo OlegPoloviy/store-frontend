@@ -58,13 +58,14 @@ export function ProductsSection({ products }: ProductsSectionProps) {
                 </h3>
 
                 <p className="text-sm text-gray-500">
-                  {product.description || "Подивитись більше"}
+                  {product.description || "See more"}
                 </p>
 
                 {/* Price Section */}
                 <div className="flex items-center justify-between pt-2">
                   <div className="flex items-center space-x-2">
                     <p>{product.price}</p>
+                    <p>{product.currency}</p>
                   </div>
 
                   <Button

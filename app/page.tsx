@@ -1,5 +1,6 @@
 import { Hero } from "@/components/Hero";
 import { ProductsList } from "@/components/ProductsList";
+import { FooterSection } from "@/components/FooterSection";
 
 export default function HomePage() {
   return (
@@ -7,6 +8,7 @@ export default function HomePage() {
       <div className="bg-[#FAFAFA] h-screen">
         <Hero />
         <ProductsList />
+        <FooterSection />
       </div>
     </>
   );
