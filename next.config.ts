@@ -21,6 +21,12 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "internet-store-bucket.s3.us-east-2.amazonaws.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
 };
