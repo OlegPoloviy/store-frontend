@@ -20,7 +20,7 @@ export function ProductsSection({ products }: ProductsSectionProps) {
             No products found
           </h3>
           <p className="text-gray-500 mb-6">
-            We couldn't find any products at the moment. Please check back
+            We couldn&apos;t find any products at the moment. Please check back
             later.
           </p>
           <Button variant="outline" className="px-6">

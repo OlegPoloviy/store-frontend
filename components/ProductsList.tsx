@@ -3,7 +3,7 @@ import { ProductsSection } from "./ProductsSection";
 import { productsApi } from "@/api/productApi";
 import { Product } from "@/types/product.type";
 import { useEffect, useState } from "react";
-import { Loader, ProductsGridSkeleton } from "./Loader";
+import { ProductsGridSkeleton } from "./Loader";
 
 export function ProductsList() {
   const [products, setProducts] = useState<Product[]>([]);

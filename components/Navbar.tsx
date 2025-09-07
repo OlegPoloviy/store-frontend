@@ -1,5 +1,5 @@
 "use client";
-import { Search, User, ShoppingCart, Mountain, Menu, X } from "lucide-react";
+import { Search, User, ShoppingCart, Mountain, Menu } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   return (
