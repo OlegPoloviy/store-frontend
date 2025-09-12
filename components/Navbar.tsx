@@ -1,5 +1,6 @@
 "use client";
 import { Search, User, ShoppingCart, Mountain, Menu } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export function Navbar() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const router = useRouter();
 
   return (
     <nav className="fixed w-full bg-white z-100 border-b border-gray-200">
@@ -94,6 +96,7 @@ export function Navbar() {
               variant="ghost"
               size="sm"
               className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-stone-50 transition-colors duration-200 group"
+              onClick={() => router.push("/register")}
             >
               <User
                 size={20}
@@ -135,6 +138,7 @@ export function Navbar() {
                   variant="ghost"
                   size="sm"
                   className="md:hidden p-2 rounded-lg hover:bg-stone-50 transition-colors duration-200"
+                  onClick={() => router.push("/register")}
                 >
                   <Menu size={24} className="text-stone-600" />
                 </Button>

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Product } from "@/types/product.type";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,57 +36,57 @@ export function ProductsSection({ products }: ProductsSectionProps) {
     <section className="py-8 px-4 max-w-7xl mx-auto">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
         {products.map((product) => (
-          <Card
-            key={product.id}
-            className="group overflow-hidden border-0 shadow-none hover:shadow-lg transition-all duration-300 cursor-pointer"
-          >
-            <CardContent className="p-0">
-              {/* Product Image Container */}
-              <div className="relative aspect-square bg-gray-50 overflow-hidden rounded-lg mb-4">
-                <Image
-                  src={product.images[0].url}
-                  alt={product.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
-              </div>
-
-              {/* Product Info */}
-              <div className="space-y-2">
-                <h3 className="font-medium text-lg text-gray-900 group-hover:text-gray-700 transition-colors">
-                  {product.title}
-                </h3>
-
-                <p className="text-sm text-gray-500">
-                  {product.description || "See more"}
-                </p>
-
-                {/* Price Section */}
-                <div className="flex items-center justify-between pt-2">
-                  <div className="flex items-center space-x-2">
-                    <p>{product.price}</p>
-                    <p>{product.currency}</p>
-                  </div>
-
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                  >
-                    +
-                  </Button>
+          <Link key={product.id} href={`/products/${product.id}`}>
+            <Card className="group overflow-hidden border-0 shadow-none hover:shadow-lg transition-all duration-300 cursor-pointer">
+              <CardContent className="p-0">
+                <div className="relative aspect-square bg-gray-50 overflow-hidden rounded-lg mb-4">
+                  {product.images && product.images.length > 0 ? (
+                    <Image
+                      src={product.images[0].url}
+                      alt={product.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 768px) 100vw, 
+                             (max-width: 1200px) 50vw, 
+                             33vw"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 text-gray-400">
+                      <Package className="w-12 h-12 mb-2" />
+                      <p className="text-sm font-medium">No Image</p>
+                    </div>
+                  )}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+
+                <div className="space-y-2">
+                  <h3 className="font-medium text-lg text-gray-900 group-hover:text-gray-700 transition-colors">
+                    {product.title}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    {product.description || "See more"}
+                  </p>
+
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="flex items-center space-x-2">
+                      <p>{product.price}</p>
+                      <p>{product.currency}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => e.preventDefault()} // щоб не тригерило перехід
+                    >
+                      +
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
 
-      {/* Optional: Load More Button */}
       {products.length > 0 && (
         <div className="flex justify-center mt-8">
           <Button variant="outline" className="px-8">

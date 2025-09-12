@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { CategoryCard } from "@/components/CategoryCard";
 import { Button } from "@/components/ui/button";
 import { Category } from "@/types/category.type";
@@ -9,6 +10,7 @@ import { Loader } from "@/components/Loader";
 export default function CatalogPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     async function getCategories() {
@@ -57,7 +59,10 @@ export default function CatalogPage() {
           <p className="text-lg text-gray-600 mb-8">
             Discover our complete collection of premium furniture
           </p>
-          <Button className="px-8 py-3">
+          <Button
+            className="px-8 py-3"
+            onClick={() => router.push("/products")}
+          >
             View All Products
             <svg
               className="ml-2 -mr-1 w-5 h-5"
