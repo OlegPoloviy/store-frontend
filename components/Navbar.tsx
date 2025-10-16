@@ -1,15 +1,29 @@
 "use client";
 import { Search, User, ShoppingCart, Mountain, Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { getCurrentUser } from "@/lib/auth";
 
 export function Navbar() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [user, setUser] = useState<any>({});
   const router = useRouter();
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
+      } catch (error) {
+        console.error("Error loading user:", error);
+        setUser(null);
+      }
+    };
+    loadUser();
+  }, []);
 
   return (
     <nav className="fixed w-full bg-white z-100 border-b border-gray-200">
@@ -92,20 +106,37 @@ export function Navbar() {
             </div>
 
             {/* Account */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-stone-50 transition-colors duration-200 group"
-              onClick={() => router.push("/register")}
-            >
-              <User
-                size={20}
-                className="text-stone-600 group-hover:text-emerald-700 transition-colors duration-200"
-              />
-              <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200 hidden lg:inline">
-                Account
-              </span>
-            </Button>
+            {user ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-stone-50 transition-colors duration-200 group"
+                onClick={() => router.push("/user/profile")}
+              >
+                <User
+                  size={20}
+                  className="text-stone-600 group-hover:text-emerald-700 transition-colors duration-200"
+                />
+                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200 hidden lg:inline">
+                  {user.user_metadata?.firstName}
+                </span>
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-stone-50 transition-colors duration-200 group"
+                onClick={() => router.push("/register")}
+              >
+                <User
+                  size={20}
+                  className="text-stone-600 group-hover:text-emerald-700 transition-colors duration-200"
+                />
+                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200 hidden lg:inline">
+                  Account
+                </span>
+              </Button>
+            )}
 
             {/* Cart */}
             <Button
