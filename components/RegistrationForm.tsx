@@ -20,6 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useRouter } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/PhoneInput";
 import { Eye, EyeOff, Mail, Lock, User, MapPin, UserCheck } from "lucide-react";
@@ -38,6 +39,8 @@ export function RegistrationForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const router = useRouter();
+
   const form = useForm<RegistrationFormData>({
     resolver: zodResolver(registrationSchema),
     mode: "onChange",
@@ -50,7 +53,7 @@ export function RegistrationForm() {
       const user = await registerUser(data);
 
       toast.success("Account created! Check your email to confirm.");
-      console.log("New user:", user);
+      router.push("/");
     } catch (error: any) {
       toast.error(error.message || "Registration failed");
     } finally {

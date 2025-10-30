@@ -21,6 +21,7 @@ export async function registerUser({
         city: meta.city,
         postalCode: meta.postalCode,
         country: meta.country,
+        role: "USER",
       },
       emailRedirectTo: `${window.location.origin}/auth/callback`,
     },
@@ -56,7 +57,24 @@ export async function updateUserProfile(profileData: {
   return data;
 }
 
+export async function loginUser({
+  email,
+  password,
+}: {
+  email: string;
+  password: string;
+}) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) throw error;
+  return data;
+}
+
 export async function signOut() {
   const { error } = await supabase.auth.signOut();
+  console.log("logged out");
   if (error) throw error;
 }

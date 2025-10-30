@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { getCurrentUser } from "@/lib/auth";
+import { supabase } from "@/lib/supabase.client";
 
 export function Navbar() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -14,15 +15,23 @@ export function Navbar() {
   const router = useRouter();
   useEffect(() => {
     const loadUser = async () => {
-      try {
-        const currentUser = await getCurrentUser();
-        setUser(currentUser);
-      } catch (error) {
-        console.error("Error loading user:", error);
-        setUser(null);
-      }
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
     };
+
     loadUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   return (

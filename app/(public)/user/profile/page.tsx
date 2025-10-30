@@ -24,9 +24,10 @@ import {
   X,
   Eye,
   EyeOff,
+  LogOut,
 } from "lucide-react";
 import { toast } from "sonner";
-import { getCurrentUser, updateUserProfile } from "@/lib/auth";
+import { getCurrentUser, updateUserProfile, signOut } from "@/lib/auth";
 
 interface UserProfile {
   firstName: string;
@@ -132,6 +133,11 @@ export default function UserProfile() {
       </div>
     );
   }
+
+  const handleSignOut = () => {
+    signOut();
+    router.push("/");
+  };
 
   return (
     <div className="min-h-screen pt-[5%] bg-gray-50 py-8">
@@ -359,7 +365,7 @@ export default function UserProfile() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex justify-end space-x-3 pt-6 border-t">
+            <div className="flex justify-between space-x-3 pt-6 border-t">
               {isEditing ? (
                 <>
                   <Button
@@ -389,6 +395,13 @@ export default function UserProfile() {
                   Edit Profile
                 </Button>
               )}
+              <Button
+                className="bg-gray-900 hover:bg-gray-800"
+                onClick={() => handleSignOut()}
+              >
+                <LogOut />
+                Logout
+              </Button>
             </div>
           </CardContent>
         </Card>
