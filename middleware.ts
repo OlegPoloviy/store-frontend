@@ -21,8 +21,6 @@ export async function middleware(req: NextRequest) {
     : null;
   const role = jwtPayload?.user_role || "USER";
 
-  console.log("User role:", role);
-
   if (path.startsWith("/admin") && role !== "ADMIN") {
     return NextResponse.redirect(new URL("/", req.url));
   }
@@ -31,5 +29,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/user/:path*"],
+  matcher: ["/admin/:path*", "/:path*"],
 };

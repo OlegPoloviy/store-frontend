@@ -28,6 +28,8 @@ import type { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { loginUser } from "@/lib/auth";
+import { supabase } from "@/lib/supabase.client";
+import { isAdminBySession, isAdminByToken } from "@/lib/util/isAdmin";
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
@@ -44,12 +46,29 @@ export function LoginForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      console.log(data);
       setIsLoading(true);
-      const user = await loginUser(data);
+      const loginResponse = await loginUser(data);
 
-      toast.success("Login successful! Welcome back.");
-      router.push("/");
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        throw new Error("Failed to verify user authentication");
+      }
+
+      const isAdmin = loginResponse.session?.access_token
+        ? isAdminByToken(loginResponse.session.access_token)
+        : false;
+
+      if (isAdmin) {
+        toast.success(`Login successful! Welcome back, ${user.email}`);
+        router.replace("/dashboard");
+      } else {
+        toast.success("Login successful! Welcome back.");
+        router.replace("/");
+      }
     } catch (error: any) {
       toast.error(error.message || "Login failed");
     } finally {
