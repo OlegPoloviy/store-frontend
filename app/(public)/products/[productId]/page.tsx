@@ -1,4 +1,4 @@
-import { productsApi } from "@/api/productApi";
+import { productsApiServer } from "@/api/productApi.server";
 import { Product } from "@/types/product.type";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,8 @@ interface ProductPageProps {
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const product = await productsApi.getById(params.productId);
+  const productId = await params.productId;
+  const product = await productsApiServer.getById(productId);
 
   const formatPrice = (price: string, currency: string) => {
     return new Intl.NumberFormat("uk-UA", {

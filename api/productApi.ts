@@ -16,4 +16,9 @@ export const productsApi = {
     const response = await httpClient.get(`/products/category/${category}`);
     return response.data;
   },
+
+  createProduct: async (formData: FormData): Promise<Product> => {
+    const response = await httpClient.post("/products", formData);
+    return response.data;
+  },
 };
