@@ -62,7 +62,7 @@ export function ProductsSection({ products }: ProductsSectionProps) {
                   <h3 className="font-medium text-lg text-gray-900 group-hover:text-gray-700 transition-colors">
                     {product.title}
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 line-clamp-2">
                     {product.description || "See more"}
                   </p>
 

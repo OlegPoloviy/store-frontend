@@ -62,7 +62,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
             {category.name}
           </h3>
 
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 line-clamp-2">
             {category.subtitle || "Explore collection"}
           </p>
 

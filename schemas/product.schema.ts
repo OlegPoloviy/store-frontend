@@ -48,7 +48,7 @@ export const productCreationSchema = z.object({
 
   // Care & Assembly
   careInstructions: z.string().optional(),
-  assemblyRequired: z.string().optional(),
+  assemblyRequired: z.boolean().optional(),
   warranty: z.string().optional(),
 
   // Story & Design

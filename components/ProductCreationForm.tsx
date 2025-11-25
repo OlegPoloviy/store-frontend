@@ -63,6 +63,7 @@ export function ProductCreationForm() {
       unitOfMeasure: "cm",
       weightUnit: "kg",
       handmade: false,
+      assemblyRequired: false,
       features: [],
       craftsmanshipDetails: [],
       secondaryMaterials: [],
@@ -851,10 +852,16 @@ export function ProductCreationForm() {
                     <FormItem>
                       <FormLabel>Assembly Required</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="e.g., Yes, No, Partial"
-                          {...field}
-                        />
+                        <select
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
+                          value={field.value ? "true" : "false"}
+                          onChange={(e) =>
+                            field.onChange(e.target.value === "true")
+                          }
+                        >
+                          <option value="false">No</option>
+                          <option value="true">Yes</option>
+                        </select>
                       </FormControl>
                       <FormMessage />
                     </FormItem>

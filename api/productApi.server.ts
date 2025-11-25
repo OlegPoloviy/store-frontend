@@ -18,4 +18,29 @@ export const productsApiServer = {
     );
     return response.data;
   },
+
+  addToFavorite: async (productId: string): Promise<Product> => {
+    const response = await httpClientServer.post("/products/favorite", {
+      productId,
+    });
+    return response.data;
+  },
+
+  removeFromFavorites: async (productId: string): Promise<Product> => {
+    const response = await httpClientServer.delete("/products/favorite", {
+      data: { productId },
+    });
+    return response.data;
+  },
+
+  checkIfFavorite: async (productId: string): Promise<boolean> => {
+    try {
+      const response = await httpClientServer.get(
+        `/products/favorite/${productId}`
+      );
+      return response.data.isFavorite;
+    } catch (error) {
+      return false;
+    }
+  },
 };

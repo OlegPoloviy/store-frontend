@@ -1,24 +1,36 @@
 "use client";
-import { Search, User, ShoppingCart, Mountain, Menu } from "lucide-react";
+import {
+  Search,
+  User,
+  ShoppingCart,
+  Mountain,
+  Menu,
+  LayoutDashboard,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { getCurrentUser } from "@/lib/auth";
 import { supabase } from "@/lib/supabase.client";
+import { isAdminByToken } from "@/lib/util/isAdmin";
 
 export function Navbar() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [user, setUser] = useState<any>({});
+  const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
   useEffect(() => {
     const loadUser = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       setUser(user);
+      setIsAdmin(isAdminByToken(session?.access_token));
     };
 
     loadUser();
@@ -27,6 +39,7 @@ export function Navbar() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setIsAdmin(isAdminByToken(session?.access_token));
     });
 
     return () => {
@@ -89,6 +102,16 @@ export function Navbar() {
               About
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
             </Link>
+            {isAdmin && (
+              <Link
+                href="/dashboard"
+                className="relative text-emerald-700 hover:text-emerald-900 font-medium transition-colors duration-200 group flex items-center space-x-1"
+              >
+                <LayoutDashboard size={18} />
+                <span>Admin Dashboard</span>
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-800 group-hover:w-full transition-all duration-300"></span>
+              </Link>
+            )}
           </div>
 
           {/* Right Side Actions */}
@@ -222,6 +245,17 @@ export function Navbar() {
                           About
                         </Button>
                       </Link>
+                      {isAdmin && (
+                        <Link href="/dashboard">
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start text-left px-4 py-2 text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50 rounded-lg transition-colors duration-200 font-medium flex items-center"
+                          >
+                            <LayoutDashboard size={20} className="mr-2" />
+                            Admin Dashboard
+                          </Button>
+                        </Link>
+                      )}
                     </div>
                   </div>
 

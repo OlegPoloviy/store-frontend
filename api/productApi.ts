@@ -21,4 +21,27 @@ export const productsApi = {
     const response = await httpClient.post("/products", formData);
     return response.data;
   },
+
+  addToFavorite: async (productId: string): Promise<Product> => {
+    const response = await httpClient.post("/products/favorite", { productId });
+    return response.data;
+  },
+
+  removeFromFavorites: async (productId: string): Promise<Product> => {
+    const response = await httpClient.delete("/products/favorite", {
+      data: { productId },
+    });
+    return response.data;
+  },
+
+  checkIfFavorite: async (productId: string): Promise<boolean> => {
+    try {
+      const response = await httpClient.get(
+        `/products/favorite/status/${productId}`
+      );
+      return response.data.isFavorite;
+    } catch (error) {
+      return false;
+    }
+  },
 };

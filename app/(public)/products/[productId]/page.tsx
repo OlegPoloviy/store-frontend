@@ -1,13 +1,6 @@
 import { productsApiServer } from "@/api/productApi.server";
-import { Product } from "@/types/product.type";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FooterSection } from "@/components/FooterSection";
 import {
-  ArrowLeft,
-  Heart,
-  Share2,
   Star,
   Truck,
   Shield,
@@ -16,15 +9,18 @@ import {
   Ruler,
   Package,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
-import { CopyButton } from "@/components/CopyButton";
+import { ProductImageGallery } from "@/components/ProductImageGallery";
+import { ProductActions } from "@/components/ProductActions";
 
 interface ProductPageProps {
   params: { productId: string };
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
+export default async function ProductPage({
+  params: pageParams,
+}: ProductPageProps) {
+  const params = await pageParams;
   const productId = await params.productId;
   const product = await productsApiServer.getById(productId);
 
@@ -81,47 +77,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
             {/* Product Images */}
-            <div className="space-y-4">
-              <div className="aspect-square bg-white rounded-2xl overflow-hidden shadow-lg">
-                {product.images && product.images.length > 0 ? (
-                  <Image
-                    src={product.images[0].url}
-                    alt={product.title}
-                    width={600}
-                    height={600}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 text-gray-400">
-                    <Package className="w-16 h-16 mb-4" />
-                    <p className="text-lg font-medium">No Image Available</p>
-                    <p className="text-sm text-center px-4">
-                      Image will be added soon
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Additional Images */}
-              {product.images && product.images.length > 1 && (
-                <div className="grid grid-cols-4 gap-2">
-                  {product.images.slice(1, 5).map((image, index) => (
-                    <div
-                      key={index}
-                      className="aspect-square bg-white rounded-lg overflow-hidden shadow-sm"
-                    >
-                      <Image
-                        src={image.url}
-                        alt={`${product.title} ${index + 2}`}
-                        width={150}
-                        height={150}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <ProductImageGallery
+              images={product.images || []}
+              productTitle={product.title}
+            />
 
             {/* Product Info */}
             <div className="space-y-6">
@@ -136,9 +95,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </h1>
 
               {/* Description */}
-              <p className="text-lg text-gray-600 leading-relaxed">
-                {product.description}
-              </p>
+              <div className="text-lg leading-relaxed">
+                {product.description ? (
+                  <p className="text-gray-600">{product.description}</p>
+                ) : (
+                  <p className="text-gray-400 italic">
+                    No description available yet. Please contact us for more
+                    details.
+                  </p>
+                )}
+              </div>
 
               {/* Price */}
               <div className="flex items-baseline space-x-2">
@@ -157,18 +123,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex space-x-4">
-                <Button
-                  size="lg"
-                  className="flex-1 bg-gray-900 hover:bg-gray-800"
-                >
-                  Add to Cart
-                </Button>
-                <Button variant="outline" size="lg" className="px-4">
-                  <Heart className="w-5 h-5" />
-                </Button>
-                <CopyButton />
-              </div>
+              <ProductActions productId={productId} />
 
               {/* Features */}
               <div className="grid grid-cols-2 gap-4 pt-6 border-t">
