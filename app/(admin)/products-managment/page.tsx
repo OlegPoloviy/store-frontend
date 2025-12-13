@@ -33,8 +33,7 @@ export default function ProductsManagmentPage() {
 
   const handleDelete = async (productId: string) => {
     try {
-      // TODO: Implement delete API call
-      // await productsApi.delete(productId);
+      await productsApi.deleteProduct(productId);
       setProducts(products.filter((p) => p.id !== productId));
       toast.success("Product deleted successfully");
     } catch (error) {

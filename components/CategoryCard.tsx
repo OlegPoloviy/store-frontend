@@ -14,7 +14,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
   return (
     <Card
       key={category.id}
-      className="group overflow-hidden border-0 shadow-none hover:shadow-lg transition-all duration-300 cursor-pointer"
+      className="group overflow-hidden border-0 shadow-none hover:shadow-lg transition-all duration-300 cursor-pointer p-0"
       onClick={() => router.push(`/categories/${category.name}`)}
     >
       <CardContent className="p-0">

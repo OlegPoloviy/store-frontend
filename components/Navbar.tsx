@@ -6,6 +6,7 @@ import {
   Mountain,
   Menu,
   LayoutDashboard,
+  Heart,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -191,6 +192,25 @@ export function Navbar() {
                   Cart
                 </span>
                 <div className="text-xs text-stone-500">₦15,240.00</div>
+              </div>
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="relative flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-stone-50 transition-colors duration-200 group"
+              onClick={() => router.push("/products/favorites")}
+            >
+              <div className="relative">
+                <Heart
+                  size={20}
+                  className="text-stone-600 group-hover:text-emerald-700 transition-colors duration-200"
+                />
+              </div>
+              <div className="hidden lg:block">
+                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200">
+                  Favorites
+                </span>
               </div>
             </Button>
 

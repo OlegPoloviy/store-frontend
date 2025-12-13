@@ -752,7 +752,7 @@ export function ProductCreationForm() {
                     <FormItem>
                       <FormLabel>Seating Capacity</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., 4 people" {...field} />
+                        <Input type="number" placeholder="e.g., 4" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

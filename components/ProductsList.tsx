@@ -1,33 +1,25 @@
-"use client";
 import { ProductsSection } from "./ProductsSection";
-import { productsApi } from "@/api/productApi";
 import { Product } from "@/types/product.type";
-import { useEffect, useState } from "react";
 import { ProductsGridSkeleton } from "./Loader";
 
-export function ProductsList() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+interface ProductsListProps {
+  products: Product[];
+  loading?: boolean;
+  fullWidth?: boolean;
+}
 
-  useEffect(() => {
-    async function getProducts() {
-      try {
-        setLoading(true);
-        const productsData = await productsApi.getAll();
-        setProducts(productsData);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    getProducts();
-  }, []);
+export function ProductsList({
+  products,
+  loading = false,
+  fullWidth = false,
+}: ProductsListProps) {
+  const skeletonContainerClass = fullWidth
+    ? "py-8 px-4"
+    : "py-8 px-4 max-w-7xl mx-auto";
 
   if (loading) {
     return (
-      <section className="py-8 px-4 max-w-7xl mx-auto">
+      <section className={skeletonContainerClass}>
         <ProductsGridSkeleton count={6} />
       </section>
     );
@@ -35,7 +27,7 @@ export function ProductsList() {
 
   return (
     <>
-      <ProductsSection products={products} />
+      <ProductsSection products={products} fullWidth={fullWidth} />
     </>
   );
 }

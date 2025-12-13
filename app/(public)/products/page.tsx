@@ -1,7 +1,16 @@
 import { ProductsList } from "@/components/ProductsList";
-import { FooterSection } from "@/components/FooterSection";
+import { productsApiServer } from "@/api/productApi.server";
+import { Product } from "@/types/product.type";
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  let products: Product[] = [];
+
+  try {
+    products = await productsApiServer.getAll();
+  } catch (error) {
+    console.error("Error fetching products:", error);
+  }
+
   return (
     <div className="bg-[#FAFAFA] min-h-screen">
       <div className="pt-20">
@@ -14,7 +23,7 @@ export default function ProductsPage() {
               Discover our complete collection of premium hand-made furniture
             </p>
           </div>
-          <ProductsList />
+          <ProductsList products={products} />
         </div>
       </div>
     </div>

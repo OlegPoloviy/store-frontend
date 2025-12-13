@@ -20,14 +20,14 @@ export const productsApiServer = {
   },
 
   addToFavorite: async (productId: string): Promise<Product> => {
-    const response = await httpClientServer.post("/products/favorite", {
+    const response = await httpClientServer.post("/favorites", {
       productId,
     });
     return response.data;
   },
 
   removeFromFavorites: async (productId: string): Promise<Product> => {
-    const response = await httpClientServer.delete("/products/favorite", {
+    const response = await httpClientServer.delete("/favorites", {
       data: { productId },
     });
     return response.data;
@@ -35,12 +35,18 @@ export const productsApiServer = {
 
   checkIfFavorite: async (productId: string): Promise<boolean> => {
     try {
-      const response = await httpClientServer.get(
-        `/products/favorite/${productId}`
-      );
+      const response = await httpClientServer.get(`/favorites/${productId}`);
       return response.data.isFavorite;
     } catch (error) {
       return false;
+    }
+  },
+
+  deleteProduct: async (productId: string): Promise<void> => {
+    try {
+      await httpClientServer.delete(`products/${productId}`);
+    } catch (error) {
+      console.error(error);
     }
   },
 };

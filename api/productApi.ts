@@ -22,13 +22,18 @@ export const productsApi = {
     return response.data;
   },
 
+  getAllFavorites: async (): Promise<Product[]> => {
+    const response = await httpClient.get("/favorites");
+    return response.data;
+  },
+
   addToFavorite: async (productId: string): Promise<Product> => {
-    const response = await httpClient.post("/products/favorite", { productId });
+    const response = await httpClient.post("/favorites", { productId });
     return response.data;
   },
 
   removeFromFavorites: async (productId: string): Promise<Product> => {
-    const response = await httpClient.delete("/products/favorite", {
+    const response = await httpClient.delete("/favorites", {
       data: { productId },
     });
     return response.data;
@@ -36,12 +41,18 @@ export const productsApi = {
 
   checkIfFavorite: async (productId: string): Promise<boolean> => {
     try {
-      const response = await httpClient.get(
-        `/products/favorite/status/${productId}`
-      );
+      const response = await httpClient.get(`/favorites/status/${productId}`);
       return response.data.isFavorite;
     } catch (error) {
       return false;
+    }
+  },
+
+  deleteProduct: async (productId: string): Promise<void> => {
+    try {
+      await httpClient.delete(`products/${productId}`);
+    } catch (error) {
+      console.error(error);
     }
   },
 };

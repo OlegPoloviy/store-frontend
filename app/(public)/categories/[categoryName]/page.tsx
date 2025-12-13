@@ -2,9 +2,8 @@
 import { useEffect, useState } from "react";
 import { productsApi } from "@/api/productApi";
 import { Product } from "@/types/product.type";
-import { ProductsSection } from "@/components/ProductsSection";
+import { ProductsList } from "@/components/ProductsList";
 import { useParams } from "next/navigation";
-import { ProductsGridSkeleton } from "@/components/Loader";
 
 export default function ProductsByCategoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -13,27 +12,24 @@ export default function ProductsByCategoryPage() {
 
   useEffect(() => {
     async function getProducts() {
-      setLoading(true);
-      const productsData = await productsApi.getByCategory(
-        categoryName as string
-      );
-      setProducts(productsData);
-      setLoading(false);
+      try {
+        setLoading(true);
+        const productsData = await productsApi.getByCategory(
+          categoryName as string
+        );
+        setProducts(productsData);
+      } catch (error) {
+        console.error("Error fetching products by category:", error);
+      } finally {
+        setLoading(false);
+      }
     }
     getProducts();
   }, [categoryName]);
 
-  if (loading) {
-    return (
-      <div className="relative top-20">
-        <ProductsGridSkeleton count={4} />
-      </div>
-    );
-  }
-
   return (
     <div className="relative top-20">
-      <ProductsSection products={products} />
+      <ProductsList products={products} loading={loading} />
     </div>
   );
 }
