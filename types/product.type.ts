@@ -25,6 +25,7 @@ export interface Product {
   categoryId: string;
   category: ProductCategory;
   images: ProductImage[];
+  isFavorite?: boolean;
 
   // Additional detailed fields
   assemblyRequired?: string | null;

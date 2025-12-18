@@ -7,11 +7,13 @@ import { ProductCard } from "./ProductCard";
 interface ProductsSectionProps {
   products: Product[];
   fullWidth?: boolean;
+  showFavorite?: boolean;
 }
 
 export function ProductsSection({
   products,
   fullWidth = false,
+  showFavorite = true,
 }: ProductsSectionProps) {
   const containerClass = fullWidth
     ? "py-16 px-4"
@@ -46,7 +48,11 @@ export function ProductsSection({
     <section className={gridContainerClass}>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-8">
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard
+            showFavorite={showFavorite}
+            key={product.id}
+            product={product}
+          />
         ))}
       </div>
 

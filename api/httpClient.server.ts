@@ -1,5 +1,6 @@
 import axios from "axios";
 import { cookies } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
 
 const baseURL =
   process.env.NEXT_PUBLIC_API_URL ||
@@ -18,11 +19,28 @@ httpClientServer.interceptors.request.use(async (config) => {
   try {
     const cookieStore = await cookies();
 
-    // Get Supabase session from cookies
-    const accessToken = cookieStore.get("sb-access-token")?.value;
+    // Create Supabase client with proper cookie handling
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+          set() {},
+          remove() {},
+        },
+      }
+    );
 
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+    // Get session from Supabase (reads from cookies automatically)
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (session?.access_token) {
+      config.headers.Authorization = `Bearer ${session.access_token}`;
     }
   } catch (error) {
     console.error("Error getting auth token:", error);

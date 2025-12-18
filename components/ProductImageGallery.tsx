@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { Package } from "lucide-react";
 import { useState } from "react";
+import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 
 interface ProductImage {
   url: string;
@@ -36,11 +36,7 @@ export function ProductImageGallery({
     return (
       <div className="space-y-4">
         <div className="aspect-square bg-white rounded-2xl overflow-hidden shadow-lg">
-          <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 text-gray-400">
-            <Package className="w-16 h-16 mb-4" />
-            <p className="text-lg font-medium">No Image Available</p>
-            <p className="text-sm text-center px-4">Image will be added soon</p>
-          </div>
+          <ImagePlaceholder className="text-gray-400" text="No image available" />
         </div>
       </div>
     );

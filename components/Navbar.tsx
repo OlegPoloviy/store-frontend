@@ -175,6 +175,7 @@ export function Navbar() {
             <Button
               variant="ghost"
               size="sm"
+              onClick={() => router.push("/cart")}
               className="relative flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-stone-50 transition-colors duration-200 group"
             >
               <div className="relative">

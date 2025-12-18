@@ -6,11 +6,14 @@ import { productsApi } from "@/api/productApi";
 import { collectionApi } from "@/api/collections.api";
 import { ViewToggle } from "@/components/ViewToggle";
 import { ProductsList } from "@/components/ProductsList";
+import { Moodboard } from "@/components/Moodboard";
 import { CollectionsFilter } from "@/components/CollectionsFilter";
 import { CreateCollectionDialog } from "@/components/CreateCollectionDialog";
+import { toast } from "sonner";
 
 export default function FavoritesPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [view, setView] = useState<"list" | "moodboard">("list");
   const [collections, setCollections] = useState<Collection[]>([]);
   const [selectedCollectionId, setSelectedCollectionId] = useState<
     string | null
@@ -54,10 +57,31 @@ export default function FavoritesPage() {
   }, []);
 
   // Обробник зміни колекції
-  const handleCollectionChange = (collectionId: string | null) => {
+  const handleCollectionChange = async (collectionId: string | null) => {
     setSelectedCollectionId(collectionId);
-    // TODO: Тут можна додати логіку фільтрації продуктів за колекцією
-    // Наприклад, викликати API для отримання продуктів конкретної колекції
+
+    // Завантажити продукти для вибраної колекції
+    try {
+      setLoading(true);
+
+      if (collectionId === null) {
+        // Якщо вибрано "All saved", завантажити всі улюблені
+        const favoriteProducts = await productsApi.getAllFavorites();
+        setProducts(favoriteProducts);
+      } else {
+        // Завантажити продукти конкретної колекції
+        const collectionProducts = await collectionApi.getItemsByCollection(
+          collectionId
+        );
+        setProducts(collectionProducts);
+      }
+    } catch (error) {
+      console.error("Error fetching products for collection:", error);
+      toast.error("Failed to load products");
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Обробник відкриття діалогу створення колекції
@@ -66,11 +90,11 @@ export default function FavoritesPage() {
   };
 
   // Обробник після успішного створення колекції
-  const handleCollectionCreated = (newCollection: Collection) => {
+  const handleCollectionCreated = async (newCollection: Collection) => {
     // Додати нову колекцію до списку
     setCollections((prev) => [...prev, newCollection]);
-    // Автоматично вибрати нову колекцію
-    setSelectedCollectionId(newCollection.id);
+    // Автоматично вибрати нову колекцію та завантажити її продукти
+    await handleCollectionChange(newCollection.id);
   };
 
   return (
@@ -86,7 +110,7 @@ export default function FavoritesPage() {
               create the perfect space.
             </p>
           </div>
-          <ViewToggle />
+          <ViewToggle view={view} onViewChange={setView} />
         </div>
         <div className="mt-5">
           <CollectionsFilter
@@ -97,7 +121,16 @@ export default function FavoritesPage() {
             loading={collectionsLoading}
           />
         </div>
-        <ProductsList products={products} loading={loading} fullWidth />
+        {view === "list" ? (
+          <ProductsList
+            showFavorite={false}
+            products={products}
+            loading={loading}
+            fullWidth
+          />
+        ) : (
+          <Moodboard products={products} loading={loading} />
+        )}
       </div>
 
       {/* Діалог створення колекції */}

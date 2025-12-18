@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import { createBrowserClient } from "@supabase/ssr";
+import { getOrCreateAnonymousId } from "@/lib/util/anonymousId";
 
 const baseURL =
   process.env.NEXT_PUBLIC_API_URL ||
@@ -27,11 +28,21 @@ httpClient.interceptors.request.use(async (config) => {
 
   const token = session?.access_token;
   if (token) {
+    config.headers = config.headers ?? {};
     config.headers.Authorization = `Bearer ${token}`;
   }
 
+  // Identify the client session even when user is not authorized.
+  // Backend reads it from: @Headers('x-anonymous-id')
+  const anonymousId = getOrCreateAnonymousId();
+  if (anonymousId) {
+    config.headers = config.headers ?? {};
+    (config.headers as any)["x-anonymous-id"] = anonymousId;
+  }
+
   if (config.data instanceof FormData) {
-    delete config.headers["Content-Type"];
+    config.headers = config.headers ?? {};
+    delete (config.headers as any)["Content-Type"];
   }
 
   return config;

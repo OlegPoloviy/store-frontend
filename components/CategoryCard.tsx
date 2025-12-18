@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Category } from "@/types/category.type";
 import { useRouter } from "next/navigation";
+import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 
 interface CategoryCardProps {
   category: Category;
@@ -42,8 +43,12 @@ export function CategoryCard({ category }: CategoryCardProps) {
               </div>
 
               {/* Main icon */}
-              <div className="text-6xl text-gray-500 mb-2 relative z-10">
-                📦
+              <div className="relative z-10 w-full h-full flex items-center justify-center">
+                <ImagePlaceholder
+                  className="bg-transparent text-gray-500"
+                  iconClassName="w-10 h-10 mb-2"
+                  textClassName="text-xs"
+                />
               </div>
 
               {/* Category name overlay */}

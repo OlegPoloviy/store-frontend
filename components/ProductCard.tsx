@@ -4,20 +4,51 @@ import Link from "next/link";
 import { Product } from "@/types/product.type";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, Heart, ShoppingCart, Edit3, Sparkles } from "lucide-react";
+import { Heart, ShoppingCart, Edit3, Sparkles } from "lucide-react";
 import Image from "next/image";
+import { productsApi } from "@/api/productApi";
+import { toast } from "sonner";
+import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 
 interface ProductCardProps {
   product: Product;
+  showFavorite?: boolean;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
-  const [isFavorite, setIsFavorite] = useState(false);
+export function ProductCard({
+  product,
+  showFavorite = true,
+}: ProductCardProps) {
+  const [isFavorite, setIsFavorite] = useState(product.isFavorite || false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleFavoriteClick = (e: React.MouseEvent) => {
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (isLoading) return;
+
+    setIsLoading(true);
+    const previousState = isFavorite;
+
     setIsFavorite(!isFavorite);
+
+    try {
+      if (isFavorite) {
+        await productsApi.removeFromFavorites(product.id);
+        toast.success("Removed from favorites");
+      } else {
+        await productsApi.addToFavorite(product.id);
+        toast.success("Added to favorites");
+      }
+    } catch (error) {
+      // Відкат при помилці
+      setIsFavorite(previousState);
+      console.error("Error toggling favorite:", error);
+      toast.error("Failed to update favorites");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleBuyClick = (e: React.MouseEvent) => {
@@ -58,26 +89,30 @@ export function ProductCard({ product }: ProductCardProps) {
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 text-gray-400">
-              <Package className="w-8 h-8 mb-1" />
-              <p className="text-xs font-medium">No Image</p>
-            </div>
+            <ImagePlaceholder />
           )}
 
           {/* Favorite Button */}
-          <button
-            onClick={handleFavoriteClick}
-            className="absolute top-2 right-2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-[2px] shadow-sm flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200 z-10 hover:bg-white"
-            aria-label="Add to favorites"
-          >
-            <Heart
-              className={`w-4 h-4 transition-colors duration-300 ${
-                isFavorite
-                  ? "fill-red-500 text-red-500"
-                  : "text-gray-600 hover:text-gray-900"
+          {showFavorite && (
+            <button
+              onClick={handleFavoriteClick}
+              disabled={isLoading}
+              className={`absolute top-2 right-2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-[2px] shadow-sm flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200 z-10 hover:bg-white ${
+                isLoading ? "opacity-50 cursor-not-allowed" : ""
               }`}
-            />
-          </button>
+              aria-label={
+                isFavorite ? "Remove from favorites" : "Add to favorites"
+              }
+            >
+              <Heart
+                className={`w-4 h-4 transition-colors duration-300 ${
+                  isFavorite
+                    ? "fill-red-500 text-red-500"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              />
+            </button>
+          )}
         </div>
       </Link>
 

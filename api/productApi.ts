@@ -4,6 +4,7 @@ import { Product } from "@/types/product.type";
 export const productsApi = {
   getAll: async (): Promise<Product[]> => {
     const response = await httpClient.get("/products");
+    console.log(response.data);
     return response.data;
   },
 

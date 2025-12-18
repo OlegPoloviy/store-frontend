@@ -123,7 +123,10 @@ export default async function ProductPage({
               </div>
 
               {/* Action Buttons */}
-              <ProductActions productId={productId} />
+              <ProductActions
+                productId={productId}
+                initialIsFavorite={product.isFavorite}
+              />
 
               {/* Features */}
               <div className="grid grid-cols-2 gap-4 pt-6 border-t">

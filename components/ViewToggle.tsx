@@ -1,11 +1,20 @@
 "use client";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LayoutGrid, CircuitBoard } from "lucide-react"; // Імпортуємо іконки
+import { LayoutGrid, CircuitBoard } from "lucide-react";
 
-export function ViewToggle() {
+interface ViewToggleProps {
+  view: "list" | "moodboard";
+  onViewChange: (view: "list" | "moodboard") => void;
+}
+
+export function ViewToggle({ view, onViewChange }: ViewToggleProps) {
   return (
-    <Tabs defaultValue="list" className="w-fit">
+    <Tabs
+      value={view}
+      onValueChange={(value) => onViewChange(value as "list" | "moodboard")}
+      className="w-fit"
+    >
       <TabsList className="bg-white border border-gray-200 h-auto p-1 rounded-lg gap-1">
         {/* --- Кнопка "Список" --- */}
         <TabsTrigger
@@ -30,7 +39,7 @@ export function ViewToggle() {
           "
         >
           <CircuitBoard className="w-4 h-4" />
-          <span> Moodboard</span>
+          <span>Moodboard</span>
         </TabsTrigger>
       </TabsList>
     </Tabs>
