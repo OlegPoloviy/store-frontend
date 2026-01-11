@@ -22,9 +22,11 @@ httpClient.interceptors.request.use(async (config) => {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
+  // FIX: Додаємо (as any), щоб обійти помилку TypeScript,
+  // бо getSession відсутній у нових типах клієнта, але потрібен для токена.
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await (supabase.auth as any).getSession();
 
   const token = session?.access_token;
   if (token) {
