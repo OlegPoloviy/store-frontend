@@ -25,19 +25,30 @@ httpClientServer.interceptors.request.use(async (config) => {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
+          getAll() {
+            return cookieStore.getAll();
           },
-          set() {},
-          remove() {},
+          setAll(cookiesToSet) {
+            try {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              );
+            } catch {
+              // The `setAll` method was called from a Server Component.
+              // This can be ignored if you have middleware refreshing
+              // user sessions.
+            }
+          },
         },
       }
     );
 
-    // Get session from Supabase (reads from cookies automatically)
+    // FIX: Використовуємо 'as any', щоб обійти помилку TypeScript.
+    // getSession прихований у типах для сервера, але необхідний для отримання access_token.
+    // Альтернатива - refreshSession(), але вона робить зайвий HTTP запит.
     const {
       data: { session },
-    } = await supabase.auth.getSession();
+    } = await (supabase.auth as any).getSession();
 
     if (session?.access_token) {
       config.headers.Authorization = `Bearer ${session.access_token}`;
