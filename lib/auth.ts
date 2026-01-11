@@ -7,7 +7,7 @@ export async function registerUser({
 }: {
   email: string;
   password: string;
-  [key: string]: any;
+  [key: string]: string | number | boolean | undefined;
 }) {
   const { data, error } = await supabase.auth.signUp({
     email,

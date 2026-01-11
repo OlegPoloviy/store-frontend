@@ -13,6 +13,7 @@ export default function CartPage() {
   const [shipping, setShipping] = useState<number>(0);
   const [generalPrice, setGeneralPrice] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [pendingQty, setPendingQty] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     let isMounted = true;
@@ -52,6 +53,58 @@ export default function CartPage() {
     }
   };
 
+  const handleQuantityChange = async (
+    id: string,
+    action: "increment" | "decrement"
+  ) => {
+    if (pendingQty[id]) return;
+
+    const prevItems = cartItems;
+    const prevTotal = total;
+    const prevShipping = shipping;
+    const prevGeneral = generalPrice;
+
+    const item = cartItems.find((x) => x.id === id);
+    if (!item) return;
+
+    const currentQty = item.quantity ?? 1;
+    if (action === "decrement" && currentQty <= 1) return;
+
+    const delta = action === "increment" ? 1 : -1;
+
+    // Optimistic UI update
+    setPendingQty((m) => ({ ...m, [id]: true }));
+    setCartItems((items) =>
+      items.map((it) =>
+        it.id === id ? { ...it, quantity: (it.quantity ?? 1) + delta } : it
+      )
+    );
+    setTotal((t) => t + delta * (item.price ?? 0));
+    setGeneralPrice((g) => g + delta * (item.price ?? 0));
+
+    try {
+      const updatedCart = await cartApi.updateQuantity(id, action);
+      setCartItems(updatedCart.items);
+      setTotal(updatedCart.total);
+      setShipping(updatedCart.shippingPrice);
+      setGeneralPrice(updatedCart.generalPrice);
+    } catch (e) {
+      // Rollback
+      setCartItems(prevItems);
+      setTotal(prevTotal);
+      setShipping(prevShipping);
+      setGeneralPrice(prevGeneral);
+      console.error(e);
+      toast.error("Failed to update quantity");
+    } finally {
+      setPendingQty((m) => {
+        const next = { ...m };
+        delete next[id];
+        return next;
+      });
+    }
+  };
+
   if (isLoading) return <div className="p-6">Loading cart...</div>;
 
   return (
@@ -64,6 +117,7 @@ export default function CartPage() {
           <CartItemsList
             className="h-[80%]"
             onRemove={handleDelete}
+            onQuantityChange={handleQuantityChange}
             items={cartItems}
           />
 

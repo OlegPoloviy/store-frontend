@@ -29,7 +29,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { loginUser } from "@/lib/auth";
 import { supabase } from "@/lib/supabase.client";
-import { isAdminBySession, isAdminByToken } from "@/lib/util/isAdmin";
+import { isAdminByToken } from "@/lib/util/isAdmin";
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
@@ -69,8 +69,10 @@ export function LoginForm() {
         toast.success("Login successful! Welcome back.");
         router.replace("/");
       }
-    } catch (error: any) {
-      toast.error(error.message || "Login failed");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Login failed";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -179,7 +181,7 @@ export function LoginForm() {
             {/* Registration Link */}
             <div className="text-center pt-4">
               <p className="text-gray-600">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link
                   href="/register"
                   className="text-gray-900 hover:underline font-medium"

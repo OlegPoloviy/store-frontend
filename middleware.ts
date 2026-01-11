@@ -12,7 +12,14 @@ export async function middleware(req: NextRequest) {
   const user = session?.user;
   const path = req.nextUrl.pathname;
 
-  if (!user && (path.startsWith("/user") || path.startsWith("/admin"))) {
+  const isAdminRoute =
+    path === "/dashboard" ||
+    path.startsWith("/dashboard/") ||
+    path === "/products-managment" ||
+    path.startsWith("/products-managment/") ||
+    path.startsWith("/admin");
+
+  if (!user && (path.startsWith("/user") || isAdminRoute)) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
@@ -21,7 +28,7 @@ export async function middleware(req: NextRequest) {
     : null;
   const role = jwtPayload?.user_role || "USER";
 
-  if (path.startsWith("/admin") && role !== "ADMIN") {
+  if (isAdminRoute && role !== "ADMIN") {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
@@ -29,5 +36,10 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/:path*"],
+  matcher: [
+    "/user/:path*",
+    "/admin/:path*",
+    "/dashboard/:path*",
+    "/products-managment/:path*",
+  ],
 };

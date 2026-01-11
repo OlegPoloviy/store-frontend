@@ -1,9 +1,11 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { ShieldCheck } from "lucide-react";
 import { Button } from "../ui/button";
 import { CheckCircle2, ArrowRight } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 
 export function CheckoutCard({
   subtotal,
@@ -15,6 +17,44 @@ export function CheckoutCard({
   generalPrice: number;
 }) {
   const [doorCheck, setDoorCheck] = useState(false);
+
+  if (subtotal === 0) {
+    return (
+      <Card className="w-[40%] h-full">
+        <CardHeader>
+          <CardTitle>Your order summary</CardTitle>
+        </CardHeader>
+        <CardContent className="h-full flex flex-col items-center justify-center text-center px-8 py-10">
+          <div className="w-14 h-14 rounded-2xl bg-stone-100 text-stone-900 flex items-center justify-center shadow-sm">
+            <ShoppingCart className="w-7 h-7" />
+          </div>
+          <h3 className="mt-5 text-lg font-semibold text-stone-900">
+            Your cart is empty
+          </h3>
+          <p className="mt-2 text-sm text-stone-600 max-w-sm">
+            Add some items to your cart to see the full checkout summary.
+          </p>
+
+          <Button
+            asChild
+            className="mt-6 w-full max-w-sm bg-stone-900 text-white py-4 rounded-lg font-medium hover:bg-stone-800 transition flex items-center justify-center gap-2 group"
+          >
+            <Link href="/products">
+              Browse products
+              <ArrowRight
+                size={18}
+                className="group-hover:translate-x-1 transition-transform"
+              />
+            </Link>
+          </Button>
+
+          <div className="mt-6 flex items-center justify-center gap-2 text-xs text-stone-400">
+            <ShieldCheck size={12} /> Safe payment using Stripe
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-[40%] h-full">
@@ -29,7 +69,7 @@ export function CheckoutCard({
             <span>{subtotal} USD</span>
           </div>
           <div className="flex justify-between">
-            <span>Доставка (White Glove)</span>
+            <span>Delivery (White Glove)</span>
             <span>{shipping.toLocaleString()} USD</span>
           </div>
         </div>

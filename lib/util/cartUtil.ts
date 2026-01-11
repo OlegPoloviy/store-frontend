@@ -1,5 +1,6 @@
 import { type CartItemApi } from "@/api/cart.api";
 import { type CartItemVM } from "@/types/cart-item.type";
+import { Product } from "@/types/product.type";
 
 export function toNumber(val: unknown): number | null {
   if (typeof val === "number" && Number.isFinite(val)) return val;
@@ -32,7 +33,18 @@ export function uniqueStrings(
   return out;
 }
 
-export function formatDimensions(product: any): string | null {
+interface ProductWithExtraFields extends Partial<Product> {
+  dimensions?: string | null;
+  size?: string | null;
+  leadTime?: string | null;
+  productionTime?: string | null;
+  manufacturingTime?: string | null;
+  production_time?: string | null;
+}
+
+export function formatDimensions(
+  product: ProductWithExtraFields
+): string | null {
   // Prefer explicit combined field if backend provides it
   const direct =
     toNonEmptyString(product?.dimensions) ?? toNonEmptyString(product?.size);
@@ -49,7 +61,9 @@ export function formatDimensions(product: any): string | null {
   return `${parts.join(" x ")} ${unit}`;
 }
 
-export function pickProductionTime(product: any): string | null {
+export function pickProductionTime(
+  product: ProductWithExtraFields
+): string | null {
   return (
     toNonEmptyString(product?.leadTime) ??
     toNonEmptyString(product?.productionTime) ??
@@ -66,10 +80,10 @@ export function mapCartItem(item: CartItemApi): CartItemVM {
     toNumber(item.priceSnapshot) ?? toNumber(item.product?.price) ?? 0;
 
   const imageUrl =
-    (item.product?.images?.[0] as any)?.url ?? // images are typed, but product is Partial<>
+    (item.product?.images?.[0] as { url: string })?.url ?? // images are typed, but product is Partial<>
     null;
 
-  const p: any = item.product ?? {};
+  const p: ProductWithExtraFields = item.product ?? {};
   const materials = uniqueStrings([
     toNonEmptyString(p.material),
     toNonEmptyString(p.color),

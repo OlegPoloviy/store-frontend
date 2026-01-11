@@ -42,15 +42,18 @@ export function ImageDropzone({
     });
   }, [images]);
 
-  const validateFile = (file: File): string | null => {
-    if (!file.type.startsWith("image/")) {
-      return `File must be an image (got ${file.type})`;
-    }
-    if (file.size > maxSize * 1024 * 1024) {
-      return `Image must be smaller than ${maxSize}MB`;
-    }
-    return null;
-  };
+  const validateFile = useCallback(
+    (file: File): string | null => {
+      if (!file.type.startsWith("image/")) {
+        return `File must be an image (got ${file.type})`;
+      }
+      if (file.size > maxSize * 1024 * 1024) {
+        return `Image must be smaller than ${maxSize}MB`;
+      }
+      return null;
+    },
+    [maxSize]
+  );
 
   const handleFiles = useCallback(
     (files: FileList | null) => {
@@ -105,7 +108,7 @@ export function ImageDropzone({
         console.warn("No valid files to add");
       }
     },
-    [images, maxImages, maxSize, onChange]
+    [images, maxImages, onChange, validateFile]
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -257,8 +260,11 @@ export function ImageDropzone({
               >
                 {/* Image Container */}
                 <div className="relative w-full aspect-square overflow-hidden">
-                  <img
+                  <Image
                     src={image.preview}
+                    alt={`Preview of ${image.file.name}`}
+                    fill
+                    unoptimized
                     className="absolute inset-0 w-full h-full object-cover"
                   />
 

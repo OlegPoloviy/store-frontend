@@ -75,7 +75,7 @@ export function ProductCreationForm() {
       try {
         const data = await categoryApi.getAll();
         setCategories(data as ProductCategory[]);
-      } catch (error) {
+      } catch {
         toast.error("Failed to load categories");
       } finally {
         setLoadingCategories(false);
@@ -107,7 +107,8 @@ export function ProductCreationForm() {
       }
 
       // Prepare product data object (excluding categoryId, replacing with category name)
-      const productData: Record<string, any> = {};
+      const productData: Record<string, string | number | boolean | string[]> =
+        {};
 
       Object.entries(data).forEach(([key, value]) => {
         if (key === "categoryId") {
@@ -156,9 +157,11 @@ export function ProductCreationForm() {
       productImages.forEach((img) => URL.revokeObjectURL(img.preview));
 
       router.push("/products-managment");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Product creation error:", error);
-      toast.error(error.message || "Failed to create product");
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create product";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

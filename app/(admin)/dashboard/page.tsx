@@ -8,6 +8,7 @@ import { UserCreationChart } from "@/components/user/UserCreationChart";
 import { type userTable } from "@/types/user.type";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase.client";
+import { User } from "@/types/user.type";
 
 export default function DashboardPage() {
   const [users, setUsers] = useState<userTable[]>([]);
@@ -24,7 +25,7 @@ export default function DashboardPage() {
         ? response
         : response?.data || [];
 
-      const transformedUsers = usersData.map((user: any) => ({
+      const transformedUsers = usersData.map((user: User) => ({
         ...user,
         createdAt: user.createdAt ? new Date(user.createdAt) : new Date(),
         updatedAt: user.updatedAt ? new Date(user.updatedAt) : new Date(),

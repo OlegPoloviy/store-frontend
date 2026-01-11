@@ -14,14 +14,13 @@ import { ProductImageGallery } from "@/components/ProductImageGallery";
 import { ProductActions } from "@/components/ProductActions";
 
 interface ProductPageProps {
-  params: { productId: string };
+  params: Promise<{ productId: string }>;
 }
 
 export default async function ProductPage({
   params: pageParams,
 }: ProductPageProps) {
-  const params = await pageParams;
-  const productId = await params.productId;
+  const { productId } = await pageParams;
   const product = await productsApiServer.getById(productId);
 
   const formatPrice = (price: string, currency: string) => {

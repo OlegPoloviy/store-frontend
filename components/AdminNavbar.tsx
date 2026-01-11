@@ -1,17 +1,17 @@
 "use client";
-import { Search, User, ShoppingCart, Mountain, Menu } from "lucide-react";
+import { Search, User, Mountain, Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { getCurrentUser } from "@/lib/auth";
 import { supabase } from "@/lib/supabase.client";
+import { User as SupabaseUser } from "@supabase/supabase-js";
 
 export function AdminNavbar() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [user, setUser] = useState<any>({});
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const router = useRouter();
   useEffect(() => {
     const loadUser = async () => {

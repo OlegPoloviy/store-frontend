@@ -52,9 +52,14 @@ export function AddToCollectionButton({
     // TODO: Додати API метод для додавання продукту в колекцію
     try {
       await collectionApi.addToCollection(collectionId, productId);
+      setSelectedCollections((prev) => [...prev, collectionId]);
       toast.success("Added product to collection");
     } catch (error) {
-      toast.error("Failed to add product to collection");
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to add product to collection";
+      toast.error(errorMessage);
     }
   };
 

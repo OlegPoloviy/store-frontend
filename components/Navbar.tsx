@@ -16,10 +16,11 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/lib/supabase.client";
 import { isAdminByToken } from "@/lib/util/isAdmin";
+import { User as SupabaseUser } from "@supabase/supabase-js";
 
 export function Navbar() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [user, setUser] = useState<any>({});
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
   useEffect(() => {

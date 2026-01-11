@@ -1,7 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { Trash2, Clock, Ruler } from "lucide-react";
+import Link from "next/link";
+import {
+  Trash2,
+  Clock,
+  Ruler,
+  ShoppingCart,
+  ArrowRight,
+  Minus,
+  Plus,
+} from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CartItemVM } from "@/types/cart-item.type";
@@ -16,16 +25,41 @@ function formatPrice(amount: number | null, currency: string | null) {
 export function CartItemsList({
   items,
   onRemove,
+  onQuantityChange,
   className,
 }: {
   items: CartItemVM[];
   onRemove?: (id: string) => void | Promise<void>;
+  onQuantityChange?: (id: string, action: "increment" | "decrement") => void;
   className?: string;
 }) {
   if (!items || items.length === 0) {
     return (
       <Card className={className}>
-        <div className="px-6 py-8 text-stone-600">Cart is empty</div>
+        <div className="px-6 py-10 flex flex-col items-center justify-center text-center">
+          <div className="w-14 h-14 rounded-2xl bg-stone-100 text-stone-900 flex items-center justify-center shadow-sm">
+            <ShoppingCart className="w-7 h-7" />
+          </div>
+          <h3 className="mt-5 text-lg font-semibold text-stone-900">
+            Your cart is empty
+          </h3>
+          <p className="mt-2 text-sm text-stone-600 max-w-sm">
+            Add some items to your cart to see them here.
+          </p>
+
+          <Button
+            asChild
+            className="mt-6 w-full max-w-sm bg-stone-900 text-white py-4 rounded-lg font-medium hover:bg-stone-800 transition flex items-center justify-center gap-2 group"
+          >
+            <Link href="/products">
+              Browse products
+              <ArrowRight
+                size={18}
+                className="group-hover:translate-x-1 transition-transform"
+              />
+            </Link>
+          </Button>
+        </div>
       </Card>
     );
   }
@@ -81,18 +115,49 @@ export function CartItemsList({
                   )}
                 </div>
 
-                {onRemove && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="text-stone-500 hover:text-red-600"
-                    onClick={() => onRemove(it.id)}
-                    aria-label="Remove item"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
+                <div className="flex items-center gap-2">
+                  {onQuantityChange && (
+                    <div className="flex items-center rounded-md border border-stone-200 bg-white">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-stone-700 hover:text-stone-900"
+                        onClick={() => onQuantityChange(it.id, "decrement")}
+                        disabled={(it.quantity ?? 1) <= 1}
+                        aria-label="Decrease quantity"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <div className="min-w-8 px-2 text-center text-sm font-medium text-stone-900">
+                        {it.quantity ?? 1}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-stone-700 hover:text-stone-900"
+                        onClick={() => onQuantityChange(it.id, "increment")}
+                        aria-label="Increase quantity"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+
+                  {onRemove && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="text-stone-500 hover:text-red-600"
+                      onClick={() => onRemove(it.id)}
+                      aria-label="Remove item"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           </div>

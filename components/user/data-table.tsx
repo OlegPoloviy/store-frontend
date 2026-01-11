@@ -31,8 +31,6 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
   });
 
-  const [rowSelection, setRowSelection] = React.useState({});
-
   return (
     <div className="overflow-hidden rounded-md border">
       <Table>

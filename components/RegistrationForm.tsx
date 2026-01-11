@@ -50,12 +50,14 @@ export function RegistrationForm() {
     try {
       console.log(data);
       setIsLoading(true);
-      const user = await registerUser(data);
+      await registerUser(data);
 
       toast.success("Account created! Check your email to confirm.");
       router.push("/");
-    } catch (error: any) {
-      toast.error(error.message || "Registration failed");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Registration failed";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

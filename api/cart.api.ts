@@ -47,4 +47,18 @@ export const cartApi = {
     const response = await httpClient.delete(`/cart/items/${cartItemId}`);
     return normalizeCartResponse(response.data);
   },
+
+  updateQuantity: async (
+    cartItemId: string,
+    action: "increment" | "decrement"
+  ): Promise<CartVM> => {
+    const response = await httpClient.patch(
+      `/cart/items/${cartItemId}/quantity`,
+      { action }
+    );
+
+    console.log(response.data);
+
+    return normalizeCartResponse(response.data);
+  },
 };

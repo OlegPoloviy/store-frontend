@@ -69,7 +69,7 @@ export default function UserProfile() {
     };
 
     checkUser();
-  }, []);
+  }, [router]);
 
   const loadUserProfile = async () => {
     try {
@@ -91,7 +91,9 @@ export default function UserProfile() {
 
       return user;
     } catch (error) {
-      toast.error("Failed to load profile");
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load profile";
+      toast.error(errorMessage);
       console.error("Error loading profile:", error);
     } finally {
       setIsLoading(false);
@@ -114,8 +116,10 @@ export default function UserProfile() {
 
       toast.success("Profile updated successfully!");
       setIsEditing(false);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update profile");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update profile";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

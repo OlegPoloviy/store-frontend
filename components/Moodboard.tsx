@@ -28,10 +28,6 @@ export function Moodboard({ products, loading = false }: MoodboardProps) {
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const canvasAreaRef = useRef<HTMLDivElement>(null);
-  const [dropPosition, setDropPosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
@@ -51,20 +47,7 @@ export function Moodboard({ products, loading = false }: MoodboardProps) {
       // Зберігаємо поточну позицію для відображення
       const canvasElement = canvasRef.current;
       if (canvasElement) {
-        const rect = canvasElement.getBoundingClientRect();
-        const x =
-          event.activatorEvent instanceof MouseEvent
-            ? event.activatorEvent.clientX
-            : 0;
-        const y =
-          event.activatorEvent instanceof MouseEvent
-            ? event.activatorEvent.clientY
-            : 0;
-
-        setDropPosition({
-          x: x - rect.left,
-          y: y - rect.top,
-        });
+        // Position logic removed as it's not currently used for rendering anything
       }
     }
   };
@@ -73,7 +56,6 @@ export function Moodboard({ products, loading = false }: MoodboardProps) {
     const { active, over, delta } = event;
 
     setActiveProduct(null);
-    setDropPosition(null);
 
     if (!over || !active.data.current) return;
 

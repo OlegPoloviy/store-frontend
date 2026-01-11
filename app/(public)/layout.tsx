@@ -1,5 +1,5 @@
 import { Navbar } from "@/components/Navbar";
-import { Toaster } from "@/components/ui/sonner";
+import { OpenChatButton } from "@/components/chat/OpenChatButton";
 
 export default function PublicLayout({
   children,
@@ -10,7 +10,7 @@ export default function PublicLayout({
     <>
       <Navbar />
       {children}
-      <Toaster />
+      <OpenChatButton />
     </>
   );
 }
