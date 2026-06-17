@@ -9,6 +9,30 @@ export interface ExportOptions {
   scale?: number;
 }
 
+const TRANSPARENT_IMAGE_PLACEHOLDER =
+  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+
+function createCommonOptions(options: ExportOptions) {
+  return {
+    backgroundColor: options.backgroundColor || "#ffffff",
+    pixelRatio: options.scale || 2,
+    skipAutoScale: false,
+    cacheBust: true,
+    includeQueryParams: true,
+    imagePlaceholder: TRANSPARENT_IMAGE_PLACEHOLDER,
+    fontEmbedCSS: "", // Вимикаємо вбудовування шрифтів
+    onImageErrorHandler: () => TRANSPARENT_IMAGE_PLACEHOLDER,
+    // Фільтр для виключення елементів з експорту
+    filter: (node: HTMLElement) => {
+      // Виключаємо кнопку експорту
+      if (node.classList?.contains("export-button-exclude")) {
+        return false;
+      }
+      return true;
+    },
+  };
+}
+
 /**
  * Конвертує HTML елемент в зображення та завантажує його
  * @param element - HTML елемент для конвертації
@@ -21,34 +45,8 @@ export async function exportToImage(
   filename: string = "moodboard"
 ): Promise<void> {
   try {
-    // Додаємо crossOrigin до всіх зображень перед експортом
-    const images = element.querySelectorAll("img");
-    const originalCrossOrigins: (string | null)[] = [];
-
-    images.forEach((img, index) => {
-      originalCrossOrigins[index] = img.getAttribute("crossOrigin");
-      img.setAttribute("crossOrigin", "anonymous");
-    });
-
-    const pixelRatio = options.scale || 2;
-
     let dataUrl: string;
-
-    const commonOptions = {
-      backgroundColor: options.backgroundColor || "#ffffff",
-      pixelRatio,
-      skipAutoScale: false,
-      cacheBust: false, // Вимикаємо для кращої сумісності з CORS
-      fontEmbedCSS: "", // Вимикаємо вбудовування шрифтів
-      // Фільтр для виключення елементів з експорту
-      filter: (node: HTMLElement) => {
-        // Виключаємо кнопку експорту
-        if (node.classList?.contains("export-button-exclude")) {
-          return false;
-        }
-        return true;
-      },
-    };
+    const commonOptions = createCommonOptions(options);
 
     // Генеруємо зображення залежно від формату
     if (options.format === "png") {
@@ -80,24 +78,8 @@ export async function exportToImage(
 
     // Очищаємо URL
     URL.revokeObjectURL(url);
-
-    // Відновлюємо оригінальні значення crossOrigin
-    images.forEach((img, index) => {
-      if (originalCrossOrigins[index] === null) {
-        img.removeAttribute("crossOrigin");
-      } else {
-        img.setAttribute("crossOrigin", originalCrossOrigins[index]!);
-      }
-    });
   } catch (error) {
     console.error("Error exporting to image:", error);
-
-    // Відновлюємо crossOrigin навіть у разі помилки
-    const images = element.querySelectorAll("img");
-    images.forEach((img) => {
-      img.removeAttribute("crossOrigin");
-    });
-
     throw error;
   }
 }
@@ -111,21 +93,7 @@ export async function getImageDataUrl(
   element: HTMLElement,
   options: ExportOptions
 ): Promise<string> {
-  const pixelRatio = options.scale || 2;
-
-  const commonOptions = {
-    backgroundColor: options.backgroundColor || "#ffffff",
-    pixelRatio,
-    skipAutoScale: false,
-    cacheBust: true,
-    fontEmbedCSS: "", // Вимикаємо вбудовування шрифтів
-    filter: (node: HTMLElement) => {
-      if (node.classList?.contains("export-button-exclude")) {
-        return false;
-      }
-      return true;
-    },
-  };
+  const commonOptions = createCommonOptions(options);
 
   if (options.format === "png") {
     return await htmlToImage.toPng(element, commonOptions);

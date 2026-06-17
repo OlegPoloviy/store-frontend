@@ -1,4 +1,4 @@
-import { Hero } from "@/components/Hero";
+import { HomeShowcase } from "@/components/HomeShowcase";
 import { ProductsList } from "@/components/ProductsList";
 import { FooterSection } from "@/components/FooterSection";
 import { productsApiServer } from "@/api/productApi.server";
@@ -22,7 +22,7 @@ export default async function HomePage() {
   return (
     <>
       <div className="bg-[#FAFAFA] min-h-screen">
-        <Hero categories={categories} />
+        <HomeShowcase categories={categories} products={products} />
         <ProductsList products={products} />
         <FooterSection />
       </div>

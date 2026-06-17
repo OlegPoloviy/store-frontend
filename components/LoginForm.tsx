@@ -79,7 +79,7 @@ export function LoginForm() {
   };
 
   return (
-    <Card className="shadow-lg border-0">
+    <Card className="w-full shadow-lg border-0">
       <CardHeader className="text-center pb-4">
         <CardTitle className="text-xl lg:text-2xl font-semibold text-gray-900">
           Sign In
@@ -89,7 +89,7 @@ export function LoginForm() {
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="p-6 lg:p-8">
+      <CardContent className="p-4 sm:p-6 lg:p-8">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             {/* Email Field */}
@@ -154,11 +154,11 @@ export function LoginForm() {
             />
 
             {/* Submit Button */}
-            <div className="flex justify-between w-[80%] pl-[20%]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="bg-gray-900 hover:bg-gray-800 text-white py-3 text-lg font-medium"
+                className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 text-base sm:text-lg font-medium"
               >
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
@@ -172,9 +172,12 @@ export function LoginForm() {
                   </div>
                 )}
               </Button>
-              <Button className="bg-gray-900 hover:bg-gray-800 text-white py-3 text-lg font-medium">
+              <Button
+                type="button"
+                className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 text-base sm:text-lg font-medium"
+              >
                 <FaGoogle />
-                Sign in with Google
+                <span>Sign in with Google</span>
               </Button>
             </div>
 

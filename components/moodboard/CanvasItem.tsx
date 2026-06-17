@@ -6,6 +6,7 @@ import { BoardItem } from "./types";
 import Image from "next/image";
 import { X, Heart } from "lucide-react";
 import { ImagePlaceholder } from "@/components/ImagePlaceholder";
+import { getImageProxyUrl } from "@/lib/util/imageProxy";
 
 interface CanvasItemProps {
   item: BoardItem;
@@ -44,7 +45,7 @@ export function CanvasItem({ item, onRemove }: CanvasItemProps) {
         <div className="relative w-full aspect-square">
           {item.product.images && item.product.images.length > 0 ? (
             <Image
-              src={item.product.images[0].url}
+              src={getImageProxyUrl(item.product.images[0].url)}
               alt={item.product.title}
               fill
               className="object-cover pointer-events-none"

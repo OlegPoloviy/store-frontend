@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Category } from "@/types/category.type";
 import { categoryApi } from "@/api/category.api";
 import { Loader } from "@/components/Loader";
+import { ArrowRight } from "lucide-react";
 
 export default function CatalogPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -29,8 +30,8 @@ export default function CatalogPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 relative top-20 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="relative min-h-screen bg-[#d9d6d1] px-4 py-32 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-[1760px] rounded-[32px] border border-white/60 bg-[#f7f4ef]/88 p-8 shadow-[0_24px_80px_rgba(70,61,50,0.1)] backdrop-blur">
           <Loader message="Loading categories..." />
         </div>
       </div>
@@ -38,44 +39,35 @@ export default function CatalogPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 relative top-20 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Browse Categories
-          </h1>
+    <div className="min-h-screen bg-[#d9d6d1] px-4 py-32 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1760px] rounded-[32px] border border-white/60 bg-[#f7f4ef]/88 p-5 shadow-[0_24px_80px_rgba(70,61,50,0.1)] backdrop-blur md:p-8 lg:p-10">
+        <div className="mb-10 flex flex-col gap-5 border-b border-stone-200/70 pb-7 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <p className="text-xs font-medium uppercase tracking-[0.28em] text-stone-500">
+              Category index
+            </p>
+            <h1 className="mt-3 text-4xl font-medium tracking-tight text-stone-950 sm:text-5xl">
+              Browse collections shaped around rooms, rituals and materials
+            </h1>
+            <p className="mt-4 max-w-2xl text-base leading-7 text-stone-500">
+              Start from a category and move through warm, tactile product
+              groups without losing the calmer editorial feel of the homepage.
+            </p>
+          </div>
+
+          <Button
+            className="h-12 rounded-full bg-stone-950 px-5 text-white hover:bg-stone-800"
+            onClick={() => router.push("/products")}
+          >
+            View all products
+            <ArrowRight className="h-4 w-4" />
+          </Button>
         </div>
 
-        {/* Categories Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {categories.map((category) => (
             <CategoryCard key={category.id} category={category} />
           ))}
-        </div>
-
-        {/* Call to Action */}
-        <div className="text-center mt-16">
-          <p className="text-lg text-gray-600 mb-8">
-            Discover our complete collection of premium furniture
-          </p>
-          <Button
-            className="px-8 py-3"
-            onClick={() => router.push("/products")}
-          >
-            View All Products
-            <svg
-              className="ml-2 -mr-1 w-5 h-5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </Button>
         </div>
       </div>
     </div>

@@ -6,12 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createColumns } from "@/components/user/columns";
 import { UserCreationChart } from "@/components/user/UserCreationChart";
 import { type userTable } from "@/types/user.type";
+import { productsApi } from "@/api/productApi";
+import { ProductCreationChart } from "@/components/products/ProductCreationChart";
+import { type Product } from "@/types/product.type";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase.client";
 import { User } from "@/types/user.type";
 
 export default function DashboardPage() {
   const [users, setUsers] = useState<userTable[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -42,8 +46,19 @@ export default function DashboardPage() {
     }
   }, []);
 
+  const fetchProducts = useCallback(async () => {
+    try {
+      const response = await productsApi.getAll();
+      setProducts(Array.isArray(response) ? response : []);
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      toast.error("Failed to fetch products");
+    }
+  }, []);
+
   useEffect(() => {
     fetchUsers();
+    fetchProducts();
 
     // Get current user ID and email
     const getCurrentUser = async () => {
@@ -55,7 +70,7 @@ export default function DashboardPage() {
     };
 
     getCurrentUser();
-  }, [fetchUsers]);
+  }, [fetchUsers, fetchProducts]);
 
   const handleDelete = useCallback(
     async (userId: string) => {
@@ -117,7 +132,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="p-6">
+      <div className="px-4 py-5 sm:p-6 lg:p-8">
         <h2 className="text-2xl font-bold mb-4">Admin Dashboard</h2>
         <p>Loading users...</p>
       </div>
@@ -126,7 +141,7 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="p-6">
+      <div className="px-4 py-5 sm:p-6 lg:p-8">
         <h2 className="text-2xl font-bold mb-4">Admin Dashboard</h2>
         <p className="text-red-500">{error}</p>
       </div>
@@ -134,62 +149,67 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6">Admin Dashboard</h2>
+    <div className="mx-auto w-full max-w-[1800px] px-4 py-5 sm:p-6 lg:p-8">
+      <div className="mb-5 sm:mb-6">
+        <h2 className="text-2xl font-bold tracking-tight text-stone-950 sm:text-3xl">
+          Admin Dashboard
+        </h2>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+      <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:gap-4 2xl:grid-cols-4">
+        <Card className="min-h-[132px] justify-between rounded-2xl border-stone-200/80 bg-white py-5 shadow-sm">
+          <CardHeader className="px-5 pb-0">
+            <CardTitle className="text-sm font-medium text-stone-500">
               Total Users
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{users.length}</p>
+          <CardContent className="px-5">
+            <p className="text-3xl font-bold text-stone-950">{users.length}</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+        <Card className="min-h-[132px] justify-between rounded-2xl border-stone-200/80 bg-white py-5 shadow-sm">
+          <CardHeader className="px-5 pb-0">
+            <CardTitle className="text-sm font-medium text-stone-500">
               New Users Today
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-amber-600">{newUsersToday}</p>
+          <CardContent className="px-5">
+            <p className="text-3xl font-bold text-amber-600">{newUsersToday}</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+        <Card className="min-h-[132px] justify-between rounded-2xl border-stone-200/80 bg-white py-5 shadow-sm">
+          <CardHeader className="px-5 pb-0">
+            <CardTitle className="text-sm font-medium text-stone-500">
               Unique Countries
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-blue-600">
+          <CardContent className="px-5">
+            <p className="text-3xl font-bold text-blue-600">
               {uniqueCountriesCount}
             </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+        <Card className="min-h-[132px] justify-between rounded-2xl border-stone-200/80 bg-white py-5 shadow-sm">
+          <CardHeader className="px-5 pb-0">
+            <CardTitle className="text-sm font-medium text-stone-500">
               Admins
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-emerald-600">
+          <CardContent className="px-5">
+            <p className="text-3xl font-bold text-emerald-600">
               {users.filter((u) => u.role === "ADMIN").length}
             </p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 gap-6">
+        <div className="min-w-0">
           <DataTable columns={columns} data={users} />
         </div>
-        <div className="lg:col-span-1">
+        <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-2">
           <UserCreationChart users={users} />
+          <ProductCreationChart products={products} />
         </div>
       </div>
     </div>

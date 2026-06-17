@@ -23,6 +23,19 @@ interface MoodboardProps {
   loading?: boolean;
 }
 
+function getExportErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (error instanceof Event) {
+    const target = error.target as HTMLImageElement | null;
+    return target?.currentSrc || target?.src || error.type;
+  }
+
+  return String(error);
+}
+
 export function Moodboard({ products, loading = false }: MoodboardProps) {
   const [boardItems, setBoardItems] = useState<BoardItem[]>([]);
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
@@ -145,8 +158,7 @@ export function Moodboard({ products, loading = false }: MoodboardProps) {
     } catch (error) {
       console.error("Export error:", error);
 
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = getExportErrorMessage(error);
       if (
         errorMessage.includes("CORS") ||
         errorMessage.includes("cross-origin") ||

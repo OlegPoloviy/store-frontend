@@ -1,0 +1,396 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, Heart, Users } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Category } from "@/types/category.type";
+import { Product } from "@/types/product.type";
+
+interface HomeShowcaseProps {
+  categories: Category[];
+  products: Product[];
+}
+
+const teamMembers = [
+  {
+    name: "Iryna",
+    initials: "IR",
+    tone: "bg-[#d7c6b3] text-stone-900",
+  },
+  {
+    name: "Mark",
+    initials: "MK",
+    tone: "bg-[#b99f8f] text-white",
+  },
+  {
+    name: "Nadia",
+    initials: "ND",
+    tone: "bg-[#eadfd2] text-stone-800",
+  },
+  {
+    name: "Anna",
+    initials: "AN",
+    tone: "bg-[#cab8a8] text-stone-950",
+  },
+];
+
+function getProductImage(product?: Product) {
+  return product?.images?.[0]?.url || product?.category?.categoryImage || null;
+}
+
+function getCategoryImage(category?: Category) {
+  return category?.categoryImage || null;
+}
+
+function ProductImage({
+  src,
+  alt,
+  priority = false,
+  className = "",
+}: {
+  src: string | null;
+  alt: string;
+  priority?: boolean;
+  className?: string;
+}) {
+  if (!src) {
+    return (
+      <div
+        className={`flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.95),_rgba(231,226,218,0.92)_45%,_rgba(212,206,198,0.9))] ${className}`}
+      >
+        <div className="h-28 w-28 rounded-full bg-white/50 blur-2xl" />
+      </div>
+    );
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      priority={priority}
+      className={`object-cover ${className}`}
+      sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+    />
+  );
+}
+
+export function HomeShowcase({ categories, products }: HomeShowcaseProps) {
+  const featuredProduct = products[0];
+  const spotlightProduct = products[1] || products[0];
+  const editorialProduct = products[2] || products[0];
+  const accentProduct = products[3] || products[1] || products[0];
+  const topCategories = categories.slice(0, 6);
+
+  return (
+    <section className="relative overflow-hidden px-3 pb-8 pt-32 sm:px-5 sm:pt-40 lg:px-8 lg:pt-44">
+      <div className="absolute inset-0 -z-10 bg-[#d9d6d1]" />
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.72),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.58),_transparent_28%)]" />
+      <div className="absolute inset-0 -z-10 opacity-40 [background-image:radial-gradient(circle_at_center,rgba(255,255,255,0.6)_1px,transparent_1px)] [background-size:28px_28px]" />
+
+      <div className="mx-auto max-w-[1760px] rounded-[32px] border border-white/60 bg-[#f7f4ef]/88 p-3 shadow-[0_24px_80px_rgba(70,61,50,0.12)] backdrop-blur md:p-5 lg:p-7">
+        <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-14 w-14 rounded-full bg-white text-stone-700 shadow-sm hover:bg-white"
+          >
+            <Users className="h-5 w-5" />
+          </Button>
+          <div className="flex gap-3 overflow-x-auto pb-1 lg:flex-1">
+            {topCategories.map((category) => (
+              <Link
+                key={category.id}
+                href={`/categories/${category.name}`}
+                className="shrink-0 rounded-full bg-white px-6 py-4 text-sm font-medium text-stone-700 shadow-sm transition hover:bg-stone-900 hover:text-white"
+              >
+                {category.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-5 grid gap-4 xl:grid-cols-[1.08fr_1.28fr_0.72fr]">
+          <article className="relative overflow-hidden rounded-[30px] bg-[#d8d1c8] p-6 md:p-8">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.42),_transparent_45%)]" />
+            <div className="relative flex min-h-[460px] flex-col gap-8">
+              <div>
+                <p className="inline-block rounded-[22px] bg-white/32 px-4 py-2 text-4xl font-light tracking-tight text-stone-950 shadow-[0_16px_40px_rgba(54,47,39,0.08)] backdrop-blur-sm sm:text-5xl">
+                  New Deals
+                </p>
+              </div>
+
+              <div className="rounded-[30px] bg-white/82 p-5 shadow-[0_20px_50px_rgba(84,72,57,0.12)] backdrop-blur">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-4xl font-semibold tracking-tight text-stone-950">
+                      ${featuredProduct?.price || "508"}
+                    </p>
+                    <p className="mt-1 text-lg text-stone-500">
+                      {featuredProduct?.title || "Long Chair"}
+                    </p>
+                  </div>
+                  <div className="rounded-full bg-stone-100 px-4 py-3 text-sm font-medium text-stone-700">
+                    <span className="mr-2 text-amber-400">★</span>4.9
+                  </div>
+                </div>
+
+                <Link
+                  href={
+                    featuredProduct ? `/products/${featuredProduct.id}` : "/products"
+                  }
+                  className="group mt-5 block"
+                >
+                  <div className="relative overflow-hidden rounded-[26px] bg-[#f3efe8] aspect-[4/5]">
+                    <ProductImage
+                      src={getProductImage(featuredProduct)}
+                      alt={featuredProduct?.title || "Featured furniture"}
+                      priority
+                      className="object-cover transition duration-700 group-hover:scale-105"
+                    />
+                  </div>
+                </Link>
+
+                <div className="mt-5 flex items-center justify-between">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-stone-100 px-4 py-3 text-sm text-stone-500">
+                    <span>Slide left and right</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-12 w-12 rounded-full bg-stone-100 text-stone-700 hover:bg-stone-200"
+                    >
+                      <Heart className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      asChild
+                      size="icon"
+                      className="h-12 w-12 rounded-full bg-stone-950 text-white hover:bg-stone-800"
+                    >
+                      <Link
+                        href={
+                          featuredProduct
+                            ? `/products/${featuredProduct.id}`
+                            : "/products"
+                        }
+                      >
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <div className="grid gap-4">
+            <article className="relative overflow-hidden rounded-[30px] bg-[#d5cec5] p-6 md:p-8">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.38),_transparent_40%)]" />
+              <div className="relative flex min-h-[560px] flex-col justify-between">
+                <div className="max-w-xl rounded-[24px] bg-white/28 px-4 py-3 shadow-[0_18px_46px_rgba(54,47,39,0.08)] backdrop-blur-sm">
+                  <p className="text-4xl font-light tracking-tight text-stone-950 sm:text-5xl">
+                    Great Value Deals
+                  </p>
+                  <p className="mt-3 text-base leading-7 text-stone-700 sm:text-lg">
+                    Find items on sale with handcrafted finishes, warm oak
+                    details and quietly sculptural silhouettes.
+                  </p>
+                </div>
+
+                <div className="relative mx-auto flex w-full max-w-[520px] flex-1 items-end justify-center pt-8">
+                  <div className="absolute bottom-4 left-0 rounded-full bg-white/88 px-5 py-4 text-base font-medium text-stone-800 shadow-sm">
+                    <span className="mr-2 text-amber-400">★</span>4.9
+                  </div>
+                  <div className="relative h-[420px] w-full overflow-hidden rounded-[28px]">
+                    <ProductImage
+                      src={getProductImage(spotlightProduct)}
+                      alt={spotlightProduct?.title || "Spotlight chair"}
+                      priority
+                      className="object-contain"
+                    />
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <div className="grid gap-4 lg:grid-cols-[0.95fr_1.15fr]">
+              <article className="rounded-[30px] bg-white p-6 shadow-sm">
+                <Badge
+                  variant="outline"
+                  className="rounded-full border-stone-200 px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-500"
+                >
+                  Exclusive
+                </Badge>
+                <div className="mt-8 space-y-4">
+                  <h2 className="text-3xl font-medium tracking-tight text-stone-950">
+                    {editorialProduct?.title || "PureSpace Focus Duo"}
+                  </h2>
+                  <p className="max-w-sm text-base leading-7 text-stone-500">
+                    {editorialProduct?.description ||
+                      "Sleek, minimalist furniture chosen for calm rooms, tactile materials and long-lasting comfort."}
+                  </p>
+                </div>
+              </article>
+
+              <article className="relative overflow-hidden rounded-[30px] bg-[#f0ebe4] p-5">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-4 top-4 z-10 h-12 w-12 rounded-full bg-white/88 text-rose-500 shadow-sm hover:bg-white"
+                >
+                  <Heart className="h-4 w-4 fill-current" />
+                </Button>
+                <Link
+                  href={
+                    editorialProduct
+                      ? `/products/${editorialProduct.id}`
+                      : "/products"
+                  }
+                  className="block"
+                >
+                  <div className="relative aspect-[16/11] overflow-hidden rounded-[24px]">
+                    <ProductImage
+                      src={getProductImage(editorialProduct)}
+                      alt={editorialProduct?.title || "Editorial piece"}
+                      className="object-cover transition duration-700 hover:scale-105"
+                    />
+                  </div>
+                  <div className="mt-4 flex items-center justify-between rounded-full bg-[#d8ccbb] pl-5 pr-2 py-2 text-stone-900">
+                    <span className="text-lg font-medium">Open</span>
+                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-stone-950 text-white">
+                      <ArrowRight className="h-4 w-4" />
+                    </span>
+                  </div>
+                </Link>
+              </article>
+            </div>
+          </div>
+
+          <div className="grid gap-4">
+            <article className="rounded-[30px] bg-white p-6 shadow-sm">
+              <div className="flex items-start justify-between gap-4">
+                <Badge
+                  variant="outline"
+                  className="rounded-full border-stone-200 px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-500"
+                >
+                  Our team
+                </Badge>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-12 w-12 rounded-full bg-stone-100 text-stone-700 hover:bg-stone-200"
+                >
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="mt-6">
+                <p className="text-3xl font-medium tracking-tight text-stone-950">
+                  Our Team
+                </p>
+                <p className="mt-3 text-base leading-7 text-stone-500">
+                  Designers, makers and stylists shaping warm minimalist
+                  furniture for everyday rituals.
+                </p>
+              </div>
+
+              <div className="mt-8 flex items-center gap-3">
+                {teamMembers.map((member) => (
+                  <div
+                    key={member.name}
+                    className={`flex h-14 w-14 items-center justify-center rounded-full text-xs font-semibold ring-2 ring-[#f7f4ef] ${member.tone}`}
+                  >
+                    {member.initials}
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 flex items-center gap-2">
+                <span className="h-1.5 w-12 rounded-full bg-stone-900" />
+                <span className="h-1.5 w-5 rounded-full bg-stone-200" />
+                <span className="h-1.5 w-5 rounded-full bg-stone-200" />
+              </div>
+            </article>
+
+            <article className="rounded-[30px] bg-white p-6 shadow-sm">
+              <div className="flex items-start justify-between gap-4">
+                <Badge
+                  variant="outline"
+                  className="rounded-full border-stone-200 px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-500"
+                >
+                  Get a bonus
+                </Badge>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-12 w-12 rounded-full bg-stone-100 text-stone-700 hover:bg-stone-200"
+                >
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="mt-6">
+                <p className="text-2xl font-medium tracking-tight text-stone-950">
+                  Discover exclusive drops
+                </p>
+                <p className="mt-3 text-base leading-7 text-stone-500">
+                  Get early access to new collections, limited finishes and
+                  studio notes from our team.
+                </p>
+              </div>
+
+              <div className="mt-8 space-y-3">
+                <Input
+                  placeholder="Email"
+                  className="h-12 rounded-full border-stone-200 bg-stone-50 px-5"
+                />
+                <Button className="h-12 w-full rounded-full bg-stone-950 text-white hover:bg-stone-800">
+                  Subscribe
+                </Button>
+              </div>
+            </article>
+
+            <article className="overflow-hidden rounded-[30px] bg-white p-4 shadow-sm">
+              <div className="relative aspect-[16/10] overflow-hidden rounded-[26px] bg-stone-100">
+                <ProductImage
+                  src={getProductImage(accentProduct) || getCategoryImage(categories[0])}
+                  alt={accentProduct?.title || "Studio pick"}
+                  className="object-cover"
+                />
+                <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-4">
+                  <Badge
+                    variant="outline"
+                    className="rounded-full border-white/70 bg-white/86 px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-700 shadow-sm backdrop-blur"
+                  >
+                    Studio pick
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-12 w-12 rounded-full bg-white/88 text-stone-800 shadow-sm backdrop-blur hover:bg-white"
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="px-2 pb-2 pt-5">
+                <p className="text-2xl font-medium tracking-tight text-stone-950">
+                  Join us for more refined living ideas.
+                </p>
+                <p className="mt-3 text-base leading-7 text-stone-500">
+                  Materials, proportions and styling notes chosen to make the
+                  home feel composed.
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

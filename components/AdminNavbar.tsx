@@ -1,5 +1,5 @@
 "use client";
-import { Search, User, Mountain, Menu } from "lucide-react";
+import { Menu, Mountain, Search, ShoppingCart, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -35,11 +35,11 @@ export function AdminNavbar() {
   }, []);
 
   return (
-    <nav className="fixed w-full bg-white z-100 border-b border-gray-200">
+    <nav className="fixed w-full bg-white z-[100] border-b border-gray-200">
       <div className=" mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex h-20 items-center justify-between gap-8">
           {/* Logo Section */}
-          <Link href="/admin" className="flex-shrink-0 group">
+          <Link href="/admin" className="min-w-0 shrink-0 group lg:min-w-[220px] xl:min-w-[280px] min-[1800px]:min-w-[340px]">
             <div className="flex items-center space-x-3">
               <div className="relative">
                 <Mountain className="h-8 w-8 text-gray-700 group-hover:text-gray-600 transition-colors duration-300" />
@@ -52,13 +52,13 @@ export function AdminNavbar() {
                 </h2>
               </div>
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="hidden text-xs text-gray-500 mt-1 min-[1800px]:block">
               Manage products, orders, users and more
             </p>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden flex-1 items-center justify-center gap-5 xl:flex xl:gap-6 2xl:gap-10">
             <Link
               href="/dashboard"
               className="relative text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200 group"
@@ -97,12 +97,12 @@ export function AdminNavbar() {
           </div>
 
           {/* Right Side Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2 xl:ml-3 xl:gap-2 2xl:ml-6 2xl:gap-4">
             {/* Enhanced Search */}
             <div
               className={`relative transition-all duration-300 ${
-                isSearchFocused ? "w-64" : "w-48"
-              } hidden sm:block`}
+                isSearchFocused ? "w-60" : "w-44"
+              } hidden min-[1800px]:block`}
             >
               <div className="relative">
                 <Search
@@ -131,7 +131,7 @@ export function AdminNavbar() {
                   size={20}
                   className="text-stone-600 group-hover:text-emerald-700 transition-colors duration-200"
                 />
-                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200 hidden lg:inline">
+                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200 hidden min-[1800px]:inline">
                   {user.user_metadata?.firstName}
                 </span>
               </Button>
@@ -146,14 +146,38 @@ export function AdminNavbar() {
                   size={20}
                   className="text-stone-600 group-hover:text-emerald-700 transition-colors duration-200"
                 />
-                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200 hidden lg:inline">
+                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200 hidden min-[1800px]:inline">
                   Account
                 </span>
               </Button>
             )}
 
+            {/* Cart */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push("/cart")}
+              className="relative flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-stone-50 transition-colors duration-200 group"
+            >
+              <div className="relative">
+                <ShoppingCart
+                  size={20}
+                  className="text-stone-600 group-hover:text-emerald-700 transition-colors duration-200"
+                />
+                <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-md animate-pulse">
+                  2
+                </span>
+              </div>
+              <div className="hidden min-[1800px]:block">
+                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200">
+                  Cart
+                </span>
+                <div className="text-xs text-stone-500">₦15,240.00</div>
+              </div>
+            </Button>
+
             {/* Link back to Storefront */}
-            <Link href="/">
+            <Link href="/" className="hidden xl:block">
               <Button
                 variant="ghost"
                 size="sm"
@@ -171,8 +195,7 @@ export function AdminNavbar() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="md:hidden p-2 rounded-lg hover:bg-stone-50 transition-colors duration-200"
-                  onClick={() => router.push("/register")}
+                  className="xl:hidden p-2 rounded-lg hover:bg-stone-50 transition-colors duration-200"
                 >
                   <Menu size={24} className="text-stone-600" />
                 </Button>
@@ -250,6 +273,14 @@ export function AdminNavbar() {
                     >
                       <User size={20} className="mr-2 text-stone-600" />
                       Account
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
+                      onClick={() => router.push("/cart")}
+                    >
+                      <ShoppingCart size={20} className="mr-2 text-stone-600" />
+                      Cart (2) - ₦15,240.00
                     </Button>
                     <Link href="/">
                       <Button

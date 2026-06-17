@@ -64,7 +64,7 @@ export function RegistrationForm() {
   };
 
   return (
-    <Card className="shadow-lg border-0">
+    <Card className="w-full shadow-lg border-0">
       <CardHeader className="text-center pb-4">
         <CardTitle className="text-xl lg:text-2xl font-semibold text-gray-900">
           Sign Up
@@ -74,7 +74,7 @@ export function RegistrationForm() {
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="p-6 lg:p-8">
+      <CardContent className="p-4 sm:p-6 lg:p-8">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             {/* Personal Information */}
