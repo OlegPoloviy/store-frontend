@@ -41,10 +41,61 @@ import {
 } from "@/schemas/product.schema";
 import { productsApi } from "@/api/productApi";
 import { categoryApi } from "@/api/category.api";
-import { ProductCategory } from "@/types/product.type";
+import { Product, ProductCategory } from "@/types/product.type";
 import { ImageDropzone, ImageFile } from "@/components/ImageDropzone";
+import Image from "next/image";
 
-export function ProductCreationForm() {
+interface ProductCreationFormProps {
+  mode?: "create" | "edit";
+  product?: Product;
+}
+
+const toFormString = (value: string | null | undefined) => value ?? "";
+const toFormBoolean = (value: unknown) => value === true || value === "true";
+
+const productToFormValues = (
+  product?: Product
+): Partial<ProductCreationFormData> => ({
+  title: toFormString(product?.title),
+  description: toFormString(product?.description),
+  price: toFormString(product?.price),
+  currency: product?.currency || "USD",
+  categoryId: product?.categoryId || product?.category?.id || "",
+  material: toFormString(product?.material),
+  color: toFormString(product?.color),
+  style: toFormString(product?.style),
+  width: toFormString(product?.width),
+  height: toFormString(product?.height),
+  depth: toFormString(product?.depth),
+  unitOfMeasure: product?.unitOfMeasure || "cm",
+  weight: toFormString(product?.weight),
+  weightUnit: product?.weightUnit || "kg",
+  primaryMaterial: toFormString(product?.primaryMaterial),
+  secondaryMaterials: product?.secondaryMaterials || [],
+  finish: toFormString(product?.finish),
+  pattern: toFormString(product?.pattern),
+  texture: toFormString(product?.texture),
+  handmade: Boolean(product?.handmade),
+  designer: toFormString(product?.designer),
+  originOfMaterial: toFormString(product?.originOfMaterial),
+  craftsmanshipDetails: product?.craftsmanshipDetails || [],
+  features: product?.features || [],
+  seatingCapacity: toFormString(product?.seatingCapacity),
+  storageCapacity: toFormString(product?.storageCapacity),
+  careInstructions: toFormString(product?.careInstructions),
+  assemblyRequired: toFormBoolean(product?.assemblyRequired),
+  warranty: toFormString(product?.warranty),
+  story: toFormString(product?.story),
+  designInspiration: toFormString(product?.designInspiration),
+  woodTreatment: toFormString(product?.woodTreatment),
+  uniqueIdentifier: toFormString(product?.uniqueIdentifier),
+});
+
+export function ProductCreationForm({
+  mode = "create",
+  product,
+}: ProductCreationFormProps) {
+  const isEditMode = mode === "edit";
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
@@ -67,6 +118,7 @@ export function ProductCreationForm() {
       features: [],
       craftsmanshipDetails: [],
       secondaryMaterials: [],
+      ...productToFormValues(product),
     },
   });
 
@@ -89,8 +141,16 @@ export function ProductCreationForm() {
     try {
       setIsLoading(true);
 
+      const hasExistingImages = Boolean(product?.images?.length);
+
       // Validate images
-      if (productImages.length === 0) {
+      if (!isEditMode && productImages.length === 0) {
+        toast.error("Please add at least one product image");
+        setIsLoading(false);
+        return;
+      }
+
+      if (isEditMode && !hasExistingImages && productImages.length === 0) {
         toast.error("Please add at least one product image");
         setIsLoading(false);
         return;
@@ -148,19 +208,29 @@ export function ProductCreationForm() {
         }))
       );
 
-      // Send to backend
-      await productsApi.createProduct(formData);
-
-      toast.success("Product created successfully!");
+      if (isEditMode && product) {
+        await productsApi.updateProduct(product.id, formData);
+        toast.success("Product updated successfully!");
+      } else {
+        await productsApi.createProduct(formData);
+        toast.success("Product created successfully!");
+      }
 
       // Clean up image URLs
       productImages.forEach((img) => URL.revokeObjectURL(img.preview));
 
       router.push("/products-managment");
     } catch (error) {
-      console.error("Product creation error:", error);
+      console.error(
+        isEditMode ? "Product update error:" : "Product creation error:",
+        error
+      );
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to create product";
+        error instanceof Error
+          ? error.message
+          : isEditMode
+          ? "Failed to update product"
+          : "Failed to create product";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -194,10 +264,12 @@ export function ProductCreationForm() {
     <Card className="shadow-lg border-0 max-w-5xl mx-auto">
       <CardHeader className="text-center pb-4">
         <CardTitle className="text-2xl font-semibold text-gray-900">
-          Create New Product
+          {isEditMode ? "Edit Product" : "Create New Product"}
         </CardTitle>
         <CardDescription className="text-gray-600">
-          Fill in the details to add a new product to your store
+          {isEditMode
+            ? "Update product details and save the changes"
+            : "Fill in the details to add a new product to your store"}
         </CardDescription>
       </CardHeader>
 
@@ -291,6 +363,36 @@ export function ProductCreationForm() {
                 <Package className="w-5 h-5 mr-2" />
                 Product Images
               </h3>
+              {isEditMode && product?.images?.length ? (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-gray-700">
+                    Current Images ({product.images.length})
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 w-full min-w-0">
+                    {product.images.map((image) => (
+                      <div
+                        key={image.id}
+                        className="relative rounded-lg overflow-hidden border border-gray-200"
+                      >
+                        <div className="relative w-full aspect-square overflow-hidden">
+                          <Image
+                            src={image.url}
+                            alt={image.altText || product.title}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 50vw, 25vw"
+                          />
+                          {image.isMain && (
+                            <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-md">
+                              Main
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
               <ImageDropzone
                 images={productImages}
                 onChange={setProductImages}
@@ -949,12 +1051,18 @@ export function ProductCreationForm() {
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Creating Product...</span>
+                    <span>
+                      {isEditMode
+                        ? "Updating Product..."
+                        : "Creating Product..."}
+                    </span>
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
                     <Package className="w-5 h-5" />
-                    <span>Create Product</span>
+                    <span>
+                      {isEditMode ? "Update Product" : "Create Product"}
+                    </span>
                   </div>
                 )}
               </Button>

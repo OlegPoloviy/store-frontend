@@ -23,6 +23,17 @@ export const productsApi = {
     return response.data;
   },
 
+  updateProduct: async (
+    productId: string,
+    formData: FormData
+  ): Promise<Product> => {
+    const response = await httpClient.patch(
+      `/products/id/${productId}`,
+      formData
+    );
+    return response.data;
+  },
+
   getAllFavorites: async (): Promise<Product[]> => {
     const response = await httpClient.get("/favorites");
     return response.data;

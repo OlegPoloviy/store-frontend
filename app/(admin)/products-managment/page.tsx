@@ -5,10 +5,12 @@ import { productsApi } from "@/api/productApi";
 import { ProductDataTable } from "@/components/products/data-table";
 import { createProductColumns } from "@/components/products/columns";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function ProductsManagmentPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     getAllProducts();
@@ -28,7 +30,7 @@ export default function ProductsManagmentPage() {
   }
 
   const handleEdit = (product: Product) => {
-    toast.info(`Edit functionality for "${product.title}" coming soon`);
+    router.push(`/products-managment/${product.id}/edit`);
   };
 
   const handleDelete = async (productId: string) => {

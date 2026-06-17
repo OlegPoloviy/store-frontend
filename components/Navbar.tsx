@@ -18,7 +18,11 @@ import { supabase } from "@/lib/supabase.client";
 import { isAdminByToken } from "@/lib/util/isAdmin";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 
-export function Navbar() {
+interface NavbarProps {
+  supportDrawerOpen?: boolean;
+}
+
+export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -54,19 +58,19 @@ export function Navbar() {
 
   return (
     <nav
-      className={`fixed w-full z-[100] transition-all duration-300 ${
+      className={`fixed z-[100] w-full overflow-hidden transition-all duration-300 ${
         isHomePage
           ? "border-b-0 bg-transparent pt-3 sm:pt-4 lg:pt-5"
           : "border-b border-gray-200 bg-white"
-      }`}
+      } ${supportDrawerOpen ? "lg:w-[calc(100%_-_520px)]" : ""}`}
     >
-      <div className={`mx-auto px-4 sm:px-6 lg:px-8 ${isHomePage ? "max-w-[1760px]" : ""}`}>
+      <div className={`mx-auto min-w-0 px-4 sm:px-6 lg:px-8 ${isHomePage ? "max-w-[1760px]" : ""}`}>
         <div
-          className={`flex items-center justify-between gap-8 ${
+          className={`flex min-w-0 items-center justify-between ${
             isHomePage
               ? "min-h-[88px] rounded-[30px] border border-white/60 bg-[#f7f4ef]/92 px-5 py-4 shadow-[0_20px_70px_rgba(70,61,50,0.12)] backdrop-blur md:px-7"
               : "h-20"
-          }`}
+          } ${supportDrawerOpen ? "gap-4" : "gap-8"}`}
         >
           {/* Logo Section */}
           <Link href="/" className="min-w-0 shrink-0 group xl:min-w-[260px] min-[1800px]:min-w-[390px]">
@@ -98,7 +102,7 @@ export function Navbar() {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden flex-1 items-center justify-center gap-5 xl:flex 2xl:gap-8">
+          <div className="hidden min-w-0 flex-1 items-center justify-center gap-5 xl:flex 2xl:gap-8">
             <Link
               href="/categories"
               className="relative whitespace-nowrap text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200 group"
@@ -141,7 +145,11 @@ export function Navbar() {
           </div>
 
           {/* Right Side Actions */}
-          <div className="flex shrink-0 items-center gap-1 sm:gap-2 xl:ml-3 xl:gap-2 2xl:ml-6 2xl:gap-4">
+          <div
+            className={`flex shrink-0 items-center gap-1 sm:gap-2 xl:ml-3 xl:gap-2 2xl:ml-6 2xl:gap-4 ${
+              supportDrawerOpen ? "lg:hidden" : ""
+            }`}
+          >
             {/* Enhanced Search */}
             <div
               className={`relative transition-all duration-300 ${
