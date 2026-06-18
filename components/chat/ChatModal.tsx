@@ -8,12 +8,13 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Message, ChatModalProps } from "./types";
 import { ChatMessage } from "./ChatMessage";
 import { ChatSuggestions } from "./ChatSuggestions";
 import { ChatInput } from "./ChatInput";
 import { Headphones, MessageSquare, Sparkles } from "lucide-react";
+import { supportChatApi } from "@/api/support-chat.api";
 
 const SAMPLE_QUESTIONS = [
   "How long does delivery take?",
@@ -22,8 +23,13 @@ const SAMPLE_QUESTIONS = [
   "Where can I see your furniture in person?",
 ];
 
+const CONVERSATION_STORAGE_KEY = "support-chat-conversation-id";
+
 export function ChatModal({ open, onOpenChange }: ChatModalProps) {
   const [inputValue, setInputValue] = useState("");
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [isSending, setIsSending] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -33,6 +39,21 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
     },
   ]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  const mergeMessages = useCallback((incomingMessages: Message[]) => {
+    setMessages((prev) => {
+      const draftMessages = prev.filter(
+        (message) => message.status === "sending" || message.status === "error"
+      );
+      const nextMessages = incomingMessages.length ? incomingMessages : prev;
+      const knownIds = new Set(nextMessages.map((message) => message.id));
+      const pendingMessages = draftMessages.filter(
+        (message) => !knownIds.has(message.id)
+      );
+
+      return [...nextMessages, ...pendingMessages];
+    });
+  }, []);
 
   const scrollToBottom = () => {
     if (scrollAreaRef.current) {
@@ -46,29 +67,115 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
     }
   }, [messages, open]);
 
-  const handleSendMessage = (text: string) => {
+  useEffect(() => {
+    if (!open) return;
+
+    const storedConversationId = window.localStorage.getItem(
+      CONVERSATION_STORAGE_KEY
+    );
+
+    if (storedConversationId) {
+      setConversationId(storedConversationId);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || !conversationId) return;
+
+    let ignore = false;
+
+    const fetchMessages = async () => {
+      try {
+        const conversationMessages = await supportChatApi.getMessages(
+          conversationId
+        );
+
+        if (!ignore && conversationMessages.length) {
+          mergeMessages(conversationMessages);
+          setErrorMessage(null);
+        }
+      } catch (error) {
+        if (!ignore) {
+          console.error("Error fetching support chat messages:", error);
+          setErrorMessage("Could not refresh support replies.");
+        }
+      }
+    };
+
+    fetchMessages();
+    const intervalId = window.setInterval(fetchMessages, 5000);
+
+    return () => {
+      ignore = true;
+      window.clearInterval(intervalId);
+    };
+  }, [conversationId, mergeMessages, open]);
+
+  const handleSendMessage = async (text: string) => {
     if (!text.trim()) return;
 
+    const trimmedText = text.trim();
+    const optimisticId = `local-${Date.now()}`;
     const newUserMessage: Message = {
-      id: Date.now().toString(),
-      text: text.trim(),
+      id: optimisticId,
+      text: trimmedText,
       sender: "user",
       timestamp: new Date(),
+      status: "sending",
     };
 
     setMessages((prev) => [...prev, newUserMessage]);
     setInputValue("");
+    setIsSending(true);
+    setErrorMessage(null);
 
-    // Simulate support response
-    setTimeout(() => {
-      const supportResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        text: "Thanks for your question! One of our team members will get back to you soon.",
-        sender: "support",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, supportResponse]);
-    }, 1000);
+    try {
+      const result = await supportChatApi.sendMessage(
+        trimmedText,
+        conversationId
+      );
+
+      if (result.conversationId) {
+        setConversationId(result.conversationId);
+        window.localStorage.setItem(
+          CONVERSATION_STORAGE_KEY,
+          result.conversationId
+        );
+      }
+
+      setMessages((prev) =>
+        prev.map((message) =>
+          message.id === optimisticId
+            ? {
+                ...(result.message ?? message),
+                text: result.message?.text || message.text,
+                sender: "user",
+                status: undefined,
+              }
+            : message
+        )
+      );
+
+      if (result.conversationId) {
+        const conversationMessages = await supportChatApi.getMessages(
+          result.conversationId
+        );
+
+        if (conversationMessages.length) {
+          mergeMessages(conversationMessages);
+        }
+      }
+    } catch (error) {
+      console.error("Error sending support chat message:", error);
+      setErrorMessage("Message was not sent. Please try again.");
+      setMessages((prev) =>
+        prev.map((message) =>
+          message.id === optimisticId ? { ...message, status: "error" } : message
+        )
+      );
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const handleQuestionClick = (question: string) => {
@@ -126,6 +233,11 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
           {messages.map((message) => (
             <ChatMessage key={message.id} message={message} />
           ))}
+          {errorMessage && (
+            <div className="rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
+              {errorMessage}
+            </div>
+          )}
         </div>
 
         {!inputValue && messages.length < 3 && (
@@ -140,6 +252,7 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
             value={inputValue}
             onChange={setInputValue}
             onSend={handleSendMessage}
+            disabled={isSending}
           />
         </div>
       </SheetContent>

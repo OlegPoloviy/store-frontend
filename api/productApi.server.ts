@@ -1,12 +1,22 @@
-import { httpClientServer } from "./httpClient.server";
+import {
+  getServerApiErrorMessage,
+  httpClientServer,
+} from "./httpClient.server";
 import { Product } from "@/types/product.type";
 
 export const productsApiServer = {
   getAll: async (): Promise<Product[]> => {
-    const response = await httpClientServer.get("/products");
-    console.log(response.data);
+    try {
+      const response = await httpClientServer.get("/products");
 
-    return response.data;
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Error fetching products on server:",
+        getServerApiErrorMessage(error)
+      );
+      return [];
+    }
   },
 
   getById: async (id: string): Promise<Product> => {

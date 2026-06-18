@@ -6,9 +6,15 @@ interface ChatInputProps {
   value: string;
   onChange: (value: string) => void;
   onSend: (text: string) => void;
+  disabled?: boolean;
 }
 
-export function ChatInput({ value, onChange, onSend }: ChatInputProps) {
+export function ChatInput({
+  value,
+  onChange,
+  onSend,
+  disabled = false,
+}: ChatInputProps) {
   return (
     <div className="flex items-center gap-2 rounded-2xl border border-stone-200 bg-[#f7f4ef] p-2 shadow-sm">
       <div className="min-w-0 flex-1">
@@ -18,14 +24,16 @@ export function ChatInput({ value, onChange, onSend }: ChatInputProps) {
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") onSend(value);
+            if (e.key === "Enter" && !disabled) onSend(value);
           }}
+          disabled={disabled}
         />
       </div>
       <Button
         size="icon"
         className="h-11 w-11 shrink-0 rounded-full bg-stone-950 text-white shadow-sm hover:bg-stone-800"
         onClick={() => onSend(value)}
+        disabled={disabled || !value.trim()}
         aria-label="Send message"
       >
         <Send className="h-4 w-4" />

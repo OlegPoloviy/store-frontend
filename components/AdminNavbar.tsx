@@ -88,6 +88,13 @@ export function AdminNavbar() {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
+              href="/support-chat"
+              className="relative text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200 group"
+            >
+              Support
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
+            </Link>
+            <Link
               href="/users"
               className="relative text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200 group"
             >
@@ -237,6 +244,14 @@ export function AdminNavbar() {
                           className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
                         >
                           Orders
+                        </Button>
+                      </Link>
+                      <Link href="/support-chat">
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
+                        >
+                          Support
                         </Button>
                       </Link>
                       <Link href="/admin/users">

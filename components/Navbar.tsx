@@ -17,6 +17,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/lib/supabase.client";
 import { isAdminByToken } from "@/lib/util/isAdmin";
 import { User as SupabaseUser } from "@supabase/supabase-js";
+import { cartApi } from "@/api/cart.api";
 
 interface NavbarProps {
   supportDrawerOpen?: boolean;
@@ -26,6 +27,9 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+  const [cartTotal, setCartTotal] = useState(0);
+  const [cartCurrency, setCartCurrency] = useState("USD");
   const router = useRouter();
   const pathname = usePathname();
   const isHomePage = pathname === "/";
@@ -56,6 +60,42 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
     };
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadCartSummary = async () => {
+      try {
+        const cart = await cartApi.getCart();
+        if (!isMounted) return;
+
+        const count = cart.items.reduce(
+          (sum, item) => sum + (item.quantity ?? 1),
+          0
+        );
+        const currency = cart.items.find((item) => item.currency)?.currency;
+
+        setCartCount(count);
+        setCartTotal(cart.total);
+        setCartCurrency(currency ?? "USD");
+      } catch (error) {
+        console.error("Error fetching cart summary:", error);
+        if (!isMounted) return;
+        setCartCount(0);
+        setCartTotal(0);
+      }
+    };
+
+    loadCartSummary();
+
+    window.addEventListener("cart:updated", loadCartSummary);
+    return () => {
+      isMounted = false;
+      window.removeEventListener("cart:updated", loadCartSummary);
+    };
+  }, []);
+
+  const formattedCartTotal = `${cartTotal.toLocaleString()} ${cartCurrency}`;
+
   return (
     <nav
       className={`fixed z-[100] w-full overflow-hidden transition-all duration-300 ${
@@ -68,7 +108,7 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
         <div
           className={`flex min-w-0 items-center justify-between ${
             isHomePage
-              ? "min-h-[88px] rounded-[30px] border border-white/60 bg-[#f7f4ef]/92 px-5 py-4 shadow-[0_20px_70px_rgba(70,61,50,0.12)] backdrop-blur md:px-7"
+              ? "min-h-[88px] rounded-[30px] border border-white/70 bg-[#f7f4ef]/92 px-5 py-4 shadow-[0_10px_28px_rgba(70,61,50,0.06)] ring-1 ring-stone-200/35 backdrop-blur md:px-7"
               : "h-20"
           } ${supportDrawerOpen ? "gap-4" : "gap-8"}`}
         >
@@ -224,16 +264,19 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
                   size={20}
                   className="text-stone-600 group-hover:text-emerald-700 transition-colors duration-200"
                 />
-                {/* Enhanced Badge */}
-                <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-md animate-pulse">
-                  2
-                </span>
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-red-600 px-1 text-xs font-bold text-white shadow-md">
+                    {cartCount > 99 ? "99+" : cartCount}
+                  </span>
+                )}
               </div>
               <div className="hidden min-[1800px]:block">
                 <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200">
                   Cart
                 </span>
-                <div className="text-xs text-stone-500">₦15,240.00</div>
+                <div className="text-xs text-stone-500">
+                  {cartCount > 0 ? formattedCartTotal : "Empty"}
+                </div>
               </div>
             </Button>
 
@@ -350,10 +393,12 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
                     </Button>
                     <Button
                       variant="ghost"
+                      onClick={() => router.push("/cart")}
                       className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
                     >
                       <ShoppingCart size={20} className="mr-2 text-stone-600" />
-                      Cart (2) - ₦15,240.00
+                      Cart ({cartCount}) -{" "}
+                      {cartCount > 0 ? formattedCartTotal : "Empty"}
                     </Button>
                   </div>
                 </div>

@@ -2,10 +2,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { ShieldCheck } from "lucide-react";
 import { Button } from "../ui/button";
-import { CheckCircle2, ArrowRight } from "lucide-react";
-import { ShoppingCart } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  ShieldCheck,
+  ShoppingCart,
+  Truck,
+} from "lucide-react";
+
+function formatSummaryPrice(amount: number) {
+  return amount.toLocaleString();
+}
 
 export function CheckoutCard({
   subtotal,
@@ -20,24 +28,26 @@ export function CheckoutCard({
 
   if (subtotal === 0) {
     return (
-      <Card className="w-[40%] h-full">
-        <CardHeader>
-          <CardTitle>Your order summary</CardTitle>
+      <Card className="overflow-hidden rounded-[28px] border border-white/70 bg-white/85 p-0 shadow-[0_18px_50px_rgba(84,72,57,0.08)] backdrop-blur xl:sticky xl:top-28">
+        <CardHeader className="border-b border-stone-100 px-6 py-6">
+          <CardTitle className="text-2xl font-medium tracking-tight text-stone-950">
+            Your order summary
+          </CardTitle>
         </CardHeader>
-        <CardContent className="h-full flex flex-col items-center justify-center text-center px-8 py-10">
-          <div className="w-14 h-14 rounded-2xl bg-stone-100 text-stone-900 flex items-center justify-center shadow-sm">
-            <ShoppingCart className="w-7 h-7" />
+        <CardContent className="flex flex-col items-center justify-center px-6 py-10 text-center sm:py-12">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#f3eee7] text-stone-900 shadow-sm sm:h-16 sm:w-16">
+            <ShoppingCart className="h-6 w-6 sm:h-7 sm:w-7" />
           </div>
-          <h3 className="mt-5 text-lg font-semibold text-stone-900">
+          <h3 className="mt-5 text-xl font-medium tracking-tight text-stone-950 sm:mt-6">
             Your cart is empty
           </h3>
-          <p className="mt-2 text-sm text-stone-600 max-w-sm">
+          <p className="mt-3 max-w-sm text-sm leading-6 text-stone-500">
             Add some items to your cart to see the full checkout summary.
           </p>
 
           <Button
             asChild
-            className="mt-6 w-full max-w-sm bg-stone-900 text-white py-4 rounded-lg font-medium hover:bg-stone-800 transition flex items-center justify-center gap-2 group"
+            className="group mt-6 h-12 w-full max-w-[220px] rounded-full bg-stone-950 px-5 text-white hover:bg-stone-800 sm:mt-7 sm:max-w-sm"
           >
             <Link href="/products">
               Browse products
@@ -57,36 +67,48 @@ export function CheckoutCard({
   }
 
   return (
-    <Card className="w-[40%] h-full">
-      <CardHeader>
-        <CardTitle>Your order summary</CardTitle>
+    <Card className="overflow-hidden rounded-[28px] border border-white/70 bg-white/85 p-0 shadow-[0_18px_50px_rgba(84,72,57,0.08)] backdrop-blur xl:sticky xl:top-28">
+      <CardHeader className="border-b border-stone-100 px-6 py-6">
+        <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-stone-400">
+          Checkout
+        </p>
+        <CardTitle className="text-2xl font-medium tracking-tight text-stone-950">
+          Your order summary
+        </CardTitle>
       </CardHeader>
 
-      <CardContent className="h-full flex flex-col">
-        <div className="space-y-3 text-sm text-stone-600 mb-6 border-b border-stone-100 pb-6">
-          <div className="flex justify-between">
+      <CardContent className="flex flex-col px-6 py-6">
+        <div className="mb-6 space-y-4 border-b border-stone-100 pb-6 text-sm text-stone-600">
+          <div className="flex items-center justify-between gap-4">
             <span>Products price</span>
-            <span>{subtotal} USD</span>
+            <span className="font-medium text-stone-950">
+              {formatSummaryPrice(subtotal)} USD
+            </span>
           </div>
-          <div className="flex justify-between">
-            <span>Delivery (White Glove)</span>
-            <span>{shipping.toLocaleString()} USD</span>
+          <div className="flex items-center justify-between gap-4">
+            <span className="inline-flex items-center gap-2">
+              <Truck className="h-4 w-4 text-stone-400" />
+              Delivery (White Glove)
+            </span>
+            <span className="font-medium text-stone-950">
+              {formatSummaryPrice(shipping)} USD
+            </span>
           </div>
         </div>
-        <div className="flex justify-between items-end mb-8">
+        <div className="mb-8 rounded-[22px] bg-[#f3eee7] p-5">
           <div>
-            <span className="block text-sm text-stone-500 mb-1">
+            <span className="mb-2 block text-[11px] font-medium uppercase tracking-[0.24em] text-stone-500">
               General price
             </span>
-            <span className="text-3xl font-serif font-bold text-stone-900">
-              {generalPrice.toLocaleString()} USD
+            <span className="text-4xl font-semibold tracking-tight text-stone-950">
+              {formatSummaryPrice(generalPrice)} USD
             </span>
           </div>
         </div>
-        <div className="mb-6 flex ">
-          <label className="flex items-center gap-3 cursor-pointer group text-center">
+        <div className="mb-6 flex">
+          <label className="group flex cursor-pointer items-start gap-3">
             <div
-              className={`w-5 h-5 rounded border flex items-center justify-center transition-colors shrink-0 ${
+              className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
                 doorCheck
                   ? "bg-stone-900 border-stone-900"
                   : "bg-white border-stone-300 group-hover:border-stone-500"
@@ -100,7 +122,7 @@ export function CheckoutCard({
               checked={doorCheck}
               onChange={() => setDoorCheck(!doorCheck)}
             />
-            <div className="text-xs text-stone-600 select-none">
+            <div className="select-none text-sm leading-6 text-stone-500">
               I have checked the width of my doors and passageways. I understand
               that bulky furniture (sofas) may not fit through a standard
               doorway (less than 80 cm).
@@ -109,7 +131,7 @@ export function CheckoutCard({
         </div>
         <Button
           disabled={!doorCheck}
-          className="mt-auto mx-auto w-full bg-stone-900 text-white py-4 rounded-lg font-medium hover:bg-stone-800 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
+          className="group mx-auto h-12 w-full rounded-full bg-stone-950 px-5 text-white hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Check out
           <ArrowRight

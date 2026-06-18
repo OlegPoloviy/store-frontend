@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Heart, Users } from "lucide-react";
+import { Armchair, ArrowRight, Heart, ImageIcon, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,29 +13,6 @@ interface HomeShowcaseProps {
   categories: Category[];
   products: Product[];
 }
-
-const teamMembers = [
-  {
-    name: "Iryna",
-    initials: "IR",
-    tone: "bg-[#d7c6b3] text-stone-900",
-  },
-  {
-    name: "Mark",
-    initials: "MK",
-    tone: "bg-[#b99f8f] text-white",
-  },
-  {
-    name: "Nadia",
-    initials: "ND",
-    tone: "bg-[#eadfd2] text-stone-800",
-  },
-  {
-    name: "Anna",
-    initials: "AN",
-    tone: "bg-[#cab8a8] text-stone-950",
-  },
-];
 
 function getProductImage(product?: Product) {
   return product?.images?.[0]?.url || product?.category?.categoryImage || null;
@@ -50,18 +27,64 @@ function ProductImage({
   alt,
   priority = false,
   className = "",
+  compact = false,
 }: {
   src: string | null;
   alt: string;
   priority?: boolean;
   className?: string;
+  compact?: boolean;
 }) {
   if (!src) {
     return (
       <div
-        className={`flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.95),_rgba(231,226,218,0.92)_45%,_rgba(212,206,198,0.9))] ${className}`}
+        className={`relative flex h-full w-full items-center justify-center overflow-hidden bg-[#eee7dc] ${className}`}
       >
-        <div className="h-28 w-28 rounded-full bg-white/50 blur-2xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.92),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(164,143,115,0.34),_transparent_42%)]" />
+        <div className="absolute inset-0 opacity-40 [background-image:linear-gradient(135deg,rgba(255,255,255,0.36)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.36)_50%,rgba(255,255,255,0.36)_75%,transparent_75%,transparent)] [background-size:26px_26px]" />
+        <div className="absolute bottom-0 left-1/2 h-28 w-[78%] -translate-x-1/2 rounded-t-full bg-stone-900/10 blur-2xl" />
+
+        <div
+          className={`relative flex flex-col items-center justify-center border border-white/70 bg-white/40 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_20px_50px_rgba(84,72,57,0.1)] backdrop-blur-sm ${
+            compact
+              ? "h-[74%] w-[74%] rounded-[22px] p-4"
+              : "h-[72%] w-[76%] rounded-[28px] p-6"
+          }`}
+        >
+          <div
+            className={`relative flex items-center justify-center rounded-full bg-stone-950 text-white shadow-[0_18px_40px_rgba(41,37,36,0.18)] ${
+              compact ? "h-14 w-14" : "h-28 w-28"
+            }`}
+          >
+            <Armchair
+              className={compact ? "h-7 w-7" : "h-12 w-12"}
+              strokeWidth={1.5}
+            />
+            <span
+              className={`absolute flex items-center justify-center rounded-full bg-emerald-100 text-emerald-800 ring-white/80 ${
+                compact
+                  ? "-right-1 -top-1 h-6 w-6 ring-2"
+                  : "-right-2 -top-2 h-9 w-9 ring-4"
+              }`}
+            >
+              <ImageIcon className={compact ? "h-3 w-3" : "h-4 w-4"} />
+            </span>
+          </div>
+          <p
+            className={`font-semibold tracking-tight text-stone-950 ${
+              compact ? "mt-3 text-sm" : "mt-6 text-lg"
+            }`}
+          >
+            Image coming soon
+          </p>
+          <p
+            className={`mt-2 max-w-[240px] text-stone-600 ${
+              compact ? "line-clamp-2 text-xs leading-5" : "text-sm leading-6"
+            }`}
+          >
+            Handcrafted piece selected for the Carpathians collection.
+          </p>
+        </div>
       </div>
     );
   }
@@ -256,6 +279,7 @@ export function HomeShowcase({ categories, products }: HomeShowcaseProps) {
                     <ProductImage
                       src={getProductImage(editorialProduct)}
                       alt={editorialProduct?.title || "Editorial piece"}
+                      compact
                       className="object-cover transition duration-700 hover:scale-105"
                     />
                   </div>
@@ -277,7 +301,7 @@ export function HomeShowcase({ categories, products }: HomeShowcaseProps) {
                   variant="outline"
                   className="rounded-full border-stone-200 px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-500"
                 >
-                  Our team
+                  Studio approach
                 </Badge>
                 <Button
                   variant="ghost"
@@ -290,23 +314,24 @@ export function HomeShowcase({ categories, products }: HomeShowcaseProps) {
 
               <div className="mt-6">
                 <p className="text-3xl font-medium tracking-tight text-stone-950">
-                  Our Team
+                  Crafted around your space
                 </p>
                 <p className="mt-3 text-base leading-7 text-stone-500">
-                  Designers, makers and stylists shaping warm minimalist
-                  furniture for everyday rituals.
+                  Thoughtful furniture guidance for materials, proportions and
+                  finishes that feel personal without overcomplicating the room.
                 </p>
               </div>
 
-              <div className="mt-8 flex items-center gap-3">
-                {teamMembers.map((member) => (
-                  <div
-                    key={member.name}
-                    className={`flex h-14 w-14 items-center justify-center rounded-full text-xs font-semibold ring-2 ring-[#f7f4ef] ${member.tone}`}
-                  >
-                    {member.initials}
-                  </div>
-                ))}
+              <div className="mt-8 grid gap-3 text-sm font-medium text-stone-700">
+                <div className="rounded-full bg-stone-100 px-5 py-3">
+                  Material-first recommendations
+                </div>
+                <div className="rounded-full bg-[#eadfd2] px-5 py-3 text-stone-800">
+                  Custom sizing conversations
+                </div>
+                <div className="rounded-full bg-stone-950 px-5 py-3 text-white">
+                  Finish and styling direction
+                </div>
               </div>
 
               <div className="mt-6 flex items-center gap-2">
@@ -359,6 +384,7 @@ export function HomeShowcase({ categories, products }: HomeShowcaseProps) {
                 <ProductImage
                   src={getProductImage(accentProduct) || getCategoryImage(categories[0])}
                   alt={accentProduct?.title || "Studio pick"}
+                  compact
                   className="object-cover"
                 />
                 <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-4">

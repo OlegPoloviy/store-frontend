@@ -35,6 +35,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
             hour: "2-digit",
             minute: "2-digit",
           })}
+          {message.status === "sending" ? " · Sending" : ""}
+          {message.status === "error" ? " · Not sent" : ""}
         </div>
       </div>
     </div>

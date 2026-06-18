@@ -26,6 +26,7 @@ export function ProductActions({
       const body = { productId, quantity: 1 };
       const result = await cartApi.addToCart(body);
       console.log(result);
+      window.dispatchEvent(new Event("cart:updated"));
       toast.success("Added to cart");
     } catch (error) {
       console.error("Error adding to cart:", error);

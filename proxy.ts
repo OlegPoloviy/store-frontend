@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createMiddlewareClient } from "./lib/supabase.server";
 import { decodeJWT } from "./lib/util/JWTUtil";
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const res = NextResponse.next();
   const supabase = createMiddlewareClient(req, res);
 
