@@ -2,16 +2,27 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import Autoplay from "embla-carousel-autoplay";
 import { Armchair, ArrowRight, Heart, ImageIcon, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/components/ui/carousel";
 import { Category } from "@/types/category.type";
 import { Product } from "@/types/product.type";
 
 interface HomeShowcaseProps {
   categories: Category[];
   products: Product[];
+  latestProducts: Product[];
 }
 
 function getProductImage(product?: Product) {
@@ -101,12 +112,36 @@ function ProductImage({
   );
 }
 
-export function HomeShowcase({ categories, products }: HomeShowcaseProps) {
-  const featuredProduct = products[0];
+export function HomeShowcase({
+  categories,
+  products,
+  latestProducts,
+}: HomeShowcaseProps) {
+  const newDealProducts = latestProducts.length > 0 ? latestProducts : products;
+  const dealSlides = newDealProducts.length > 0 ? newDealProducts : [undefined];
   const spotlightProduct = products[1] || products[0];
   const editorialProduct = products[2] || products[0];
   const accentProduct = products[3] || products[1] || products[0];
   const topCategories = categories.slice(0, 6);
+  const autoplay = useRef(
+    Autoplay({ delay: 5200, stopOnInteraction: false, stopOnMouseEnter: true })
+  ).current;
+  const [dealApi, setDealApi] = useState<CarouselApi>();
+  const [activeDealIndex, setActiveDealIndex] = useState(0);
+
+  useEffect(() => {
+    if (!dealApi) return;
+
+    const updateActiveDeal = () => setActiveDealIndex(dealApi.selectedScrollSnap());
+    updateActiveDeal();
+    dealApi.on("select", updateActiveDeal);
+    dealApi.on("reInit", updateActiveDeal);
+
+    return () => {
+      dealApi.off("select", updateActiveDeal);
+      dealApi.off("reInit", updateActiveDeal);
+    };
+  }, [dealApi]);
 
   return (
     <section className="relative overflow-hidden px-3 pb-8 pt-32 sm:px-5 sm:pt-40 lg:px-8 lg:pt-44">
@@ -146,14 +181,27 @@ export function HomeShowcase({ categories, products }: HomeShowcaseProps) {
                 </p>
               </div>
 
-              <div className="rounded-[30px] bg-white/82 p-5 shadow-[0_20px_50px_rgba(84,72,57,0.12)] backdrop-blur">
+              <Carousel
+                setApi={setDealApi}
+                opts={{
+                  align: "start",
+                  loop: dealSlides.length > 1,
+                  duration: 28,
+                }}
+                plugins={dealSlides.length > 1 ? [autoplay] : []}
+                className="group/carousel"
+              >
+                <CarouselContent className="ml-0">
+                  {dealSlides.map((product, index) => (
+                    <CarouselItem key={product?.id ?? "empty"} className="pl-0">
+                      <div className="rounded-[30px] border border-white/80 bg-white/82 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),inset_0_-1px_0_rgba(109,94,75,0.06)] backdrop-blur transition-colors duration-500 group-hover/carousel:border-white">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-4xl font-semibold tracking-tight text-stone-950">
-                      ${featuredProduct?.price || "508"}
+                      ${product?.price || "508"}
                     </p>
                     <p className="mt-1 text-lg text-stone-500">
-                      {featuredProduct?.title || "Long Chair"}
+                      {product?.title || "Long Chair"}
                     </p>
                   </div>
                   <div className="rounded-full bg-stone-100 px-4 py-3 text-sm font-medium text-stone-700">
@@ -163,15 +211,15 @@ export function HomeShowcase({ categories, products }: HomeShowcaseProps) {
 
                 <Link
                   href={
-                    featuredProduct ? `/products/${featuredProduct.id}` : "/products"
+                    product ? `/products/${product.id}` : "/products"
                   }
                   className="group mt-5 block"
                 >
                   <div className="relative overflow-hidden rounded-[26px] bg-[#f3efe8] aspect-[4/5]">
                     <ProductImage
-                      src={getProductImage(featuredProduct)}
-                      alt={featuredProduct?.title || "Featured furniture"}
-                      priority
+                      src={getProductImage(product)}
+                      alt={product?.title || "Featured furniture"}
+                      priority={index === 0}
                       className="object-cover transition duration-700 group-hover:scale-105"
                     />
                   </div>
@@ -179,7 +227,7 @@ export function HomeShowcase({ categories, products }: HomeShowcaseProps) {
 
                 <div className="mt-5 flex items-center justify-between">
                   <div className="inline-flex items-center gap-2 rounded-full bg-stone-100 px-4 py-3 text-sm text-stone-500">
-                    <span>Slide left and right</span>
+                    <span>{index + 1} / {dealSlides.length}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
@@ -196,8 +244,8 @@ export function HomeShowcase({ categories, products }: HomeShowcaseProps) {
                     >
                       <Link
                         href={
-                          featuredProduct
-                            ? `/products/${featuredProduct.id}`
+                          product
+                            ? `/products/${product.id}`
                             : "/products"
                         }
                       >
@@ -206,7 +254,35 @@ export function HomeShowcase({ categories, products }: HomeShowcaseProps) {
                     </Button>
                   </div>
                 </div>
-              </div>
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                {dealSlides.length > 1 && (
+                  <div className="mt-5 flex items-center justify-between gap-3 px-1">
+                    <div className="flex items-center gap-1.5" aria-label="Carousel pagination">
+                      {dealSlides.map((product, index) => (
+                        <button
+                          key={`deal-dot-${product?.id ?? index}`}
+                          type="button"
+                          aria-label={`Go to deal ${index + 1}`}
+                          aria-current={index === activeDealIndex ? "true" : undefined}
+                          onClick={() => dealApi?.scrollTo(index)}
+                          className={`h-2 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 focus-visible:ring-offset-2 ${
+                            index === activeDealIndex
+                              ? "w-7 bg-stone-900"
+                              : "w-2 bg-white/75 hover:bg-white"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <CarouselPrevious className="static h-10 w-10 translate-y-0 rounded-full border border-white/70 bg-white/80 text-stone-700 shadow-[0_8px_18px_-14px_rgba(61,50,37,0.5)] hover:bg-white" />
+                      <CarouselNext className="static h-10 w-10 translate-y-0 rounded-full border border-white/70 bg-white/80 text-stone-700 shadow-[0_8px_18px_-14px_rgba(61,50,37,0.5)] hover:bg-white" />
+                    </div>
+                  </div>
+                )}
+              </Carousel>
             </div>
           </article>
 

@@ -19,6 +19,22 @@ export const productsApiServer = {
     }
   },
 
+  getLatest: async (limit = 10): Promise<Product[]> => {
+    try {
+      const response = await httpClientServer.get("/products/latest", {
+        params: { limit },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Error fetching latest products on server:",
+        getServerApiErrorMessage(error)
+      );
+      return [];
+    }
+  },
+
   getById: async (id: string): Promise<Product> => {
     const response = await httpClientServer.get(`/products/id/${id}`);
     return response.data;

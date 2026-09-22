@@ -8,6 +8,13 @@ export const productsApi = {
     return response.data;
   },
 
+  getLatest: async (limit = 10): Promise<Product[]> => {
+    const response = await httpClient.get("/products/latest", {
+      params: { limit },
+    });
+    return response.data;
+  },
+
   getById: async (id: string): Promise<Product> => {
     const response = await httpClient.get(`/products/id/${id}`);
     return response.data;

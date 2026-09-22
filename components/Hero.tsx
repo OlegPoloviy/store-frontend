@@ -27,7 +27,11 @@ export function Hero({ categories }: HeroProps) {
     if (!api) return;
 
     const intervalId = setInterval(() => {
-      api.scrollNext();
+      if (api.canScrollNext()) {
+        api.scrollNext();
+      } else {
+        api.scrollTo(0);
+      }
     }, 10000); // 10 seconds
 
     return () => clearInterval(intervalId);
@@ -49,6 +53,9 @@ export function Hero({ categories }: HeroProps) {
     );
   }
 
+  // Determine if we should enable looping (only if we have more than one slide's worth of content)
+  const shouldLoop = categories.length > 1;
+
   return (
     <section className="relative w-full overflow-hidden bg-white pt-24 pb-12">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -56,7 +63,7 @@ export function Hero({ categories }: HeroProps) {
           setApi={setApi}
           opts={{
             align: "start",
-            loop: true,
+            loop: shouldLoop,
           }}
           className="w-full"
         >
