@@ -32,7 +32,7 @@ export function CartItemsList({
 }: {
   items: CartItemVM[];
   onRemove?: (id: string) => void | Promise<void>;
-  onQuantityChange?: (id: string, action: "increment" | "decrement") => void;
+  onQuantityChange?: (id: string, action: "increase" | "decrease") => void;
   pendingItems?: Record<string, boolean>;
   className?: string;
 }) {
@@ -148,7 +148,7 @@ export function CartItemsList({
                           variant="ghost"
                           size="icon"
                           className="h-9 w-9 rounded-full text-stone-700 hover:text-stone-900"
-                          onClick={() => onQuantityChange(it.id, "decrement")}
+                          onClick={() => onQuantityChange(it.id, "decrease")}
                           disabled={isPending || (it.quantity ?? 1) <= 1}
                           aria-label="Decrease quantity"
                         >
@@ -162,7 +162,7 @@ export function CartItemsList({
                           variant="ghost"
                           size="icon"
                           className="h-9 w-9 rounded-full text-stone-700 hover:text-stone-900"
-                          onClick={() => onQuantityChange(it.id, "increment")}
+                          onClick={() => onQuantityChange(it.id, "increase")}
                           disabled={isPending}
                           aria-label="Increase quantity"
                         >

@@ -14,7 +14,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { supabase } from "@/lib/supabase.client";
+import { getBrowserSession, supabase } from "@/lib/supabase.client";
 import { isAdminByToken } from "@/lib/util/isAdmin";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { cartApi } from "@/api/cart.api";
@@ -36,14 +36,13 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
 
   useEffect(() => {
     const loadUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setUser(user);
-      setIsAdmin(isAdminByToken(session?.access_token));
+      try {
+        const session = await getBrowserSession();
+        setUser(session?.user ?? null);
+        setIsAdmin(isAdminByToken(session?.access_token));
+      } catch (error) {
+        console.error("Error loading session:", error);
+      }
     };
 
     loadUser();

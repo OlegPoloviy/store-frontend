@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { cartApi } from "@/api/cart.api";
+import axios from "axios";
 import { toast } from "sonner";
 import { CartItemsList } from "@/components/cart/ProductsCard";
 import { CheckoutCard } from "@/components/cart/CheckoutCard";
@@ -31,7 +32,7 @@ export default function CartPage() {
         setGeneralPrice(cart.generalPrice);
       } catch (error) {
         console.error("Error fetching cart:", error);
-        toast.error("Error fetching cart");
+        toast.error(axios.isAxiosError(error) ? error.response?.data?.message ?? "Error fetching cart" : "Error fetching cart");
         if (isMounted) setCartItems([]);
       } finally {
         if (isMounted) setIsLoading(false);
@@ -59,7 +60,7 @@ export default function CartPage() {
 
   const handleQuantityChange = async (
     id: string,
-    action: "increment" | "decrement"
+    action: "increase" | "decrease"
   ) => {
     if (pendingQty[id]) return;
 
@@ -72,9 +73,9 @@ export default function CartPage() {
     if (!item) return;
 
     const currentQty = item.quantity ?? 1;
-    if (action === "decrement" && currentQty <= 1) return;
+    if (action === "decrease" && currentQty <= 1) return;
 
-    const delta = action === "increment" ? 1 : -1;
+    const delta = action === "increase" ? 1 : -1;
 
     // Optimistic UI update
     setPendingQty((m) => ({ ...m, [id]: true }));
@@ -176,11 +177,7 @@ export default function CartPage() {
             </div>
           </div>
 
-          <CheckoutCard
-            subtotal={total}
-            generalPrice={generalPrice}
-            shipping={shipping}
-          />
+          <CheckoutCard itemCount={cartItems.length} cartRevision={cartItems.map((item) => `${item.id}:${item.quantity}`).join(",")} />
         </div>
       </div>
     </div>

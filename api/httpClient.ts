@@ -1,8 +1,7 @@
 "use client";
 
 import axios from "axios";
-import { createBrowserClient } from "@supabase/ssr";
-import { getOrCreateAnonymousId } from "@/lib/util/anonymousId";
+import { getBrowserSession } from "@/lib/supabase.client";
 
 const baseURL =
   process.env.NEXT_PUBLIC_API_URL ||
@@ -17,16 +16,7 @@ export const httpClient = axios.create({
 });
 
 httpClient.interceptors.request.use(async (config) => {
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
-  // FIX: Додаємо (as any), щоб обійти помилку TypeScript,
-  // бо getSession відсутній у нових типах клієнта, але потрібен для токена.
-  const {
-    data: { session },
-  } = await (supabase.auth as any).getSession();
+  const session = await getBrowserSession();
 
   const token = session?.access_token;
   if (token) {
@@ -34,17 +24,9 @@ httpClient.interceptors.request.use(async (config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
-  // Identify the client session even when user is not authorized.
-  // Backend reads it from: @Headers('x-anonymous-id')
-  const anonymousId = getOrCreateAnonymousId();
-  if (anonymousId) {
-    config.headers = config.headers ?? {};
-    (config.headers as any)["x-anonymous-id"] = anonymousId;
-  }
-
   if (config.data instanceof FormData) {
     config.headers = config.headers ?? {};
-    delete (config.headers as any)["Content-Type"];
+    config.headers.delete("Content-Type");
   }
 
   return config;
