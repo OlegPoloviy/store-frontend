@@ -30,8 +30,11 @@ export const CanvasArea = forwardRef<HTMLDivElement, CanvasAreaProps>(
           else if (ref) ref.current = node;
         }}
         onPointerDown={(event) => { if (event.target === event.currentTarget) onSelect(null); }}
-        className={`relative w-full min-h-[620px] overflow-hidden rounded-[24px] border transition-all ${isOver ? "border-amber-700 ring-4 ring-amber-300/40" : "border-stone-200"}`}
-        style={expanded ? { aspectRatio: scene === "bathroom" ? "2 / 3" : scene === "kitchen" || scene === "living" ? "1600 / 1067" : "16 / 9" } : undefined}
+        className={`relative w-full overflow-hidden rounded-[24px] border transition-all ${expanded ? "mx-auto" : "min-h-[620px]"} ${isOver ? "border-amber-700 ring-4 ring-amber-300/40" : "border-stone-200"}`}
+        style={expanded ? {
+          aspectRatio: scene === "bathroom" ? "2 / 3" : scene === "kitchen" || scene === "living" ? "1600 / 1067" : "16 / 9",
+          maxWidth: scene === "bathroom" ? "min(1200px, calc((100dvh - 270px) * 0.6667))" : scene === "kitchen" || scene === "living" ? "min(1200px, calc((100dvh - 270px) * 1.5))" : "min(1200px, calc((100dvh - 270px) * 1.7778))",
+        } : undefined}
       >
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
           {scene === "custom" && customBackground ? (

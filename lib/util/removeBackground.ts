@@ -74,8 +74,37 @@ export async function removeImageBackground(imageUrl: string): Promise<string> {
     outputContext.drawImage(bitmap, 0, 0, output.width, output.height);
     outputContext.globalCompositeOperation = "destination-in";
     outputContext.drawImage(maskCanvas, 0, 0, output.width, output.height);
-    const webp = output.toDataURL("image/webp", 0.9);
-    return webp.startsWith("data:image/webp") ? webp : output.toDataURL("image/png");
+    const alpha = outputContext.getImageData(0, 0, output.width, output.height).data;
+    let left = output.width;
+    let top = output.height;
+    let right = -1;
+    let bottom = -1;
+    for (let y = 0; y < output.height; y++) {
+      for (let x = 0; x < output.width; x++) {
+        if (alpha[(y * output.width + x) * 4 + 3] < 64) continue;
+        left = Math.min(left, x);
+        top = Math.min(top, y);
+        right = Math.max(right, x);
+        bottom = Math.max(bottom, y);
+      }
+    }
+    let result = output;
+    if (right >= left && bottom >= top) {
+      const padding = Math.round(Math.max(right - left, bottom - top) * 0.04);
+      left = Math.max(0, left - padding);
+      top = Math.max(0, top - padding);
+      right = Math.min(output.width - 1, right + padding);
+      bottom = Math.min(output.height - 1, bottom + padding);
+      const cropped = document.createElement("canvas");
+      cropped.width = right - left + 1;
+      cropped.height = bottom - top + 1;
+      const croppedContext = cropped.getContext("2d");
+      if (!croppedContext) throw new Error("Canvas is unavailable");
+      croppedContext.drawImage(output, left, top, cropped.width, cropped.height, 0, 0, cropped.width, cropped.height);
+      result = cropped;
+    }
+    const webp = result.toDataURL("image/webp", 0.9);
+    return webp.startsWith("data:image/webp") ? webp : result.toDataURL("image/png");
   } finally {
     bitmap.close();
   }

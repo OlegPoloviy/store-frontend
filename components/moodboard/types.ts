@@ -15,5 +15,5 @@ export interface BoardItem {
   z: number;
 }
 
-export const CARD_WIDTH = 176;
-export const CARD_HEIGHT = 216;
+export const CARD_WIDTH = 216;
+export const CARD_HEIGHT = 256;

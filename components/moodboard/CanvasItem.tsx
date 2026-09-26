@@ -35,7 +35,7 @@ export function CanvasItem({ item, selected, onSelect, onRemove }: CanvasItemPro
       className={`group touch-none rounded-xl p-1.5 transition-shadow ${item.originalImageUrl ? "bg-transparent" : "bg-white shadow-[0_15px_40px_rgba(40,32,23,.2)]"} ${selected ? "ring-2 ring-amber-700" : item.originalImageUrl ? "hover:ring-1 hover:ring-white/70" : "hover:shadow-2xl"} ${isDragging ? "opacity-70" : ""}`}
     >
       <div {...listeners} {...attributes} aria-label={`Move ${item.title}`} className="relative cursor-grab active:cursor-grabbing">
-        <div className={`relative overflow-hidden rounded-lg ${item.originalImageUrl ? "h-[202px]" : "h-[158px] bg-stone-100"}`}>
+        <div className={`relative overflow-hidden rounded-lg ${item.originalImageUrl ? "h-[240px]" : "h-[198px] bg-stone-100"}`}>
           {item.imageUrl ? <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={item.imageUrl} alt={item.title} draggable={false} className={`h-full w-full pointer-events-none ${item.originalImageUrl ? "object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,.3)]" : "object-cover"}`} />

@@ -131,7 +131,7 @@ export function Moodboard({ products, loading = false }: MoodboardProps) {
       price: `${product.price} ${product.currency}`,
       x: clamp(position?.x ?? ((rect?.width || 800) - CARD_WIDTH) / 2 + offset, 0, (rect?.width || 800) - CARD_WIDTH),
       y: clamp(position?.y ?? ((rect?.height || 620) - CARD_HEIGHT) / 2 + offset, 0, (rect?.height || 620) - CARD_HEIGHT),
-      scale: 1, rotation: 0, z: nextZ(),
+      scale: 1.15, rotation: 0, z: nextZ(),
     };
     setBoardItems((items) => [...items, item]);
     setSelectedId(item.uniqueId);
@@ -172,7 +172,7 @@ export function Moodboard({ products, loading = false }: MoodboardProps) {
           uniqueId: crypto.randomUUID(), title: file.name.replace(/\.[^.]+$/, ""), imageUrl, isUpload: true,
           x: clamp(((rect?.width || 800) - CARD_WIDTH) / 2 + (boardItems.length + index) * 18, 0, (rect?.width || 800) - CARD_WIDTH),
           y: clamp(((rect?.height || 620) - CARD_HEIGHT) / 2 + (boardItems.length + index) * 18, 0, (rect?.height || 620) - CARD_HEIGHT),
-          scale: 1, rotation: 0, z: Date.now(),
+          scale: 1.15, rotation: 0, z: Date.now(),
         };
         setBoardItems((items) => [...items, item]);
         setSelectedId(item.uniqueId);
@@ -240,7 +240,7 @@ export function Moodboard({ products, loading = false }: MoodboardProps) {
       </div>
       {SCENE_SOURCES[scene] && <p className="mb-3 text-[11px] text-stone-500">Scene photo: <a href={SCENE_SOURCES[scene].url} target="_blank" rel="noreferrer" className="underline hover:text-stone-800">{SCENE_SOURCES[scene].author} / Unsplash</a> · <a href="https://unsplash.com/license" target="_blank" rel="noreferrer" className="underline hover:text-stone-800">Unsplash License</a> · resized</p>}
 
-      <div className={`grid gap-4 lg:grid-cols-[208px_minmax(0,1fr)] ${expanded ? "min-h-[620px] flex-1" : ""}`}>
+      <div className={`grid gap-4 lg:grid-cols-[208px_minmax(0,1fr)] ${expanded ? "mx-auto w-full max-w-[1460px] flex-1" : ""}`}>
         <aside className={`${expanded ? "max-h-[calc(100dvh-210px)]" : "max-h-[620px]"} overflow-y-auto rounded-[22px] border border-stone-200 bg-white p-3`}>
           <div className="sticky top-0 z-10 mb-3 border-b border-stone-100 bg-white pb-3"><h3 className="font-serif text-lg">Saved pieces</h3><p className="text-xs text-stone-500">Drag or tap + to add · {products.length}</p></div>
           {products.length ? products.map((product) => <SidebarItem key={product.id} product={product} onAdd={addProduct} />) : <div className="rounded-xl bg-stone-50 p-4 text-center text-xs leading-5 text-stone-500">No saved products yet. Add your own photos to start.</div>}
@@ -252,15 +252,16 @@ export function Moodboard({ products, loading = false }: MoodboardProps) {
 
       <div className="mt-4 flex min-h-12 flex-wrap items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-xs text-stone-600">
         {selected ? <div className="flex flex-wrap items-center gap-2"><span className="max-w-36 truncate font-semibold text-stone-900">{selected.title}</span><span className="mx-1 h-5 w-px bg-stone-200" />
-          <button type="button" aria-label="Make smaller" title="Make smaller" onClick={() => updateSelected({ scale: clamp(Number((selected.scale - 0.1).toFixed(1)), 0.6, 1.6) })} className="rounded-lg p-2 hover:bg-stone-100"><ZoomOut size={17} /></button>
+          <button type="button" aria-label="Make smaller" title="Make smaller" onClick={() => updateSelected({ scale: clamp(Number((selected.scale - 0.1).toFixed(1)), 0.4, 3) })} className="rounded-lg p-2 hover:bg-stone-100"><ZoomOut size={17} /></button>
           <span className="w-9 text-center tabular-nums">{Math.round(selected.scale * 100)}%</span>
-          <button type="button" aria-label="Make larger" title="Make larger" onClick={() => updateSelected({ scale: clamp(Number((selected.scale + 0.1).toFixed(1)), 0.6, 1.6) })} className="rounded-lg p-2 hover:bg-stone-100"><ZoomIn size={17} /></button>
+          <button type="button" aria-label="Make larger" title="Make larger" onClick={() => updateSelected({ scale: clamp(Number((selected.scale + 0.1).toFixed(1)), 0.4, 3) })} className="rounded-lg p-2 hover:bg-stone-100"><ZoomIn size={17} /></button>
           <button type="button" aria-label="Rotate left" title="Rotate left" onClick={() => updateSelected({ rotation: selected.rotation - 5 })} className="rounded-lg p-2 hover:bg-stone-100"><RotateCcw size={17} /></button>
           <button type="button" aria-label="Rotate right" title="Rotate right" onClick={() => updateSelected({ rotation: selected.rotation + 5 })} className="rounded-lg p-2 hover:bg-stone-100"><RotateCw size={17} /></button>
           <button type="button" aria-label="Send backward" title="Send backward" onClick={() => updateSelected({ z: Math.min(...boardItems.map((item) => item.z)) - 1 })} className="rounded-lg p-2 hover:bg-stone-100"><ArrowDown size={17} /></button>
           <button type="button" aria-label="Bring to front" title="Bring to front" onClick={() => updateSelected({ z: nextZ() })} className="rounded-lg p-2 hover:bg-stone-100"><ArrowUp size={17} /></button>
           <span className="mx-1 h-5 w-px bg-stone-200" />
-          {selected.originalImageUrl ? <button type="button" onClick={() => updateSelected({ imageUrl: selected.originalImageUrl, originalImageUrl: undefined })} className="inline-flex items-center gap-1.5 rounded-lg bg-stone-100 px-3 py-2 font-medium text-stone-900 hover:bg-stone-200"><Undo2 size={15} /> Restore photo</button> : <button type="button" onClick={handleCutout} disabled={!selected.imageUrl || !!cuttingId} className="inline-flex items-center gap-1.5 rounded-lg bg-amber-100 px-3 py-2 font-semibold text-amber-900 hover:bg-amber-200 disabled:opacity-50">{cuttingId === selected.uniqueId ? <Loader2 size={15} className="animate-spin" /> : <Scissors size={15} />}{cuttingId === selected.uniqueId ? "Cutting out…" : "Remove background"}</button>}
+          {selected.originalImageUrl && <button type="button" onClick={() => updateSelected({ imageUrl: selected.originalImageUrl, originalImageUrl: undefined })} className="inline-flex items-center gap-1.5 rounded-lg bg-stone-100 px-3 py-2 font-medium text-stone-900 hover:bg-stone-200"><Undo2 size={15} /> Restore photo</button>}
+          <button type="button" onClick={handleCutout} disabled={!selected.imageUrl || !!cuttingId} className="inline-flex items-center gap-1.5 rounded-lg bg-amber-100 px-3 py-2 font-semibold text-amber-900 hover:bg-amber-200 disabled:opacity-50">{cuttingId === selected.uniqueId ? <Loader2 size={15} className="animate-spin" /> : <Scissors size={15} />}{cuttingId === selected.uniqueId ? "Cutting out…" : selected.originalImageUrl ? "Refine cutout" : "Remove background"}</button>
         </div> : <p>Select a piece to resize, rotate or change its layer.</p>}
         {boardItems.length > 0 && <button type="button" onClick={() => { setBoardItems([]); setSelectedId(null); }} className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-stone-500 hover:bg-red-50 hover:text-red-700"><Trash2 size={15} /> Clear board</button>}
       </div>
