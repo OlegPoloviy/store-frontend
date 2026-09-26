@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -12,6 +13,7 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ category }: CategoryCardProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   return (
     <Card
@@ -48,33 +50,26 @@ export function CategoryCard({ category }: CategoryCardProps) {
             </div>
           )}
 
-          <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-2 text-[11px] font-medium uppercase tracking-[0.22em] text-stone-600 shadow-sm backdrop-blur-sm">
-            Collection
-          </div>
+          <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-2 text-[11px] font-medium uppercase tracking-[0.22em] text-stone-600 shadow-sm backdrop-blur-sm">{t("Collection")}</div>
         </div>
 
         <div className="space-y-4 p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-stone-400">
-                Category
-              </p>
+              <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-stone-400">{t("Category")}</p>
               <h3 className="mt-3 text-2xl font-medium tracking-tight text-stone-950 transition-colors group-hover:text-stone-700">
                 {category.name}
               </h3>
             </div>
-            <div className="rounded-full bg-[#f3eee7] px-3 py-1.5 text-sm font-medium text-stone-700">
-              Curated
-            </div>
+            <div className="rounded-full bg-[#f3eee7] px-3 py-1.5 text-sm font-medium text-stone-700">{t("Curated")}</div>
           </div>
 
           <p className="line-clamp-3 text-sm leading-7 text-stone-500">
-            {category.subtitle ||
-              "Explore a refined selection of furniture pieces shaped around this collection."}
+            {category.subtitle ||t("Explore a refined selection of furniture pieces shaped around this collection.")}
           </p>
 
           <div className="flex items-center justify-between border-t border-stone-100 pt-4">
-            <p className="text-sm font-medium text-stone-500">View collection</p>
+            <p className="text-sm font-medium text-stone-500">{t("View collection")}</p>
 
             <Button
               variant="ghost"

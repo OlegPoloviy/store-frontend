@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -34,6 +35,7 @@ import { isAdminByToken } from "@/lib/util/isAdmin";
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -66,7 +68,7 @@ export function LoginForm() {
         toast.success(`Login successful! Welcome back, ${user.email}`);
         router.replace("/dashboard");
       } else {
-        toast.success("Login successful! Welcome back.");
+        toast.success(t("Login successful! Welcome back."));
         router.replace("/");
       }
     } catch (error) {
@@ -81,12 +83,8 @@ export function LoginForm() {
   return (
     <Card className="w-full shadow-lg border-0">
       <CardHeader className="text-center pb-4">
-        <CardTitle className="text-xl lg:text-2xl font-semibold text-gray-900">
-          Sign In
-        </CardTitle>
-        <CardDescription className="text-gray-600">
-          Enter your credentials to access your account
-        </CardDescription>
+        <CardTitle className="text-xl lg:text-2xl font-semibold text-gray-900">{t("Sign In")}</CardTitle>
+        <CardDescription className="text-gray-600">{t("Enter your credentials to access your account")}</CardDescription>
       </CardHeader>
 
       <CardContent className="p-4 sm:p-6 lg:p-8">
@@ -98,15 +96,13 @@ export function LoginForm() {
               name="email"
               render={({ field }) => (
                 <FormItem className="relative">
-                  <FormLabel className="text-sm font-medium text-gray-700">
-                    Email Address *
-                  </FormLabel>
+                  <FormLabel className="text-sm font-medium text-gray-700">{t("Email Address *")}</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <Input
                         type="email"
-                        placeholder="Enter your email address"
+                        placeholder={t("Enter your email address")}
                         className="pl-10"
                         {...field}
                       />
@@ -123,15 +119,13 @@ export function LoginForm() {
               name="password"
               render={({ field }) => (
                 <FormItem className="relative">
-                  <FormLabel className="text-sm font-medium text-gray-700">
-                    Password *
-                  </FormLabel>
+                  <FormLabel className="text-sm font-medium text-gray-700">{t("Password *")}</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <Input
                         type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
+                        placeholder={t("Enter your password")}
                         className="pl-10 pr-10"
                         {...field}
                       />
@@ -163,12 +157,12 @@ export function LoginForm() {
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Signing In...</span>
+                    <span>{t("Signing In...")}</span>
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
                     <LogIn className="w-5 h-5" />
-                    <span>Sign In</span>
+                    <span>{t("Sign In")}</span>
                   </div>
                 )}
               </Button>
@@ -177,20 +171,18 @@ export function LoginForm() {
                 className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 text-base sm:text-lg font-medium"
               >
                 <FaGoogle />
-                <span>Sign in with Google</span>
+                <span>{t("Sign in with Google")}</span>
               </Button>
             </div>
 
             {/* Registration Link */}
             <div className="text-center pt-4">
               <p className="text-gray-600">
-                Don&apos;t have an account?{" "}
+                {t("Don't have an account?")}{" "}
                 <Link
                   href="/register"
                   className="text-gray-900 hover:underline font-medium"
-                >
-                  Sign up here
-                </Link>
+                >{t("Sign up here")}</Link>
               </p>
             </div>
           </form>

@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -24,6 +25,7 @@ const formatDate = (date?: Date) => {
 };
 
 export default function SupportChatAdminPage() {
+  const { t } = useTranslation();
   const [conversations, setConversations] = useState<
     SupportChatConversation[]
   >([]);
@@ -57,7 +59,7 @@ export default function SupportChatAdminPage() {
       });
     } catch (error) {
       console.error("Error fetching support conversations:", error);
-      toast.error("Failed to load support conversations");
+      toast.error(t("Failed to load support conversations"));
     } finally {
       setLoadingConversations(false);
     }
@@ -70,7 +72,7 @@ export default function SupportChatAdminPage() {
       setMessages(nextMessages);
     } catch (error) {
       console.error("Error fetching support messages:", error);
-      toast.error("Failed to load conversation messages");
+      toast.error(t("Failed to load conversation messages"));
     } finally {
       setLoadingMessages(false);
     }
@@ -79,11 +81,11 @@ export default function SupportChatAdminPage() {
   const handleCloseConversation = async (conversationId: string) => {
     try {
       await supportChatApi.closeConversation(conversationId);
-      toast.success("Conversation closed");
+      toast.success(t("Conversation closed"));
       await loadConversations();
     } catch (error) {
       console.error("Error closing support conversation:", error);
-      toast.error("Failed to close conversation");
+      toast.error(t("Failed to close conversation"));
     }
   };
 
@@ -104,12 +106,8 @@ export default function SupportChatAdminPage() {
     <div className="mx-auto w-full max-w-[1800px] px-4 py-5 sm:p-6 lg:p-8">
       <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-stone-950 sm:text-3xl">
-            Support Chat
-          </h2>
-          <p className="mt-1 text-sm text-stone-500">
-            Review shopper conversations and close resolved requests.
-          </p>
+          <h2 className="text-2xl font-bold tracking-tight text-stone-950 sm:text-3xl">{t("Support Chat")}</h2>
+          <p className="mt-1 text-sm text-stone-500">{t("Review shopper conversations and close resolved requests.")}</p>
         </div>
         <Button
           variant="outline"
@@ -117,24 +115,18 @@ export default function SupportChatAdminPage() {
           onClick={loadConversations}
           disabled={loadingConversations}
         >
-          <RefreshCw className="h-4 w-4" />
-          Refresh
-        </Button>
+          <RefreshCw className="h-4 w-4" />{t("Refresh")}</Button>
       </div>
 
       <div className="grid min-h-[640px] grid-cols-1 gap-4 lg:grid-cols-[380px_minmax(0,1fr)]">
         <Card className="overflow-hidden rounded-lg border-stone-200 bg-white py-0 shadow-sm">
           <CardHeader className="border-b border-stone-200 px-5 py-4">
             <CardTitle className="flex items-center gap-2 text-base text-stone-950">
-              <MessageCircle className="h-4 w-4" />
-              Conversations
-            </CardTitle>
+              <MessageCircle className="h-4 w-4" />{t("Conversations")}</CardTitle>
           </CardHeader>
           <CardContent className="max-h-[590px] overflow-y-auto p-0">
             {loadingConversations ? (
-              <div className="px-5 py-6 text-sm text-stone-500">
-                Loading conversations...
-              </div>
+              <div className="px-5 py-6 text-sm text-stone-500">{t("Loading conversations...")}</div>
             ) : conversations.length ? (
               <div className="divide-y divide-stone-100">
                 {conversations.map((conversation) => {
@@ -180,9 +172,7 @@ export default function SupportChatAdminPage() {
                 })}
               </div>
             ) : (
-              <div className="px-5 py-6 text-sm text-stone-500">
-                No support conversations yet.
-              </div>
+              <div className="px-5 py-6 text-sm text-stone-500">{t("No support conversations yet.")}</div>
             )}
           </CardContent>
         </Card>
@@ -213,19 +203,15 @@ export default function SupportChatAdminPage() {
                       handleCloseConversation(selectedConversation.id)
                     }
                   >
-                    <XCircle className="h-4 w-4" />
-                    Close
-                  </Button>
+                    <XCircle className="h-4 w-4" />{t("Close")}</Button>
                 )}
             </div>
           </CardHeader>
           <CardContent className="h-[590px] overflow-y-auto bg-[#f7f4ef] p-5">
             {!selectedConversationId ? (
-              <div className="flex h-full items-center justify-center text-sm text-stone-500">
-                Select a conversation to read messages.
-              </div>
+              <div className="flex h-full items-center justify-center text-sm text-stone-500">{t("Select a conversation to read messages.")}</div>
             ) : loadingMessages ? (
-              <div className="text-sm text-stone-500">Loading messages...</div>
+              <div className="text-sm text-stone-500">{t("Loading messages...")}</div>
             ) : messages.length ? (
               <div className="space-y-4">
                 {messages.map((message) => {
@@ -257,9 +243,7 @@ export default function SupportChatAdminPage() {
                 })}
               </div>
             ) : (
-              <div className="text-sm text-stone-500">
-                This conversation has no messages.
-              </div>
+              <div className="text-sm text-stone-500">{t("This conversation has no messages.")}</div>
             )}
           </CardContent>
         </Card>

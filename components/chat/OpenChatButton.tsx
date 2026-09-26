@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import { useState } from "react";
 import { Button } from "../ui/button";
@@ -11,6 +12,7 @@ interface OpenChatButtonProps {
 }
 
 export function OpenChatButton({ open, onOpenChange }: OpenChatButtonProps) {
+  const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = open ?? internalOpen;
   const setIsOpen = onOpenChange ?? setInternalOpen;
@@ -24,9 +26,7 @@ export function OpenChatButton({ open, onOpenChange }: OpenChatButtonProps) {
         <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/12 sm:mr-2">
           <Headphones className="h-4 w-4" />
         </span>
-        <span className="hidden text-sm font-medium sm:inline">
-          Customer support
-        </span>
+        <span className="hidden text-sm font-medium sm:inline">{t("Customer support")}</span>
       </Button>
       <ChatModal open={isOpen} onOpenChange={setIsOpen} />
     </>

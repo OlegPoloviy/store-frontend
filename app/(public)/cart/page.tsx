@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { cartApi } from "@/api/cart.api";
 import axios from "axios";
@@ -12,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export default function CartPage() {
+  const { t } = useTranslation();
   const [cartItems, setCartItems] = useState<CartItemVM[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [shipping, setShipping] = useState<number>(0);
@@ -32,7 +34,7 @@ export default function CartPage() {
         setGeneralPrice(cart.generalPrice);
       } catch (error) {
         console.error("Error fetching cart:", error);
-        toast.error(axios.isAxiosError(error) ? error.response?.data?.message ?? "Error fetching cart" : "Error fetching cart");
+        toast.error(axios.isAxiosError(error) ? error.response?.data?.message ??t("Error fetching cart") : "Error fetching cart");
         if (isMounted) setCartItems([]);
       } finally {
         if (isMounted) setIsLoading(false);
@@ -101,7 +103,7 @@ export default function CartPage() {
       setShipping(prevShipping);
       setGeneralPrice(prevGeneral);
       console.error(e);
-      toast.error("Failed to update quantity");
+      toast.error(t("Failed to update quantity"));
     } finally {
       setPendingQty((m) => {
         const next = { ...m };
@@ -127,25 +129,16 @@ export default function CartPage() {
         <div className="mb-8 flex flex-col gap-5 border-b border-stone-200/70 pb-7 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.28em] text-stone-500">
-              <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-              Order checkout
-            </p>
-            <h1 className="mt-3 text-4xl font-medium tracking-tight text-stone-950 sm:text-5xl">
-              Review your handcrafted selections
-            </h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-stone-500">
-              Confirm quantities, delivery details and passageway access before
-              moving to secure checkout.
-            </p>
+              <Sparkles className="h-3.5 w-3.5 text-amber-500" />{t("Order checkout")}</p>
+            <h1 className="mt-3 text-4xl font-medium tracking-tight text-stone-950 sm:text-5xl">{t("Review your handcrafted selections")}</h1>
+            <p className="mt-4 max-w-2xl text-base leading-7 text-stone-500">{t("Confirm quantities, delivery details and passageway access before moving to secure checkout.")}</p>
           </div>
 
           <Button
             asChild
             className="h-12 rounded-full bg-stone-950 px-5 text-white hover:bg-stone-800"
           >
-            <Link href="/products">
-              Continue shopping
-              <ArrowRight className="h-4 w-4" />
+            <Link href="/products">{t("Continue shopping")}<ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -165,13 +158,8 @@ export default function CartPage() {
                   <ShieldCheck size={20} />
                 </div>
                 <div>
-                  <h4 className="text-base font-semibold text-stone-950">
-                    Guarantee of safe orders
-                  </h4>
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-500">
-                    All furniture is insured for its full value. We use special
-                    wooden crates for transportation to avoid damage.
-                  </p>
+                  <h4 className="text-base font-semibold text-stone-950">{t("Guarantee of safe orders")}</h4>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-500">{t("All furniture is insured for its full value. We use special wooden crates for transportation to avoid damage.")}</p>
                 </div>
               </div>
             </div>

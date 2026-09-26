@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { getServerTranslation } from "@/lib/i18n/server";
 import Link from "next/link";
 import type { Metadata } from "next";
 import {
@@ -17,11 +18,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export const metadata: Metadata = {
-  title: "About Us | Carpathians Furniture",
-  description:
-    "Learn about Carpathians Furniture, our material-led approach, sustainable woodworking, and handcrafted furniture made for calm, lasting interiors.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getServerTranslation();
+  return {
+    title: t("About Us | Carpathians Furniture"),
+    description: t("Learn about Carpathians Furniture, our material-led approach, sustainable woodworking, and handcrafted furniture made for calm, lasting interiors."),
+  };
+}
 
 const values = [
   {
@@ -80,7 +83,8 @@ const workshopNotes = [
   },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const { t } = await getServerTranslation();
   return (
     <main className="min-h-screen bg-[#FAFAFA] text-stone-950">
       <section className="relative overflow-hidden px-3 pb-10 pt-40 sm:px-5 sm:pt-44 lg:px-8 lg:pt-48">
@@ -94,20 +98,11 @@ export default function AboutPage() {
               <Badge
                 variant="outline"
                 className="rounded-full border-stone-200 px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-500"
-              >
-                About Carpathians
-              </Badge>
+              >{t("About Carpathians")}</Badge>
 
               <div className="mt-10 max-w-2xl space-y-6">
-                <h1 className="text-5xl font-light tracking-tight text-stone-950 sm:text-6xl lg:text-7xl">
-                  Furniture with a quieter kind of confidence.
-                </h1>
-                <p className="max-w-xl text-base leading-7 text-stone-600 sm:text-lg">
-                  We build handcrafted furniture for homes that value warmth,
-                  proportion and material character. Each piece starts with the
-                  room it will live in, then moves through careful sourcing,
-                  patient workshop craft and a finish made to last.
-                </p>
+                <h1 className="text-5xl font-light tracking-tight text-stone-950 sm:text-6xl lg:text-7xl">{t("Furniture with a quieter kind of confidence.")}</h1>
+                <p className="max-w-xl text-base leading-7 text-stone-600 sm:text-lg">{t("We build handcrafted furniture for homes that value warmth, proportion and material character. Each piece starts with the room it will live in, then moves through careful sourcing, patient workshop craft and a finish made to last.")}</p>
               </div>
 
               <div className="mt-8 flex flex-wrap gap-2">
@@ -132,7 +127,7 @@ export default function AboutPage() {
                     {stat.value}
                   </p>
                   <p className="mt-2 text-sm leading-5 text-stone-500">
-                    {stat.label}
+                    {t(stat.label)}
                   </p>
                 </div>
               ))}
@@ -143,7 +138,7 @@ export default function AboutPage() {
             <article className="relative min-h-[360px] overflow-hidden rounded-[30px] bg-[#d8d1c8] md:min-h-full">
               <Image
                 src="/images/background_hero.png"
-                alt="Handcrafted furniture in a calm interior"
+                alt={t("Handcrafted furniture in a calm interior")}
                 fill
                 priority
                 className="object-cover"
@@ -153,10 +148,7 @@ export default function AboutPage() {
               <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
                 <div className="rounded-[26px] bg-white/18 p-5 text-white shadow-[0_20px_50px_rgba(28,25,23,0.18)] backdrop-blur">
                   <Mountain className="h-7 w-7" />
-                  <p className="mt-4 text-2xl font-medium tracking-tight">
-                    Inspired by the Carpathian sense of calm, made for modern
-                    interiors.
-                  </p>
+                  <p className="mt-4 text-2xl font-medium tracking-tight">{t("Inspired by the Carpathian sense of calm, made for modern interiors.")}</p>
                 </div>
               </div>
             </article>
@@ -166,16 +158,14 @@ export default function AboutPage() {
                 <div className="relative aspect-[16/12] overflow-hidden rounded-[24px]">
                   <Image
                     src="/images/bakcground_2.webp"
-                    alt="Warm wood textures and furniture details"
+                    alt={t("Warm wood textures and furniture details")}
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 32vw"
                   />
                 </div>
                 <div className="mt-5 flex items-center justify-between gap-4 rounded-full bg-[#d8ccbb] py-2 pl-5 pr-2 text-stone-900">
-                  <span className="text-base font-medium">
-                    Natural materials, edited forms
-                  </span>
+                  <span className="text-base font-medium">{t("Natural materials, edited forms")}</span>
                   <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-stone-950 text-white">
                     <Sparkles className="h-4 w-4" />
                   </span>
@@ -184,17 +174,10 @@ export default function AboutPage() {
 
               <article className="rounded-[30px] bg-stone-950 p-6 text-white sm:p-7">
                 <BadgeCheck className="h-7 w-7 text-emerald-300" />
-                <p className="mt-6 text-3xl font-medium tracking-tight">
-                  Not loud. Not disposable. Just furniture that settles into the
-                  room and earns its place.
-                </p>
+                <p className="mt-6 text-3xl font-medium tracking-tight">{t("Not loud. Not disposable. Just furniture that settles into the room and earns its place.")}</p>
                 <div className="mt-8 grid grid-cols-2 gap-3 text-sm text-stone-300">
-                  <div className="rounded-[20px] bg-white/10 p-4">
-                    FSC-minded sourcing
-                  </div>
-                  <div className="rounded-[20px] bg-white/10 p-4">
-                    Made-to-order rhythm
-                  </div>
+                  <div className="rounded-[20px] bg-white/10 p-4">{t("FSC-minded sourcing")}</div>
+                  <div className="rounded-[20px] bg-white/10 p-4">{t("Made-to-order rhythm")}</div>
                 </div>
               </article>
             </div>
@@ -208,20 +191,11 @@ export default function AboutPage() {
             <Badge
               variant="outline"
               className="rounded-full border-emerald-200 bg-emerald-50/60 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-emerald-700"
-            >
-              Studio approach
-            </Badge>
-            <h2 className="mt-5 text-4xl font-medium tracking-tight text-stone-950 sm:text-5xl">
-              We design around the life of the room.
-            </h2>
+            >{t("Studio approach")}</Badge>
+            <h2 className="mt-5 text-4xl font-medium tracking-tight text-stone-950 sm:text-5xl">{t("We design around the life of the room.")}</h2>
           </div>
 
-          <p className="max-w-3xl text-lg leading-8 text-stone-600">
-            A dining table has to host long evenings, not just look good in a
-            photo. A chair has to support the body, not only the composition.
-            That is why our work begins with use, scale and texture before it
-            becomes a finished object.
-          </p>
+          <p className="max-w-3xl text-lg leading-8 text-stone-600">{t("A dining table has to host long evenings, not just look good in a photo. A chair has to support the body, not only the composition. That is why our work begins with use, scale and texture before it becomes a finished object.")}</p>
         </div>
 
         <div className="mx-auto mt-12 grid max-w-7xl gap-4 md:grid-cols-3">
@@ -237,10 +211,10 @@ export default function AboutPage() {
                   <Icon className="h-6 w-6" />
                 </div>
                 <h3 className="mt-8 text-2xl font-medium tracking-tight text-stone-950">
-                  {value.title}
+                  {t(value.title)}
                 </h3>
                 <p className="mt-3 leading-7 text-stone-500">
-                  {value.description}
+                  {t(value.description)}
                 </p>
               </article>
             );
@@ -262,15 +236,13 @@ export default function AboutPage() {
                   <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white text-stone-700 shadow-sm group-hover:bg-emerald-50 group-hover:text-emerald-700">
                     <Icon className="h-5 w-5" />
                   </div>
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-stone-400">
-                    Detail
-                  </span>
+                  <span className="rounded-full bg-white px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-stone-400">{t("Detail")}</span>
                 </div>
                 <h3 className="mt-8 text-2xl font-medium tracking-tight text-stone-950">
-                  {note.title}
+                  {t(note.title)}
                 </h3>
                 <p className="mt-3 leading-7 text-stone-500">
-                  {note.description}
+                  {t(note.description)}
                 </p>
               </article>
             );
@@ -283,20 +255,15 @@ export default function AboutPage() {
           <article className="relative min-h-[520px] overflow-hidden rounded-[30px] bg-stone-200">
             <Image
               src="/images/sink.jpg"
-              alt="Custom wood furniture detail"
+              alt={t("Custom wood furniture detail")}
               fill
               className="object-cover"
               sizes="(max-width: 1024px) 100vw, 58vw"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-stone-950/72 via-transparent to-transparent" />
             <div className="absolute bottom-0 left-0 max-w-xl p-6 text-white sm:p-8">
-              <Badge className="rounded-full bg-white/18 px-4 py-2 text-xs uppercase tracking-[0.2em] text-white backdrop-blur hover:bg-white/18">
-                Workshop detail
-              </Badge>
-              <p className="mt-5 text-4xl font-medium tracking-tight sm:text-5xl">
-                The final finish should feel effortless because the work behind
-                it was exact.
-              </p>
+              <Badge className="rounded-full bg-white/18 px-4 py-2 text-xs uppercase tracking-[0.2em] text-white backdrop-blur hover:bg-white/18">{t("Workshop detail")}</Badge>
+              <p className="mt-5 text-4xl font-medium tracking-tight sm:text-5xl">{t("The final finish should feel effortless because the work behind it was exact.")}</p>
             </div>
           </article>
 
@@ -305,14 +272,8 @@ export default function AboutPage() {
               <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white text-stone-700 shadow-sm">
                 <Hammer className="h-6 w-6" />
               </div>
-              <h2 className="mt-8 text-4xl font-medium tracking-tight text-stone-950">
-                From rough material to ready room.
-              </h2>
-              <p className="mt-4 text-lg leading-8 text-stone-600">
-                Our process is deliberately simple: choose well, make carefully,
-                finish beautifully and support the piece after it leaves the
-                workshop.
-              </p>
+              <h2 className="mt-8 text-4xl font-medium tracking-tight text-stone-950">{t("From rough material to ready room.")}</h2>
+              <p className="mt-4 text-lg leading-8 text-stone-600">{t("Our process is deliberately simple: choose well, make carefully, finish beautifully and support the piece after it leaves the workshop.")}</p>
             </div>
 
             <div className="mt-10 grid gap-3">
@@ -338,20 +299,13 @@ export default function AboutPage() {
             <Badge
               variant="outline"
               className="rounded-full border-stone-200 px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-500"
-            >
-              Living with the piece
-            </Badge>
-            <p className="mt-8 text-3xl font-medium leading-tight tracking-tight text-stone-950 sm:text-4xl">
-              Good furniture should not ask for attention every time you enter
-              the room. It should make the room feel resolved.
-            </p>
+            >{t("Living with the piece")}</Badge>
+            <p className="mt-8 text-3xl font-medium leading-tight tracking-tight text-stone-950 sm:text-4xl">{t("Good furniture should not ask for attention every time you enter the room. It should make the room feel resolved.")}</p>
           </article>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <article className="rounded-[30px] bg-[#ebe4da] p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-stone-500">
-                Finish palette
-              </p>
+              <p className="text-sm font-bold uppercase tracking-[0.2em] text-stone-500">{t("Finish palette")}</p>
               <div className="mt-8 grid grid-cols-3 gap-3">
                 {["#d8ccbb", "#8f7f6b", "#322d27", "#f7f4ef", "#b4a088", "#dad5cd"].map(
                   (color) => (
@@ -366,13 +320,8 @@ export default function AboutPage() {
             </article>
 
             <article className="rounded-[30px] bg-emerald-50 p-7 text-emerald-950">
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-700">
-                Sustainability
-              </p>
-              <p className="mt-8 text-3xl font-medium tracking-tight">
-                Responsible materials, low-waste production and finishes chosen
-                for repairability.
-              </p>
+              <p className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-700">{t("Sustainability")}</p>
+              <p className="mt-8 text-3xl font-medium tracking-tight">{t("Responsible materials, low-waste production and finishes chosen for repairability.")}</p>
             </article>
           </div>
         </div>
@@ -385,13 +334,8 @@ export default function AboutPage() {
               <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white/10 text-emerald-300">
                 <TreePine className="h-6 w-6" />
               </div>
-              <h2 className="mt-8 text-4xl font-medium tracking-tight sm:text-5xl">
-                Bring home pieces that feel considered from the first day.
-              </h2>
-              <p className="mt-4 text-lg leading-8 text-stone-300">
-                Browse curated categories or start with our full product range
-                to find furniture with the right material, scale and mood.
-              </p>
+              <h2 className="mt-8 text-4xl font-medium tracking-tight sm:text-5xl">{t("Bring home pieces that feel considered from the first day.")}</h2>
+              <p className="mt-4 text-lg leading-8 text-stone-300">{t("Browse curated categories or start with our full product range to find furniture with the right material, scale and mood.")}</p>
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row lg:justify-end">
@@ -400,9 +344,7 @@ export default function AboutPage() {
                 size="lg"
                 className="rounded-full bg-white px-6 text-stone-950 hover:bg-stone-100"
               >
-                <Link href="/categories">
-                  Browse categories
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                <Link href="/categories">{t("Browse categories")}<ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
               <Button
@@ -411,7 +353,7 @@ export default function AboutPage() {
                 variant="outline"
                 className="rounded-full border-white/30 bg-transparent px-6 text-white hover:bg-white hover:text-stone-950"
               >
-                <Link href="/products">View products</Link>
+                <Link href="/products">{t("View products")}</Link>
               </Button>
             </div>
           </div>

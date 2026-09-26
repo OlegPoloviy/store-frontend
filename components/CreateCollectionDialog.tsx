@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import { useState } from "react";
 import {
@@ -27,6 +28,7 @@ export function CreateCollectionDialog({
   onOpenChange,
   onCollectionCreated,
 }: CreateCollectionDialogProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -87,22 +89,19 @@ export function CreateCollectionDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Collection</DialogTitle>
-          <DialogDescription>
-            Create a new collection to organize your favorite items.
-          </DialogDescription>
+          <DialogTitle>{t("Create New Collection")}</DialogTitle>
+          <DialogDescription>{t("Create a new collection to organize your favorite items.")}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             {/* Collection Name Input */}
             <div className="grid gap-2">
-              <Label htmlFor="name">
-                Collection Name <span className="text-red-500">*</span>
+              <Label htmlFor="name">{t("Collection Name")}<span className="text-red-500">*</span>
               </Label>
               <Input
                 id="name"
-                placeholder="e.g., Living Room, Bathroom"
+                placeholder={t("e.g., Living Room, Bathroom")}
                 value={name}
                 onChange={(e) => {
                   setName(e.target.value);
@@ -127,12 +126,8 @@ export function CreateCollectionDialog({
                 <Label
                   htmlFor="private"
                   className="text-sm font-medium cursor-pointer"
-                >
-                  Make this collection private
-                </Label>
-                <p className="text-xs text-gray-500">
-                  Only you will be able to see this collection
-                </p>
+                >{t("Make this collection private")}</Label>
+                <p className="text-xs text-gray-500">{t("Only you will be able to see this collection")}</p>
               </div>
             </div>
           </div>
@@ -143,11 +138,9 @@ export function CreateCollectionDialog({
               variant="outline"
               onClick={handleClose}
               disabled={loading}
-            >
-              Cancel
-            </Button>
+            >{t("Cancel")}</Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Creating..." : "Create Collection"}
+              {loading ? t("Creating...") : t("Create Collection")}
             </Button>
           </DialogFooter>
         </form>

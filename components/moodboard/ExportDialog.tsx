@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import { useState } from "react";
 import {
@@ -28,6 +29,7 @@ export function ExportDialog({
   onExport,
   loading = false,
 }: ExportDialogProps) {
+  const { t } = useTranslation();
   const [selectedFormat, setSelectedFormat] = useState<ImageFormat>("png");
   const [filename, setFilename] = useState("my-moodboard");
   const [quality, setQuality] = useState(90);
@@ -60,18 +62,14 @@ export function ExportDialog({
       <DialogContent className="z-[111] sm:max-w-[500px]" overlayClassName="z-[110]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileImage className="w-5 h-5" />
-            Export Moodboard
-          </DialogTitle>
-          <DialogDescription>
-            Choose format and settings for your moodboard export
-          </DialogDescription>
+            <FileImage className="w-5 h-5" />{t("Export Moodboard")}</DialogTitle>
+          <DialogDescription>{t("Choose format and settings for your moodboard export")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           {/* Filename Input */}
           <div className="space-y-2">
-            <Label htmlFor="filename">File Name</Label>
+            <Label htmlFor="filename">{t("File Name")}</Label>
             <Input
               id="filename"
               value={filename}
@@ -83,7 +81,7 @@ export function ExportDialog({
 
           {/* Format Selection */}
           <div className="space-y-3">
-            <Label>Image Format</Label>
+            <Label>{t("Image Format")}</Label>
             <div className="space-y-2">
               {formats.map((format) => (
                 <button
@@ -120,7 +118,7 @@ export function ExportDialog({
           {(selectedFormat === "jpg" || selectedFormat === "webp") && (
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <Label htmlFor="quality">Quality</Label>
+                <Label htmlFor="quality">{t("Quality")}</Label>
                 <span className="text-sm text-gray-500">{quality}%</span>
               </div>
               <input
@@ -135,17 +133,15 @@ export function ExportDialog({
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-gray-900"
               />
               <div className="flex justify-between text-xs text-gray-400">
-                <span>Smaller file</span>
-                <span>Better quality</span>
+                <span>{t("Smaller file")}</span>
+                <span>{t("Better quality")}</span>
               </div>
             </div>
           )}
 
           {/* Preview Info */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <p className="text-xs text-blue-800">
-              💡 The image will be exported at 2x resolution for better quality
-            </p>
+            <p className="text-xs text-blue-800">{t("💡 The image will be exported at 2x resolution for better quality")}</p>
           </div>
         </div>
 
@@ -155,9 +151,7 @@ export function ExportDialog({
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={loading}
-          >
-            Cancel
-          </Button>
+          >{t("Cancel")}</Button>
           <Button
             onClick={handleExport}
             disabled={loading || !filename.trim()}
@@ -165,14 +159,10 @@ export function ExportDialog({
           >
             {loading ? (
               <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                Exporting...
-              </>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />{t("Exporting...")}</>
             ) : (
               <>
-                <Download className="w-4 h-4 mr-2" />
-                Export Image
-              </>
+                <Download className="w-4 h-4 mr-2" />{t("Export Image")}</>
             )}
           </Button>
         </DialogFooter>

@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import { useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
@@ -22,6 +23,7 @@ const chartConfig = {
 } satisfies Record<string, { label: string; color: string }>;
 
 export function UserCreationChart({ users }: UserCreationChartProps) {
+  const { t } = useTranslation();
   const chartData = useMemo(() => {
     // Group users by creation date
     const dateMap = new Map<string, number>();
@@ -60,12 +62,10 @@ export function UserCreationChart({ users }: UserCreationChartProps) {
     return (
       <Card className="rounded-2xl border-stone-200/80 bg-white py-0 shadow-sm">
         <CardHeader className="px-5 py-5 sm:px-6">
-          <CardTitle className="text-lg font-semibold tracking-tight text-stone-950 sm:text-xl">
-            Users Created by Day
-          </CardTitle>
+          <CardTitle className="text-lg font-semibold tracking-tight text-stone-950 sm:text-xl">{t("Users Created by Day")}</CardTitle>
         </CardHeader>
         <CardContent className="px-5 pb-6 sm:px-6">
-          <p className="text-sm text-stone-500">No data available</p>
+          <p className="text-sm text-stone-500">{t("No data available")}</p>
         </CardContent>
       </Card>
     );
@@ -74,9 +74,7 @@ export function UserCreationChart({ users }: UserCreationChartProps) {
   return (
     <Card className="rounded-2xl border-stone-200/80 bg-white py-0 shadow-sm">
       <CardHeader className="border-b border-stone-100 px-5 py-5 sm:px-6">
-        <CardTitle className="text-lg font-semibold tracking-tight text-stone-950 sm:text-xl">
-          Users Created by Day
-        </CardTitle>
+        <CardTitle className="text-lg font-semibold tracking-tight text-stone-950 sm:text-xl">{t("Users Created by Day")}</CardTitle>
       </CardHeader>
       <CardContent className="overflow-x-auto px-3 py-5 sm:px-6">
         <ChartContainer config={chartConfig} className="h-[280px] min-w-[460px]">

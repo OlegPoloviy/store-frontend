@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -17,10 +18,10 @@ import { CartItemVM } from "@/types/cart-item.type";
 import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 import { cn } from "@/lib/utils";
 
-function formatPrice(amount: number | null, currency: string | null) {
+function formatPrice(amount: number | null, currency: string | null, locale: string) {
   if (amount == null) return "";
   const cur = currency ?? "";
-  return cur ? `${amount.toLocaleString()} ${cur}` : amount.toLocaleString();
+  return cur ? `${amount.toLocaleString(locale)} ${cur}` : amount.toLocaleString(locale);
 }
 
 export function CartItemsList({
@@ -36,6 +37,7 @@ export function CartItemsList({
   pendingItems?: Record<string, boolean>;
   className?: string;
 }) {
+  const { t, i18n } = useTranslation();
   if (!items || items.length === 0) {
     return (
       <Card
@@ -48,20 +50,14 @@ export function CartItemsList({
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#f3eee7] text-stone-900 shadow-sm sm:h-16 sm:w-16">
             <ShoppingCart className="h-6 w-6 sm:h-7 sm:w-7" />
           </div>
-          <h3 className="mt-5 text-2xl font-medium tracking-tight text-stone-950 sm:mt-6">
-            Your cart is empty
-          </h3>
-          <p className="mt-3 max-w-sm text-sm leading-6 text-stone-500">
-            Add some items to your cart to see them here.
-          </p>
+          <h3 className="mt-5 text-2xl font-medium tracking-tight text-stone-950 sm:mt-6">{t("Your cart is empty")}</h3>
+          <p className="mt-3 max-w-sm text-sm leading-6 text-stone-500">{t("Add some items to your cart to see them here.")}</p>
 
           <Button
             asChild
             className="group mt-6 h-12 w-full max-w-[220px] rounded-full bg-stone-950 px-5 text-white hover:bg-stone-800 sm:mt-7 sm:max-w-sm"
           >
-            <Link href="/products">
-              Browse products
-              <ArrowRight
+            <Link href="/products">{t("Browse products")}<ArrowRight
                 size={18}
                 className="group-hover:translate-x-1 transition-transform"
               />
@@ -108,9 +104,7 @@ export function CartItemsList({
               <div className="flex-1 min-w-0">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
-                    <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-stone-400">
-                      Cart item
-                    </p>
+                    <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-stone-400">{t("Cart item")}</p>
                     <div className="mt-2 line-clamp-2 text-xl font-medium tracking-tight text-stone-950">
                       {it.title}
                     </div>
@@ -120,7 +114,7 @@ export function CartItemsList({
                   </div>
 
                   <div className="whitespace-nowrap rounded-full bg-[#f3eee7] px-4 py-2 text-sm font-semibold text-stone-800 sm:text-right">
-                    {formatPrice(it.price, it.currency)}
+                    {formatPrice(it.price, it.currency, i18n.language)}
                   </div>
                 </div>
 
@@ -150,7 +144,7 @@ export function CartItemsList({
                           className="h-9 w-9 rounded-full text-stone-700 hover:text-stone-900"
                           onClick={() => onQuantityChange(it.id, "decrease")}
                           disabled={isPending || (it.quantity ?? 1) <= 1}
-                          aria-label="Decrease quantity"
+                          aria-label={t("Decrease quantity")}
                         >
                           <Minus className="h-4 w-4" />
                         </Button>
@@ -164,7 +158,7 @@ export function CartItemsList({
                           className="h-9 w-9 rounded-full text-stone-700 hover:text-stone-900"
                           onClick={() => onQuantityChange(it.id, "increase")}
                           disabled={isPending}
-                          aria-label="Increase quantity"
+                          aria-label={t("Increase quantity")}
                         >
                           <Plus className="h-4 w-4" />
                         </Button>
@@ -179,7 +173,7 @@ export function CartItemsList({
                         className="h-10 w-10 rounded-full text-stone-500 hover:bg-red-50 hover:text-red-600"
                         onClick={() => onRemove(it.id)}
                         disabled={isPending}
-                        aria-label="Remove item"
+                        aria-label={t("Remove item")}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

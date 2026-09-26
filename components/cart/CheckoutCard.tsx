@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import axios from "axios";
@@ -32,8 +33,8 @@ function profileValue(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function amount(minor: number | undefined, currency: string) {
-  return typeof minor === "number" ? new Intl.NumberFormat("en", { style: "currency", currency }).format(minor / 100) : "—";
+function amount(minor: number | undefined, currency: string, locale: string) {
+  return typeof minor === "number" ? new Intl.NumberFormat(locale, { style: "currency", currency }).format(minor / 100) : "—";
 }
 
 function errorMessage(error: unknown) {
@@ -61,6 +62,7 @@ function submitHostedPayment(payment: PaymentInstruction) {
 }
 
 export function CheckoutCard({ itemCount, cartRevision }: { itemCount: number; cartRevision: string }) {
+  const { t, i18n } = useTranslation();
   const [details, setDetails] = useState<ShippingDetails>(initialDetails);
   const [quote, setQuote] = useState<CheckoutQuote | null>(null);
   const [order, setOrder] = useState<CheckoutOrder | null>(null);
@@ -183,46 +185,46 @@ export function CheckoutCard({ itemCount, cartRevision }: { itemCount: number; c
   const visibleFields = editAllDetails ? fields : fields.filter(({ key }) => !details[key].trim() || editedFields.current.has(key));
 
   return <Card className="h-fit rounded-[28px] border border-white/70 bg-white/85 shadow-lg xl:sticky xl:top-28">
-    <CardHeader><CardTitle className="text-2xl">Checkout</CardTitle></CardHeader>
+    <CardHeader><CardTitle className="text-2xl">{t("Checkout")}</CardTitle></CardHeader>
     <CardContent className="space-y-5">
       {order ? <div className="space-y-4" aria-live="polite">
-        <p>Order <strong>{order.orderId}</strong></p>
-        <p>Status: <strong>{order.status ?? "PENDING"}</strong></p>
-        {order.status === "PAID" ? <><p className="text-green-700">Payment confirmed. Thank you for your order.</p><Button variant="outline" onClick={() => { window.sessionStorage.removeItem(ORDER_KEY); window.sessionStorage.removeItem(MOCK_ORDER_KEY); setOrder(null); }}>Start a new order</Button></> : null}
-        {order.status === "FAILED" ? <><p className="text-red-700">Payment failed.</p><Button onClick={retry} disabled={busy}>Retry payment</Button></> : null}
+        <p>{t("Order")}{" "}<strong>{order.orderId}</strong></p>
+        <p>{t("Status:")}{" "}<strong>{order.status ?? "PENDING"}</strong></p>
+        {order.status === "PAID" ? <><p className="text-green-700">{t("Payment confirmed. Thank you for your order.")}</p><Button variant="outline" onClick={() => { window.sessionStorage.removeItem(ORDER_KEY); window.sessionStorage.removeItem(MOCK_ORDER_KEY); setOrder(null); }}>{t("Start a new order")}</Button></> : null}
+        {order.status === "FAILED" ? <><p className="text-red-700">{t("Payment failed.")}</p><Button onClick={retry} disabled={busy}>{t("Retry payment")}</Button></> : null}
         {order.status !== "PAID" && order.status !== "FAILED" && order.payment?.provider === "mock" ? <div className="flex flex-wrap gap-2">
-          <Button onClick={() => mockPayment("approved")} disabled={busy}>Approve mock payment</Button>
-          <Button variant="outline" onClick={() => mockPayment("declined")} disabled={busy}>Decline mock payment</Button>
+          <Button onClick={() => mockPayment("approved")} disabled={busy}>{t("Approve mock payment")}</Button>
+          <Button variant="outline" onClick={() => mockPayment("declined")} disabled={busy}>{t("Decline mock payment")}</Button>
         </div> : null}
         {order.status !== "PAID" && order.status !== "FAILED" && order.payment && order.payment.provider !== "mock" ?
-          <Button onClick={() => { try { submitHostedPayment(order.payment!); } catch (cause) { setError(errorMessage(cause)); } }}>Go to secure payment</Button> : null}
-        <p className="text-xs text-stone-500">Payment status is confirmed by the server. This page refreshes it automatically.</p>
-      </div> : itemCount === 0 ? <><p>Your cart is empty.</p><Button asChild><Link href="/products">Browse products</Link></Button></> :
+          <Button onClick={() => { try { submitHostedPayment(order.payment!); } catch (cause) { setError(errorMessage(cause)); } }}>{t("Go to secure payment")}</Button> : null}
+        <p className="text-xs text-stone-500">{t("Payment status is confirmed by the server. This page refreshes it automatically.")}</p>
+      </div> : itemCount === 0 ? <><p>{t("Your cart is empty.")}</p><Button asChild><Link href="/products">{t("Browse products")}</Link></Button></> :
       <form onSubmit={createOrder} className="space-y-4">
         <div className="space-y-2 rounded-2xl bg-stone-100 p-4 text-sm">
-          <div className="flex justify-between"><span>Products</span><strong>{amount(productsMinor, currency)}</strong></div>
-          <div className="flex justify-between"><span>Shipping</span><strong>{amount(quote?.shippingMinor, currency)}</strong></div>
-          <div className="flex justify-between border-t border-stone-300 pt-2"><span>Total</span><strong>{amount(quote?.totalMinor, currency)}</strong></div>
+          <div className="flex justify-between"><span>{t("Products")}</span><strong>{amount(productsMinor, currency, i18n.language)}</strong></div>
+          <div className="flex justify-between"><span>{t("Shipping")}</span><strong>{amount(quote?.shippingMinor, currency, i18n.language)}</strong></div>
+          <div className="flex justify-between border-t border-stone-300 pt-2"><span>{t("Total")}</span><strong>{amount(quote?.totalMinor, currency, i18n.language)}</strong></div>
         </div>
-        <p className="text-xs text-stone-500">Current prices and shipping are calculated by the server.</p>
-        {profileLoading ? <p className="text-sm text-stone-500">Loading saved details…</p> : <>
+        <p className="text-xs text-stone-500">{t("Current prices and shipping are calculated by the server.")}</p>
+        {profileLoading ? <p className="text-sm text-stone-500">{t("Loading saved details…")}</p> : <>
           <div className="rounded-2xl border border-stone-200 p-4 text-sm text-stone-700">
             <div className="flex items-center justify-between gap-3">
-              <strong>Contact and delivery details</strong>
-              <button type="button" className="text-sm underline" onClick={() => setEditAllDetails((value) => !value)}>{editAllDetails ? "Show only missing" : "Edit details"}</button>
+              <strong>{t("Contact and delivery details")}</strong>
+              <button type="button" className="text-sm underline" onClick={() => setEditAllDetails((value) => !value)}>{editAllDetails ? t("Show only missing") : t("Edit details")}</button>
             </div>
-            <p className="mt-2 break-words">{[details.customerFirstName, details.customerLastName].filter(Boolean).join(" ") || "Name needed"} · {details.customerEmail || "Email needed"}</p>
-            <p className="break-words">{details.customerPhone || "Phone needed"}</p>
-            <p className="break-words">{[details.shippingAddress, details.shippingCity, details.shippingRegion, details.shippingPostalCode, details.shippingCountry].filter(Boolean).join(", ") || "Address needed"}</p>
+            <p className="mt-2 break-words">{[details.customerFirstName, details.customerLastName].filter(Boolean).join(" ") || t("Name needed")} · {details.customerEmail || t("Email needed")}</p>
+            <p className="break-words">{details.customerPhone || t("Phone needed")}</p>
+            <p className="break-words">{[details.shippingAddress, details.shippingCity, details.shippingRegion, details.shippingPostalCode, details.shippingCountry].filter(Boolean).join(", ") || t("Address needed")}</p>
           </div>
-          {missingFields.length > 0 && !editAllDetails ? <p className="text-sm text-stone-600">Please add the missing details below.</p> : null}
+          {missingFields.length > 0 && !editAllDetails ? <p className="text-sm text-stone-600">{t("Please add the missing details below.")}</p> : null}
         </>}
-        {!profileLoading && visibleFields.map(({ key, label, type }) => <label key={key} className="block text-sm text-stone-700">{label}
+        {!profileLoading && visibleFields.map(({ key, label, type }) => <label key={key} className="block text-sm text-stone-700">{t(label)}
           <input className="mt-1 w-full rounded-lg border border-stone-300 bg-white p-2" required type={type ?? "text"} pattern={key === "shippingCountry" ? "[A-Za-z]{2}" : undefined} value={details[key]} maxLength={key === "shippingCountry" ? 2 : undefined}
             onChange={(event) => { editedFields.current.add(key); setDetails((previous) => ({ ...previous, [key]: key === "shippingCountry" ? event.target.value.toUpperCase() : event.target.value })); }} />
         </label>)}
-        <label className="flex gap-2 text-sm"><input type="checkbox" checked={doorCheck} onChange={(event) => setDoorCheck(event.target.checked)} /> I checked that my furniture fits through my doors and passageways.</label>
-        <Button className="w-full" type="submit" disabled={!doorCheck || !quote || busy || profileLoading || missingFields.length > 0 || !/^[A-Z]{2}$/.test(details.shippingCountry)}>Create order</Button>
+        <label className="flex gap-2 text-sm"><input type="checkbox" checked={doorCheck} onChange={(event) => setDoorCheck(event.target.checked)} />{t("I checked that my furniture fits through my doors and passageways.")}</label>
+        <Button className="w-full" type="submit" disabled={!doorCheck || !quote || busy || profileLoading || missingFields.length > 0 || !/^[A-Z]{2}$/.test(details.shippingCountry)}>{t("Create order")}</Button>
       </form>}
       {error ? <p role="alert" className="text-sm text-red-700">{error}</p> : null}
     </CardContent>

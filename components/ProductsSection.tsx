@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 import { Product } from "@/types/product.type";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Package } from "lucide-react";
@@ -15,6 +16,7 @@ export function ProductsSection({
   fullWidth = false,
   showFavorite = true,
 }: ProductsSectionProps) {
+  const { t } = useTranslation();
   const containerClass = fullWidth
     ? "py-16 px-4"
     : "py-16 px-4 max-w-7xl mx-auto";
@@ -29,16 +31,9 @@ export function ProductsSection({
           <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-sm">
             <Package className="h-12 w-12 text-stone-400" />
           </div>
-          <h3 className="mb-2 text-xl font-semibold text-stone-900">
-            No products found
-          </h3>
-          <p className="mb-6 text-stone-500">
-            We couldn&apos;t find any products at the moment. Please check back
-            later.
-          </p>
-          <Button variant="outline" className="rounded-full px-6">
-            Refresh
-          </Button>
+          <h3 className="mb-2 text-xl font-semibold text-stone-900">{t("No products found")}</h3>
+          <p className="mb-6 text-stone-500">{t("We couldn't find any products at the moment. Please check back later.")}</p>
+          <Button variant="outline" className="rounded-full px-6">{t("Refresh")}</Button>
         </div>
       </section>
     );
@@ -49,24 +44,15 @@ export function ProductsSection({
       <div className="rounded-[32px] border border-white/60 bg-[#f7f4ef]/88 p-5 shadow-[0_24px_80px_rgba(70,61,50,0.1)] backdrop-blur md:p-7 lg:p-8">
         <div className="flex flex-col gap-5 border-b border-stone-200/70 pb-7 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
-            <p className="text-xs font-medium uppercase tracking-[0.28em] text-stone-500">
-              Curated selection
-            </p>
-            <h2 className="mt-3 text-3xl font-medium tracking-tight text-stone-950 sm:text-4xl">
-              Pieces chosen to continue the same quiet, tactile mood
-            </h2>
-            <p className="mt-3 max-w-xl text-base leading-7 text-stone-500">
-              A softer grid of sculptural furniture, natural finishes and warm
-              details that sits comfortably under the new opening showcase.
-            </p>
+            <p className="text-xs font-medium uppercase tracking-[0.28em] text-stone-500">{t("Curated selection")}</p>
+            <h2 className="mt-3 text-3xl font-medium tracking-tight text-stone-950 sm:text-4xl">{t("Pieces chosen to continue the same quiet, tactile mood")}</h2>
+            <p className="mt-3 max-w-xl text-base leading-7 text-stone-500">{t("A softer grid of sculptural furniture, natural finishes and warm details that sits comfortably under the new opening showcase.")}</p>
           </div>
 
           <Button
             variant="outline"
             className="h-12 rounded-full border-stone-300 bg-white px-5 text-stone-800 hover:bg-stone-100"
-          >
-            Browse all products
-            <ArrowRight className="h-4 w-4" />
+          >{t("Browse all products")}<ArrowRight className="h-4 w-4" />
           </Button>
         </div>
 
@@ -86,9 +72,7 @@ export function ProductsSection({
           <Button
             variant="outline"
             className="h-12 rounded-full border-stone-300 bg-white px-8 text-stone-800 hover:bg-stone-100"
-          >
-            Load more
-          </Button>
+          >{t("Load more")}</Button>
         </div>
       )}
     </section>

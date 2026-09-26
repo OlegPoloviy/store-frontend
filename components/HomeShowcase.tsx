@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -46,6 +47,7 @@ function ProductImage({
   className?: string;
   compact?: boolean;
 }) {
+  const { t } = useTranslation();
   if (!src) {
     return (
       <div
@@ -85,16 +87,12 @@ function ProductImage({
             className={`font-semibold tracking-tight text-stone-950 ${
               compact ? "mt-3 text-sm" : "mt-6 text-lg"
             }`}
-          >
-            Image coming soon
-          </p>
+          >{t("Image coming soon")}</p>
           <p
             className={`mt-2 max-w-[240px] text-stone-600 ${
               compact ? "line-clamp-2 text-xs leading-5" : "text-sm leading-6"
             }`}
-          >
-            Handcrafted piece selected for the Carpathians collection.
-          </p>
+          >{t("Handcrafted piece selected for the Carpathians collection.")}</p>
         </div>
       </div>
     );
@@ -117,6 +115,7 @@ export function HomeShowcase({
   products,
   latestProducts,
 }: HomeShowcaseProps) {
+  const { t } = useTranslation();
   const newDealProducts = latestProducts.length > 0 ? latestProducts : products;
   const dealSlides = newDealProducts.length > 0 ? newDealProducts : [undefined];
   const spotlightProduct = products[1] || products[0];
@@ -176,9 +175,7 @@ export function HomeShowcase({
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.42),_transparent_45%)]" />
             <div className="relative flex min-h-[460px] flex-col gap-8">
               <div>
-                <p className="inline-block rounded-[22px] bg-white/32 px-4 py-2 text-4xl font-light tracking-tight text-stone-950 shadow-[0_16px_40px_rgba(54,47,39,0.08)] backdrop-blur-sm sm:text-5xl">
-                  New Deals
-                </p>
+                <p className="inline-block rounded-[22px] bg-white/32 px-4 py-2 text-4xl font-light tracking-tight text-stone-950 shadow-[0_16px_40px_rgba(54,47,39,0.08)] backdrop-blur-sm sm:text-5xl">{t("New Deals")}</p>
               </div>
 
               <Carousel
@@ -201,7 +198,7 @@ export function HomeShowcase({
                       ${product?.price || "508"}
                     </p>
                     <p className="mt-1 text-lg text-stone-500">
-                      {product?.title || "Long Chair"}
+                      {product?.title || t("Long Chair")}
                     </p>
                   </div>
                   <div className="rounded-full bg-stone-100 px-4 py-3 text-sm font-medium text-stone-700">
@@ -218,7 +215,7 @@ export function HomeShowcase({
                   <div className="relative overflow-hidden rounded-[26px] bg-[#f3efe8] aspect-[4/5]">
                     <ProductImage
                       src={getProductImage(product)}
-                      alt={product?.title || "Featured furniture"}
+                      alt={product?.title || t("Featured furniture")}
                       priority={index === 0}
                       className="object-cover transition duration-700 group-hover:scale-105"
                     />
@@ -260,12 +257,12 @@ export function HomeShowcase({
                 </CarouselContent>
                 {dealSlides.length > 1 && (
                   <div className="mt-5 flex items-center justify-between gap-3 px-1">
-                    <div className="flex items-center gap-1.5" aria-label="Carousel pagination">
+                    <div className="flex items-center gap-1.5" aria-label={t("Carousel pagination")}>
                       {dealSlides.map((product, index) => (
                         <button
                           key={`deal-dot-${product?.id ?? index}`}
                           type="button"
-                          aria-label={`Go to deal ${index + 1}`}
+                          aria-label={t("Go to deal {{number}}", { number: index + 1 })}
                           aria-current={index === activeDealIndex ? "true" : undefined}
                           onClick={() => dealApi?.scrollTo(index)}
                           className={`h-2 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 focus-visible:ring-offset-2 ${
@@ -291,13 +288,8 @@ export function HomeShowcase({
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.38),_transparent_40%)]" />
               <div className="relative flex min-h-[560px] flex-col justify-between">
                 <div className="max-w-xl rounded-[24px] bg-white/28 px-4 py-3 shadow-[0_18px_46px_rgba(54,47,39,0.08)] backdrop-blur-sm">
-                  <p className="text-4xl font-light tracking-tight text-stone-950 sm:text-5xl">
-                    Great Value Deals
-                  </p>
-                  <p className="mt-3 text-base leading-7 text-stone-700 sm:text-lg">
-                    Find items on sale with handcrafted finishes, warm oak
-                    details and quietly sculptural silhouettes.
-                  </p>
+                  <p className="text-4xl font-light tracking-tight text-stone-950 sm:text-5xl">{t("Great Value Deals")}</p>
+                  <p className="mt-3 text-base leading-7 text-stone-700 sm:text-lg">{t("Find items on sale with handcrafted finishes, warm oak details and quietly sculptural silhouettes.")}</p>
                 </div>
 
                 <div className="relative mx-auto flex w-full max-w-[520px] flex-1 items-end justify-center pt-8">
@@ -307,7 +299,7 @@ export function HomeShowcase({
                   <div className="relative h-[420px] w-full overflow-hidden rounded-[28px]">
                     <ProductImage
                       src={getProductImage(spotlightProduct)}
-                      alt={spotlightProduct?.title || "Spotlight chair"}
+                      alt={spotlightProduct?.title || t("Spotlight chair")}
                       priority
                       className="object-contain"
                     />
@@ -321,12 +313,10 @@ export function HomeShowcase({
                 <Badge
                   variant="outline"
                   className="rounded-full border-stone-200 px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-500"
-                >
-                  Exclusive
-                </Badge>
+                >{t("Exclusive")}</Badge>
                 <div className="mt-8 space-y-4">
                   <h2 className="text-3xl font-medium tracking-tight text-stone-950">
-                    {editorialProduct?.title || "PureSpace Focus Duo"}
+                    {editorialProduct?.title || t("PureSpace Focus Duo")}
                   </h2>
                   <p className="max-w-sm text-base leading-7 text-stone-500">
                     {editorialProduct?.description ||
@@ -354,13 +344,13 @@ export function HomeShowcase({
                   <div className="relative aspect-[16/11] overflow-hidden rounded-[24px]">
                     <ProductImage
                       src={getProductImage(editorialProduct)}
-                      alt={editorialProduct?.title || "Editorial piece"}
+                      alt={editorialProduct?.title || t("Editorial piece")}
                       compact
                       className="object-cover transition duration-700 hover:scale-105"
                     />
                   </div>
                   <div className="mt-4 flex items-center justify-between rounded-full bg-[#d8ccbb] pl-5 pr-2 py-2 text-stone-900">
-                    <span className="text-lg font-medium">Open</span>
+                    <span className="text-lg font-medium">{t("Open")}</span>
                     <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-stone-950 text-white">
                       <ArrowRight className="h-4 w-4" />
                     </span>
@@ -376,9 +366,7 @@ export function HomeShowcase({
                 <Badge
                   variant="outline"
                   className="rounded-full border-stone-200 px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-500"
-                >
-                  Studio approach
-                </Badge>
+                >{t("Studio approach")}</Badge>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -389,25 +377,14 @@ export function HomeShowcase({
               </div>
 
               <div className="mt-6">
-                <p className="text-3xl font-medium tracking-tight text-stone-950">
-                  Crafted around your space
-                </p>
-                <p className="mt-3 text-base leading-7 text-stone-500">
-                  Thoughtful furniture guidance for materials, proportions and
-                  finishes that feel personal without overcomplicating the room.
-                </p>
+                <p className="text-3xl font-medium tracking-tight text-stone-950">{t("Crafted around your space")}</p>
+                <p className="mt-3 text-base leading-7 text-stone-500">{t("Thoughtful furniture guidance for materials, proportions and finishes that feel personal without overcomplicating the room.")}</p>
               </div>
 
               <div className="mt-8 grid gap-3 text-sm font-medium text-stone-700">
-                <div className="rounded-full bg-stone-100 px-5 py-3">
-                  Material-first recommendations
-                </div>
-                <div className="rounded-full bg-[#eadfd2] px-5 py-3 text-stone-800">
-                  Custom sizing conversations
-                </div>
-                <div className="rounded-full bg-stone-950 px-5 py-3 text-white">
-                  Finish and styling direction
-                </div>
+                <div className="rounded-full bg-stone-100 px-5 py-3">{t("Material-first recommendations")}</div>
+                <div className="rounded-full bg-[#eadfd2] px-5 py-3 text-stone-800">{t("Custom sizing conversations")}</div>
+                <div className="rounded-full bg-stone-950 px-5 py-3 text-white">{t("Finish and styling direction")}</div>
               </div>
 
               <div className="mt-6 flex items-center gap-2">
@@ -422,9 +399,7 @@ export function HomeShowcase({
                 <Badge
                   variant="outline"
                   className="rounded-full border-stone-200 px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-500"
-                >
-                  Get a bonus
-                </Badge>
+                >{t("Get a bonus")}</Badge>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -435,23 +410,16 @@ export function HomeShowcase({
               </div>
 
               <div className="mt-6">
-                <p className="text-2xl font-medium tracking-tight text-stone-950">
-                  Discover exclusive drops
-                </p>
-                <p className="mt-3 text-base leading-7 text-stone-500">
-                  Get early access to new collections, limited finishes and
-                  studio notes from our team.
-                </p>
+                <p className="text-2xl font-medium tracking-tight text-stone-950">{t("Discover exclusive drops")}</p>
+                <p className="mt-3 text-base leading-7 text-stone-500">{t("Get early access to new collections, limited finishes and studio notes from our team.")}</p>
               </div>
 
               <div className="mt-8 space-y-3">
                 <Input
-                  placeholder="Email"
+                  placeholder={t("Email")}
                   className="h-12 rounded-full border-stone-200 bg-stone-50 px-5"
                 />
-                <Button className="h-12 w-full rounded-full bg-stone-950 text-white hover:bg-stone-800">
-                  Subscribe
-                </Button>
+                <Button className="h-12 w-full rounded-full bg-stone-950 text-white hover:bg-stone-800">{t("Subscribe")}</Button>
               </div>
             </article>
 
@@ -459,7 +427,7 @@ export function HomeShowcase({
               <div className="relative aspect-[16/10] overflow-hidden rounded-[26px] bg-stone-100">
                 <ProductImage
                   src={getProductImage(accentProduct) || getCategoryImage(categories[0])}
-                  alt={accentProduct?.title || "Studio pick"}
+                  alt={accentProduct?.title ||t("Studio pick")}
                   compact
                   className="object-cover"
                 />
@@ -467,9 +435,7 @@ export function HomeShowcase({
                   <Badge
                     variant="outline"
                     className="rounded-full border-white/70 bg-white/86 px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-700 shadow-sm backdrop-blur"
-                  >
-                    Studio pick
-                  </Badge>
+                  >{t("Studio pick")}</Badge>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -481,13 +447,8 @@ export function HomeShowcase({
               </div>
 
               <div className="px-2 pb-2 pt-5">
-                <p className="text-2xl font-medium tracking-tight text-stone-950">
-                  Join us for more refined living ideas.
-                </p>
-                <p className="mt-3 text-base leading-7 text-stone-500">
-                  Materials, proportions and styling notes chosen to make the
-                  home feel composed.
-                </p>
+                <p className="text-2xl font-medium tracking-tight text-stone-950">{t("Join us for more refined living ideas.")}</p>
+                <p className="mt-3 text-base leading-7 text-stone-500">{t("Materials, proportions and styling notes chosen to make the home feel composed.")}</p>
               </div>
             </article>
           </div>

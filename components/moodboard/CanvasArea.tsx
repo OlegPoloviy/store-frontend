@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import { forwardRef } from "react";
 import { useDroppable } from "@dnd-kit/core";
@@ -20,6 +21,7 @@ interface CanvasAreaProps {
 
 export const CanvasArea = forwardRef<HTMLDivElement, CanvasAreaProps>(
   ({ items, scene, customBackground, customBackgroundRatio, selectedId, onSelect, onRemoveItem, expanded = false, expandedMaxWidth }, ref) => {
+    const { t } = useTranslation();
     const { setNodeRef, isOver } = useDroppable({ id: "canvas-area" });
     const scenePhoto = scene === "kitchen" ? "/images/moodboard/kitchen-empty.jpg" : scene === "bathroom" ? "/images/moodboard/bathroom-empty.jpg" : scene === "living" ? "/images/moodboard/living-empty.jpg" : null;
     const sceneAuthor = scene === "kitchen" ? "Alex Tyson" : scene === "bathroom" ? "Christa Grover" : scene === "living" ? "Lisa Anna" : null;
@@ -60,8 +62,8 @@ export const CanvasArea = forwardRef<HTMLDivElement, CanvasAreaProps>(
         {items.length === 0 && <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6">
           <div className="max-w-sm rounded-3xl border border-white/70 bg-white/85 px-8 py-9 text-center shadow-2xl backdrop-blur-md" data-export-ignore="true">
             <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-stone-900 text-white"><MoveUpRight size={20} /></div>
-            <p className="font-serif text-2xl text-stone-900">Make it yours</p>
-            <p className="mt-2 text-sm leading-6 text-stone-600">Drag a saved piece onto the scene, or add your own inspiration photo.</p>
+            <p className="font-serif text-2xl text-stone-900">{t("Make it yours")}</p>
+            <p className="mt-2 text-sm leading-6 text-stone-600">{t("Drag a saved piece onto the scene, or add your own inspiration photo.")}</p>
           </div>
         </div>}
       </div>

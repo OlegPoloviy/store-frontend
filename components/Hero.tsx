@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import { Category } from "@/types/category.type";
 import {
@@ -21,6 +22,7 @@ interface HeroProps {
 }
 
 export function Hero({ categories }: HeroProps) {
+  const { t } = useTranslation();
   const [api, setApi] = useState<CarouselApi>();
 
   useEffect(() => {
@@ -42,12 +44,8 @@ export function Hero({ categories }: HeroProps) {
     return (
       <section className="relative min-h-[600px] flex items-center justify-center bg-stone-50">
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-stone-800">
-            Welcome to Carpathians
-          </h1>
-          <p className="text-stone-600">
-            Discover handcrafted furniture for your home.
-          </p>
+          <h1 className="text-4xl font-bold text-stone-800">{t("Welcome to Carpathians")}</h1>
+          <p className="text-stone-600">{t("Discover handcrafted furniture for your home.")}</p>
         </div>
       </section>
     );
@@ -72,15 +70,9 @@ export function Hero({ categories }: HeroProps) {
               <Badge
                 variant="outline"
                 className="border-emerald-200 text-emerald-700 bg-emerald-50/50 uppercase tracking-widest text-[10px] font-bold px-3 py-1"
-              >
-                Our Collections
-              </Badge>
-              <h2 className="text-4xl font-bold text-stone-900 tracking-tight">
-                Handcrafted Excellence
-              </h2>
-              <p className="text-stone-500 max-w-md text-lg">
-                Browse through our curated sections of sustainable furniture
-              </p>
+              >{t("Our Collections")}</Badge>
+              <h2 className="text-4xl font-bold text-stone-900 tracking-tight">{t("Handcrafted Excellence")}</h2>
+              <p className="text-stone-500 max-w-md text-lg">{t("Browse through our curated sections of sustainable furniture")}</p>
             </div>
             <div className="flex gap-3 pb-1">
               <CarouselPrevious className="static translate-y-0 h-12 w-12 border-stone-200 hover:bg-stone-50 hover:text-emerald-700 text-stone-600 rounded-full transition-all duration-300" />
@@ -117,9 +109,7 @@ export function Hero({ categories }: HeroProps) {
                     {/* Content */}
                     <div className="absolute inset-0 p-10 flex flex-col justify-end">
                       <div className="space-y-4 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                        <Badge className="w-fit bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 text-emerald-100 hover:bg-emerald-500/30 transition-colors uppercase tracking-widest text-[10px] font-bold px-3 py-1">
-                          Collection
-                        </Badge>
+                        <Badge className="w-fit bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 text-emerald-100 hover:bg-emerald-500/30 transition-colors uppercase tracking-widest text-[10px] font-bold px-3 py-1">{t("Collection")}</Badge>
                         <div>
                           <h3 className="text-3xl font-bold text-white mb-2 tracking-tight">
                             {category.name}
@@ -131,9 +121,7 @@ export function Hero({ categories }: HeroProps) {
                         </div>
 
                         <div className="flex items-center text-emerald-400 text-sm font-bold gap-2 group-hover:text-emerald-300 transition-colors pt-2">
-                          <span className="uppercase tracking-widest text-[11px]">
-                            Shop Collection
-                          </span>
+                          <span className="uppercase tracking-widest text-[11px]">{t("Shop Collection")}</span>
                           <span className="group-hover:translate-x-2 transition-transform duration-300">
                             →
                           </span>
@@ -154,12 +142,8 @@ export function Hero({ categories }: HeroProps) {
               <Truck className="w-7 h-7 text-emerald-700" />
             </div>
             <div>
-              <h4 className="font-bold text-stone-900 text-lg mb-1">
-                Free Delivery
-              </h4>
-              <p className="text-stone-500 leading-relaxed">
-                Complimentary shipping on all handcrafted pieces over $500
-              </p>
+              <h4 className="font-bold text-stone-900 text-lg mb-1">{t("Free Delivery")}</h4>
+              <p className="text-stone-500 leading-relaxed">{t("Complimentary shipping on all handcrafted pieces over $500")}</p>
             </div>
           </div>
           <div className="flex items-start space-x-5 group">
@@ -167,12 +151,8 @@ export function Hero({ categories }: HeroProps) {
               <Clock className="w-7 h-7 text-emerald-700" />
             </div>
             <div>
-              <h4 className="font-bold text-stone-900 text-lg mb-1">
-                Expert Support
-              </h4>
-              <p className="text-stone-500 leading-relaxed">
-                Consult with our design experts for custom furniture needs
-              </p>
+              <h4 className="font-bold text-stone-900 text-lg mb-1">{t("Expert Support")}</h4>
+              <p className="text-stone-500 leading-relaxed">{t("Consult with our design experts for custom furniture needs")}</p>
             </div>
           </div>
           <div className="flex items-start space-x-5 group">
@@ -180,12 +160,8 @@ export function Hero({ categories }: HeroProps) {
               <Shield className="w-7 h-7 text-emerald-700" />
             </div>
             <div>
-              <h4 className="font-bold text-stone-900 text-lg mb-1">
-                Handmade Guarantee
-              </h4>
-              <p className="text-stone-500 leading-relaxed">
-                Each piece is certified for quality and sustainable sourcing
-              </p>
+              <h4 className="font-bold text-stone-900 text-lg mb-1">{t("Handmade Guarantee")}</h4>
+              <p className="text-stone-500 leading-relaxed">{t("Each piece is certified for quality and sustainable sourcing")}</p>
             </div>
           </div>
         </div>

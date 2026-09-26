@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ export function CollectionsFilter({
   onCreateCollection,
   loading = false,
 }: CollectionsFilterProps) {
+  const { t } = useTranslation();
   const handleValueChange = (value: string) => {
     if (onCollectionChange) {
       // "all" означає показати всі продукти (без фільтра)
@@ -50,9 +52,7 @@ export function CollectionsFilter({
               hover:bg-gray-100
               disabled:opacity-50 disabled:cursor-not-allowed
             "
-          >
-            All saved
-          </TabsTrigger>
+          >{t("All saved")}</TabsTrigger>
 
           {/* Динамічно рендеримо колекції */}
           {collections.map((collection) => (
@@ -72,7 +72,7 @@ export function CollectionsFilter({
             >
               {collection.name}
               {collection.isPrivate && (
-                <span className="ml-1 text-xs opacity-60">(Private)</span>
+                <span className="ml-1 text-xs opacity-60">{t("(Private)")}</span>
               )}
             </TabsTrigger>
           ))}
@@ -91,9 +91,7 @@ export function CollectionsFilter({
           disabled:opacity-50 disabled:cursor-not-allowed
         "
       >
-        <Plus className="w-4 h-4 mr-2" />
-        New collection
-      </Button>
+        <Plus className="w-4 h-4 mr-2" />{t("New collection")}</Button>
     </div>
   );
 }

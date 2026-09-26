@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
@@ -18,6 +19,7 @@ export function ProductActions({
   productId,
   initialIsFavorite = false,
 }: ProductActionsProps) {
+  const { t } = useTranslation();
   const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -27,10 +29,10 @@ export function ProductActions({
       const result = await cartApi.addToCart(body);
       console.log(result);
       window.dispatchEvent(new Event("cart:updated"));
-      toast.success("Added to cart");
+      toast.success(t("Added to cart"));
     } catch (error) {
       console.error("Error adding to cart:", error);
-      toast.error("Failed to add to cart");
+      toast.error(t("Failed to add to cart"));
     }
   };
 
@@ -46,10 +48,10 @@ export function ProductActions({
     try {
       if (isFavorite) {
         await productsApi.removeFromFavorites(productId);
-        toast.success("Removed from favorites");
+        toast.success(t("Removed from favorites"));
       } else {
         await productsApi.addToFavorite(productId);
-        toast.success("Added to favorites");
+        toast.success(t("Added to favorites"));
       }
     } catch (error) {
       // Відкат при помилці
@@ -73,9 +75,7 @@ export function ProductActions({
           onClick={handleAddToCart}
           size="lg"
           className="flex-1 bg-gray-900 hover:bg-gray-800"
-        >
-          Add to Cart
-        </Button>
+        >{t("Add to Cart")}</Button>
         <Button
           onClick={handleFavoriteToggle}
           variant="outline"

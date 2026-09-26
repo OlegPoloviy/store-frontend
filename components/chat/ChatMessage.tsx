@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "react-i18next";
 import { Message } from "./types";
 
 interface ChatMessageProps {
@@ -5,6 +7,7 @@ interface ChatMessageProps {
 }
 
 export function ChatMessage({ message }: ChatMessageProps) {
+  const { t, i18n } = useTranslation();
   const isUser = message.sender === "user";
 
   return (
@@ -25,18 +28,18 @@ export function ChatMessage({ message }: ChatMessageProps) {
             : "rounded-bl-md border border-stone-200 bg-white text-stone-800"
         }`}
       >
-        <p>{message.text}</p>
+        <p>{t(message.text)}</p>
         <div
           className={`mt-1 text-[10px] font-medium ${
             isUser ? "text-right text-white/62" : "text-left text-stone-400"
           }`}
         >
-          {message.timestamp.toLocaleTimeString([], {
+          {message.timestamp.toLocaleTimeString(i18n.language, {
             hour: "2-digit",
             minute: "2-digit",
           })}
-          {message.status === "sending" ? " · Sending" : ""}
-          {message.status === "error" ? " · Not sent" : ""}
+          {message.status === "sending" ? t(" · Sending") : ""}
+          {message.status === "error" ? t(" · Not sent") : ""}
         </div>
       </div>
     </div>

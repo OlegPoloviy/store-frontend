@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import {
   Sheet,
@@ -26,6 +27,7 @@ const SAMPLE_QUESTIONS = [
 const CONVERSATION_STORAGE_KEY = "support-chat-conversation-id";
 
 export function ChatModal({ open, onOpenChange }: ChatModalProps) {
+  const { t } = useTranslation();
   const [inputValue, setInputValue] = useState("");
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
@@ -195,33 +197,22 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <SheetTitle className="text-xl font-semibold tracking-tight text-stone-950">
-                  Customer Support
-                </SheetTitle>
-                <Badge className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700 hover:bg-emerald-50">
-                  Online
-                </Badge>
+                <SheetTitle className="text-xl font-semibold tracking-tight text-stone-950">{t("Customer Support")}</SheetTitle>
+                <Badge className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700 hover:bg-emerald-50">{t("Online")}</Badge>
               </div>
-              <SheetDescription className="mt-2 text-sm leading-6 text-stone-600">
-                Ask about delivery, custom orders, materials, or anything else
-                you need before choosing your furniture.
-              </SheetDescription>
+              <SheetDescription className="mt-2 text-sm leading-6 text-stone-600">{t("Ask about delivery, custom orders, materials, or anything else you need before choosing your furniture.")}</SheetDescription>
             </div>
           </div>
           <div className="mt-5 grid grid-cols-2 gap-2">
             <div className="rounded-2xl border border-stone-200 bg-[#f7f4ef] px-3 py-2">
               <div className="flex items-center gap-2 text-xs font-medium text-stone-900">
-                <MessageSquare className="h-3.5 w-3.5 text-emerald-700" />
-                Quick replies
-              </div>
-              <p className="mt-1 text-xs text-stone-500">Usually in minutes</p>
+                <MessageSquare className="h-3.5 w-3.5 text-emerald-700" />{t("Quick replies")}</div>
+              <p className="mt-1 text-xs text-stone-500">{t("Usually in minutes")}</p>
             </div>
             <div className="rounded-2xl border border-stone-200 bg-[#f7f4ef] px-3 py-2">
               <div className="flex items-center gap-2 text-xs font-medium text-stone-900">
-                <Sparkles className="h-3.5 w-3.5 text-amber-600" />
-                Custom help
-              </div>
-              <p className="mt-1 text-xs text-stone-500">Furniture guidance</p>
+                <Sparkles className="h-3.5 w-3.5 text-amber-600" />{t("Custom help")}</div>
+              <p className="mt-1 text-xs text-stone-500">{t("Furniture guidance")}</p>
             </div>
           </div>
         </SheetHeader>
@@ -235,7 +226,7 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
           ))}
           {errorMessage && (
             <div className="rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
-              {errorMessage}
+              {t(errorMessage)}
             </div>
           )}
         </div>

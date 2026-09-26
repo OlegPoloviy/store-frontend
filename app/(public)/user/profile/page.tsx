@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -51,6 +52,7 @@ function ReadOnlyField({
   label: string;
   value: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-2">
       <Label className="text-sm font-medium text-stone-500">{label}</Label>
@@ -58,13 +60,14 @@ function ReadOnlyField({
         <span className="flex h-5 w-5 shrink-0 items-center justify-center text-stone-400">
           {icon}
         </span>
-        <span className="min-w-0 break-words">{value || "Not provided yet"}</span>
+        <span className="min-w-0 break-words">{value || t("Not provided yet")}</span>
       </div>
     </div>
   );
 }
 
 export default function UserProfile() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile>({
     firstName: "",
@@ -136,7 +139,7 @@ export default function UserProfile() {
         country: profile.country,
       });
 
-      toast.success("Profile updated successfully!");
+      toast.success(t("Profile updated successfully!"));
       setIsEditing(false);
     } catch (error) {
       const errorMessage =
@@ -195,16 +198,11 @@ export default function UserProfile() {
                       {initials}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs font-medium uppercase tracking-[0.28em] text-stone-500">
-                        Personal space
-                      </p>
+                      <p className="text-xs font-medium uppercase tracking-[0.28em] text-stone-500">{t("Personal space")}</p>
                       <h1 className="mt-2 break-words text-3xl font-medium tracking-tight text-stone-950">
                         {profileName}
                       </h1>
-                      <p className="mt-2 text-sm leading-6 text-stone-500">
-                        Keep delivery details, contact info and account basics
-                        in one calm place.
-                      </p>
+                      <p className="mt-2 text-sm leading-6 text-stone-500">{t("Keep delivery details, contact info and account basics in one calm place.")}</p>
                     </div>
                   </div>
                   <Button
@@ -220,13 +218,8 @@ export default function UserProfile() {
                 <div className="rounded-[28px] border border-white/70 bg-white/90 p-5 shadow-sm">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-sm font-medium text-stone-900">
-                        Profile completeness
-                      </p>
-                      <p className="mt-1 text-sm text-stone-500">
-                        A fuller profile makes checkout and support feel much
-                        smoother.
-                      </p>
+                      <p className="text-sm font-medium text-stone-900">{t("Profile completeness")}</p>
+                      <p className="mt-1 text-sm text-stone-500">{t("A fuller profile makes checkout and support feel much smoother.")}</p>
                     </div>
                     <div className="shrink-0 rounded-full bg-[#f3eee7] px-4 py-2 text-sm font-medium text-stone-800">
                       {completion}%
@@ -247,11 +240,9 @@ export default function UserProfile() {
                         <Mail className="h-4 w-4" />
                       </span>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-stone-900">
-                          Primary email
-                        </p>
+                        <p className="text-sm font-medium text-stone-900">{t("Primary email")}</p>
                         <p className="break-words text-sm text-stone-500">
-                          {profile.email || "Not provided yet"}
+                          {profile.email || t("Not provided yet")}
                         </p>
                       </div>
                     </div>
@@ -263,12 +254,8 @@ export default function UserProfile() {
                         <ShieldCheck className="h-4 w-4" />
                       </span>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-stone-900">
-                          Account status
-                        </p>
-                        <p className="text-sm text-stone-500">
-                          Active and ready for orders
-                        </p>
+                        <p className="text-sm font-medium text-stone-900">{t("Account status")}</p>
+                        <p className="text-sm text-stone-500">{t("Active and ready for orders")}</p>
                       </div>
                     </div>
                   </div>
@@ -280,13 +267,8 @@ export default function UserProfile() {
                       <Sparkles className="h-4 w-4" />
                     </span>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-stone-900">
-                        Thoughtful details matter here
-                      </p>
-                      <p className="mt-1 text-sm leading-6 text-stone-500">
-                        Keep your phone, city and address current so delivery
-                        coordination and custom order follow-ups stay easy.
-                      </p>
+                      <p className="text-sm font-medium text-stone-900">{t("Thoughtful details matter here")}</p>
+                      <p className="mt-1 text-sm leading-6 text-stone-500">{t("Keep your phone, city and address current so delivery coordination and custom order follow-ups stay easy.")}</p>
                     </div>
                   </div>
                 </div>
@@ -298,13 +280,8 @@ export default function UserProfile() {
             <CardHeader className="border-b border-stone-200/70 px-6 py-6 sm:px-8">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <CardTitle className="text-3xl font-medium tracking-tight text-stone-950">
-                    Profile details
-                  </CardTitle>
-                  <CardDescription className="mt-2 max-w-xl text-sm leading-6 text-stone-500">
-                    Update the essentials that shape your account, delivery
-                    details and communication preferences.
-                  </CardDescription>
+                  <CardTitle className="text-3xl font-medium tracking-tight text-stone-950">{t("Profile details")}</CardTitle>
+                  <CardDescription className="mt-2 max-w-xl text-sm leading-6 text-stone-500">{t("Update the essentials that shape your account, delivery details and communication preferences.")}</CardDescription>
                 </div>
 
                 <div className="flex flex-wrap gap-3">
@@ -315,26 +292,20 @@ export default function UserProfile() {
                         className="h-12 rounded-full border-stone-300 bg-white px-5 text-stone-800 hover:bg-stone-100"
                         onClick={handleCancel}
                       >
-                        <X className="h-4 w-4" />
-                        Cancel
-                      </Button>
+                        <X className="h-4 w-4" />{t("Cancel")}</Button>
                       <Button
                         className="h-12 rounded-full bg-stone-950 px-5 text-white hover:bg-stone-800"
                         onClick={handleSave}
                         disabled={isLoading}
                       >
-                        <Save className="h-4 w-4" />
-                        Save changes
-                      </Button>
+                        <Save className="h-4 w-4" />{t("Save changes")}</Button>
                     </>
                   ) : (
                     <Button
                       className="h-12 rounded-full bg-stone-950 px-5 text-white hover:bg-stone-800"
                       onClick={() => setIsEditing(true)}
                     >
-                      <Edit3 className="h-4 w-4" />
-                      Edit profile
-                    </Button>
+                      <Edit3 className="h-4 w-4" />{t("Edit profile")}</Button>
                   )}
                 </div>
               </div>
@@ -345,15 +316,13 @@ export default function UserProfile() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-lg font-medium text-stone-900">
                     <User className="h-5 w-5 shrink-0" />
-                    <span className="min-w-0">Personal information</span>
+                    <span className="min-w-0">{t("Personal information")}</span>
                   </div>
 
                   {isEditing ? (
                     <div className="grid gap-4">
                       <div className="space-y-2">
-                        <Label className="text-sm font-medium text-stone-500">
-                          First name
-                        </Label>
+                        <Label className="text-sm font-medium text-stone-500">{t("First name")}</Label>
                         <Input
                           value={profile.firstName}
                           onChange={(e) =>
@@ -362,14 +331,12 @@ export default function UserProfile() {
                               firstName: e.target.value,
                             })
                           }
-                          placeholder="Enter first name"
+                          placeholder={t("Enter first name")}
                           className="h-12 rounded-2xl border-stone-200 bg-white"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-sm font-medium text-stone-500">
-                          Last name
-                        </Label>
+                        <Label className="text-sm font-medium text-stone-500">{t("Last name")}</Label>
                         <Input
                           value={profile.lastName}
                           onChange={(e) =>
@@ -378,7 +345,7 @@ export default function UserProfile() {
                               lastName: e.target.value,
                             })
                           }
-                          placeholder="Enter last name"
+                          placeholder={t("Enter last name")}
                           className="h-12 rounded-2xl border-stone-200 bg-white"
                         />
                       </div>
@@ -402,7 +369,7 @@ export default function UserProfile() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-lg font-medium text-stone-900">
                     <Mail className="h-5 w-5 shrink-0" />
-                    <span className="min-w-0">Contact information</span>
+                    <span className="min-w-0">{t("Contact information")}</span>
                   </div>
 
                   <div className="grid gap-4">
@@ -414,9 +381,7 @@ export default function UserProfile() {
 
                     {isEditing ? (
                       <div className="space-y-2">
-                        <Label className="text-sm font-medium text-stone-500">
-                          Phone number
-                        </Label>
+                        <Label className="text-sm font-medium text-stone-500">{t("Phone number")}</Label>
                         <PhoneInput
                           value={profile.phone}
                           onChange={(value) =>
@@ -440,20 +405,18 @@ export default function UserProfile() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-lg font-medium text-stone-900">
                     <ShieldCheck className="h-5 w-5 shrink-0" />
-                    <span className="min-w-0">Security</span>
+                    <span className="min-w-0">{t("Security")}</span>
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-stone-500">
-                      Password
-                    </Label>
+                    <Label className="text-sm font-medium text-stone-500">{t("Password")}</Label>
                     <div className="flex min-h-12 items-center justify-between gap-3 rounded-2xl border border-white/70 bg-white/90 px-4 py-3 text-stone-900 shadow-sm">
                       <div className="flex min-w-0 items-center gap-3">
                         <span className="flex h-5 w-5 shrink-0 items-center justify-center text-stone-400">
                           <ShieldCheck className="h-4 w-4" />
                         </span>
                         <span className="min-w-0 break-words">
-                          {showPassword ? "Password hidden" : profile.password}
+                          {showPassword ? t("Password hidden") : profile.password}
                         </span>
                       </div>
                       <button
@@ -474,42 +437,36 @@ export default function UserProfile() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-lg font-medium text-stone-900">
                     <MapPin className="h-5 w-5 shrink-0" />
-                    <span className="min-w-0">Address</span>
+                    <span className="min-w-0">{t("Address")}</span>
                   </div>
 
                   {isEditing ? (
                     <div className="grid gap-4">
                       <div className="space-y-2">
-                        <Label className="text-sm font-medium text-stone-500">
-                          Street address
-                        </Label>
+                        <Label className="text-sm font-medium text-stone-500">{t("Street address")}</Label>
                         <Input
                           value={profile.address}
                           onChange={(e) =>
                             setProfile({ ...profile, address: e.target.value })
                           }
-                          placeholder="Enter address"
+                          placeholder={t("Enter address")}
                           className="h-12 rounded-2xl border-stone-200 bg-white"
                         />
                       </div>
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
-                          <Label className="text-sm font-medium text-stone-500">
-                            City
-                          </Label>
+                          <Label className="text-sm font-medium text-stone-500">{t("City")}</Label>
                           <Input
                             value={profile.city}
                             onChange={(e) =>
                               setProfile({ ...profile, city: e.target.value })
                             }
-                            placeholder="City"
+                            placeholder={t("City")}
                             className="h-12 rounded-2xl border-stone-200 bg-white"
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-sm font-medium text-stone-500">
-                            Postal code
-                          </Label>
+                          <Label className="text-sm font-medium text-stone-500">{t("Postal code")}</Label>
                           <Input
                             value={profile.postalCode}
                             onChange={(e) =>
@@ -518,21 +475,19 @@ export default function UserProfile() {
                                 postalCode: e.target.value,
                               })
                             }
-                            placeholder="Postal code"
+                            placeholder={t("Postal code")}
                             className="h-12 rounded-2xl border-stone-200 bg-white"
                           />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-sm font-medium text-stone-500">
-                          Country
-                        </Label>
+                        <Label className="text-sm font-medium text-stone-500">{t("Country")}</Label>
                         <Input
                           value={profile.country}
                           onChange={(e) =>
                             setProfile({ ...profile, country: e.target.value })
                           }
-                          placeholder="Country"
+                          placeholder={t("Country")}
                           className="h-12 rounded-2xl border-stone-200 bg-white"
                         />
                       </div>

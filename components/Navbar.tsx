@@ -18,12 +18,16 @@ import { getBrowserSession, supabase } from "@/lib/supabase.client";
 import { isAdminByToken } from "@/lib/util/isAdmin";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { cartApi } from "@/api/cart.api";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface NavbarProps {
   supportDrawerOpen?: boolean;
 }
 
 export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
+  const { t, i18n } = useTranslation();
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -93,11 +97,11 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
     };
   }, []);
 
-  const formattedCartTotal = `${cartTotal.toLocaleString()} ${cartCurrency}`;
+  const formattedCartTotal = `${cartTotal.toLocaleString(i18n.language)} ${cartCurrency}`;
 
   return (
     <nav
-      className={`fixed z-[100] w-full overflow-hidden transition-all duration-300 ${
+      className={`fixed z-[100] w-full overflow-visible transition-all duration-300 ${
         isHomePage
           ? "border-b-0 bg-transparent pt-3 sm:pt-4 lg:pt-5"
           : "border-b border-gray-200 bg-white"
@@ -135,9 +139,7 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
               className={`hidden min-[1800px]:block text-xs mt-1 ${
                 isHomePage ? "text-stone-500" : "text-gray-500"
               }`}
-            >
-              Handcrafted excellence • Custom designs • Sustainable materials
-            </p>
+            >{t("Handcrafted excellence • Custom designs • Sustainable materials")}</p>
           </Link>
 
           {/* Desktop Navigation Links */}
@@ -145,30 +147,22 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
             <Link
               href="/categories"
               className="relative whitespace-nowrap text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200 group"
-            >
-              Categories
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
+            >{t("Categories")}<span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
               href="/collections"
               className="relative whitespace-nowrap text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200 group"
-            >
-              Collections
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
+            >{t("Collections")}<span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
               href="/custom-orders"
               className="relative whitespace-nowrap text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200 group"
-            >
-              Custom Orders
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
+            >{t("Custom Orders")}<span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
               href="/about"
               className="relative whitespace-nowrap text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200 group"
-            >
-              About
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
+            >{t("About")}<span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
             </Link>
             {isAdmin && (
               <Link
@@ -176,8 +170,8 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
                 className="relative flex shrink-0 items-center gap-1 whitespace-nowrap text-emerald-700 hover:text-emerald-900 font-medium transition-colors duration-200 group"
               >
                 <LayoutDashboard size={18} />
-                <span className="min-[1800px]:hidden">Admin</span>
-                <span className="hidden min-[1800px]:inline">Admin Dashboard</span>
+                <span className="min-[1800px]:hidden">{t("Admin")}</span>
+                <span className="hidden min-[1800px]:inline">{t("Admin Dashboard")}</span>
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-800 group-hover:w-full transition-all duration-300"></span>
               </Link>
             )}
@@ -189,6 +183,8 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
               supportDrawerOpen ? "lg:hidden" : ""
             }`}
           >
+            <LanguageSwitcher className="hidden sm:inline-flex" />
+            <ThemeToggle className="hidden sm:inline-flex" />
             {/* Enhanced Search */}
             <div
               className={`relative transition-all duration-300 ${
@@ -202,7 +198,7 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
                 />
                 <Input
                   type="text"
-                  placeholder="Search furniture..."
+                  placeholder={t("Search furniture...")}
                   onFocus={() => setIsSearchFocused(true)}
                   onBlur={() => setIsSearchFocused(false)}
                   className={`pl-10 border-stone-200 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 text-sm ${
@@ -243,9 +239,7 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
                   size={20}
                   className="text-stone-600 group-hover:text-emerald-700 transition-colors duration-200"
                 />
-                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200 hidden min-[1800px]:inline">
-                  Account
-                </span>
+                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200 hidden min-[1800px]:inline">{t("Account")}</span>
               </Button>
             )}
 
@@ -270,9 +264,7 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
                 )}
               </div>
               <div className="hidden min-[1800px]:block">
-                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200">
-                  Cart
-                </span>
+                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200">{t("Cart")}</span>
                 <div className="text-xs text-stone-500">
                   {cartCount > 0 ? formattedCartTotal : "Empty"}
                 </div>
@@ -294,9 +286,7 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
                 />
               </div>
               <div className="hidden min-[1800px]:block">
-                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200">
-                  Favorites
-                </span>
+                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200">{t("Favorites")}</span>
               </div>
             </Button>
 
@@ -316,41 +306,31 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
               <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                 <div className="py-6">
                   <div className="mb-6">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                      Menu
-                    </h2>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4">{t("Menu")}</h2>
                     <div className="space-y-4 border-t border-stone-200 pt-4">
                       <Link href="/shop">
                         <Button
                           variant="ghost"
                           className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
-                        >
-                          Shop
-                        </Button>
+                        >{t("Shop")}</Button>
                       </Link>
                       <Link href="/collections">
                         <Button
                           variant="ghost"
                           className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
-                        >
-                          Collections
-                        </Button>
+                        >{t("Collections")}</Button>
                       </Link>
                       <Link href="/custom-orders">
                         <Button
                           variant="ghost"
                           className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
-                        >
-                          Custom Orders
-                        </Button>
+                        >{t("Custom Orders")}</Button>
                       </Link>
                       <Link href="/about">
                         <Button
                           variant="ghost"
                           className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
-                        >
-                          About
-                        </Button>
+                        >{t("About")}</Button>
                       </Link>
                       {isAdmin && (
                         <Link href="/dashboard">
@@ -358,9 +338,7 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
                             variant="ghost"
                             className="w-full justify-start text-left px-4 py-2 text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50 rounded-lg transition-colors duration-200 font-medium flex items-center"
                           >
-                            <LayoutDashboard size={20} className="mr-2" />
-                            Admin Dashboard
-                          </Button>
+                            <LayoutDashboard size={20} className="mr-2" />{t("Admin Dashboard")}</Button>
                         </Link>
                       )}
                     </div>
@@ -375,7 +353,7 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
                       />
                       <Input
                         type="text"
-                        placeholder="Search furniture..."
+                        placeholder={t("Search furniture...")}
                         className="pl-10 bg-stone-50 border-stone-200 focus:ring-emerald-500 focus:border-transparent text-sm"
                       />
                     </div>
@@ -383,13 +361,13 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
 
                   {/* Mobile Account & Cart */}
                   <div className="space-y-2">
+                    <LanguageSwitcher fullWidth />
+                    <ThemeToggle fullWidth className="mt-3" />
                     <Button
                       variant="ghost"
                       className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
                     >
-                      <User size={20} className="mr-2 text-stone-600" />
-                      Account
-                    </Button>
+                      <User size={20} className="mr-2 text-stone-600" />{t("Account")}</Button>
                     <Button
                       variant="ghost"
                       onClick={() => router.push("/cart")}
@@ -415,7 +393,7 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
             />
             <Input
               type="text"
-              placeholder="Search furniture..."
+              placeholder={t("Search furniture...")}
               className={`pl-10 border-stone-200 focus:ring-emerald-500 focus:border-transparent text-sm ${
                 isHomePage ? "bg-white" : "bg-stone-50"
               }`}
