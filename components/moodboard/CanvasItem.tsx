@@ -2,88 +2,55 @@
 
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { BoardItem } from "./types";
-import Image from "next/image";
-import { X, Heart } from "lucide-react";
+import { BoardItem, CARD_WIDTH } from "./types";
+import { Grip, X } from "lucide-react";
 import { ImagePlaceholder } from "@/components/ImagePlaceholder";
-import { getImageProxyUrl } from "@/lib/util/imageProxy";
 
 interface CanvasItemProps {
   item: BoardItem;
-  onRemove: (uniqueId: string) => void;
+  selected: boolean;
+  onSelect: (id: string) => void;
+  onRemove: (id: string) => void;
 }
 
-export function CanvasItem({ item, onRemove }: CanvasItemProps) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({
-      id: item.uniqueId,
-      data: { type: "board", uniqueId: item.uniqueId },
-    });
-
-  const style = {
-    position: "absolute" as const,
-    left: item.x,
-    top: item.y,
-    transform: CSS.Translate.toString(transform),
-    zIndex: isDragging ? 50 : 1,
-  };
-
-  const handleRemove = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onRemove(item.uniqueId);
-  };
+export function CanvasItem({ item, selected, onSelect, onRemove }: CanvasItemProps) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: item.uniqueId,
+    data: { type: "board", uniqueId: item.uniqueId },
+  });
 
   return (
     <div
       ref={setNodeRef}
-      style={style}
-      {...listeners}
-      {...attributes}
-      className={`absolute cursor-move group ${isDragging ? "opacity-50" : ""}`}
+      style={{
+        position: "absolute",
+        left: item.x,
+        top: item.y,
+        width: CARD_WIDTH,
+        transform: `${CSS.Translate.toString(transform) || ""} rotate(${item.rotation}deg) scale(${item.scale})`,
+        transformOrigin: "center center",
+        zIndex: isDragging ? 1000 : item.z,
+      }}
+      onPointerDown={() => onSelect(item.uniqueId)}
+      className={`group touch-none rounded-xl bg-white p-1.5 shadow-[0_15px_40px_rgba(40,32,23,.2)] transition-shadow ${selected ? "ring-2 ring-amber-700 shadow-[0_20px_50px_rgba(40,32,23,.3)]" : "hover:shadow-2xl"} ${isDragging ? "opacity-70" : ""}`}
     >
-      <div className="relative w-48 border-2 border-transparent group-hover:border-blue-500 rounded-lg overflow-hidden shadow-lg bg-white">
-        <div className="relative w-full aspect-square">
-          {item.product.images && item.product.images.length > 0 ? (
-            <Image
-              src={getImageProxyUrl(item.product.images[0].url)}
-              alt={item.product.title}
-              fill
-              className="object-cover pointer-events-none"
-              sizes="200px"
-            />
-          ) : (
-            <ImagePlaceholder
-              className="bg-gray-100 text-gray-300"
-              textClassName="text-[10px]"
-            />
-          )}
-
-          {/* Favorite indicator */}
-          {item.product.isFavorite && (
-            <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/90 backdrop-blur-sm shadow-sm flex items-center justify-center">
-              <Heart className="w-3.5 h-3.5 fill-red-500 text-red-500" />
-            </div>
-          )}
+      <div {...listeners} {...attributes} aria-label={`Move ${item.title}`} className="relative cursor-grab active:cursor-grabbing">
+        <div className="relative h-[158px] overflow-hidden rounded-lg bg-stone-100">
+          {item.imageUrl ? <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={item.imageUrl} alt={item.title} draggable={false} className="h-full w-full object-cover pointer-events-none" />
+          </> : <ImagePlaceholder className="bg-stone-100 text-stone-400" textClassName="text-[10px]" />}
+          <span className="absolute bottom-2 left-2 rounded-full bg-white/85 p-1 text-stone-700 opacity-0 shadow-sm backdrop-blur-sm transition-opacity group-hover:opacity-100"><Grip size={13} /></span>
         </div>
-
-        {/* Info Bar */}
-        <div className="p-2 bg-white">
-          <p className="text-xs font-medium line-clamp-1 text-gray-800">
-            {item.product.title}
-          </p>
-          <p className="text-xs text-gray-500">
-            {item.product.price} {item.product.currency}
-          </p>
+        <div className="px-1 pb-1 pt-2">
+          <p className="truncate text-[11px] font-semibold text-stone-900">{item.title}</p>
+          <p className="mt-0.5 text-[10px] text-stone-500">{item.price || (item.isUpload ? "Your image" : "")}</p>
         </div>
-
-        {/* Remove Button */}
-        <button
-          onClick={handleRemove}
-          className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
-        >
-          <X className="w-4 h-4" />
-        </button>
       </div>
+      <button type="button" aria-label={`Remove ${item.title}`} data-export-ignore="true"
+        onPointerDown={(event) => event.stopPropagation()}
+        onClick={(event) => { event.stopPropagation(); onRemove(item.uniqueId); }}
+        className="absolute -right-2 -top-2 grid h-7 w-7 place-items-center rounded-full bg-stone-900 text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 focus:opacity-100"><X size={14} /></button>
     </div>
   );
 }

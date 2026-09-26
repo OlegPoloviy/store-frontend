@@ -3,6 +3,7 @@
 import { Product } from "@/types/product.type";
 import Image from "next/image";
 import { ImagePlaceholder } from "@/components/ImagePlaceholder";
+import { getImageProxyUrl } from "@/lib/util/imageProxy";
 
 interface DragOverlayItemProps {
   product: Product;
@@ -10,11 +11,11 @@ interface DragOverlayItemProps {
 
 export function DragOverlayItem({ product }: DragOverlayItemProps) {
   return (
-    <div className="w-48 border-2 border-blue-500 rounded-lg overflow-hidden shadow-2xl bg-white opacity-90 cursor-grabbing">
+    <div className="w-44 border-2 border-amber-700 rounded-xl overflow-hidden shadow-2xl bg-white opacity-90 cursor-grabbing">
       <div className="relative w-full aspect-square">
         {product.images && product.images.length > 0 ? (
           <Image
-            src={product.images[0].url}
+            src={getImageProxyUrl(product.images[0].url)}
             alt={product.title}
             fill
             className="object-cover"

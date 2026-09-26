@@ -25,7 +25,7 @@ function createCommonOptions(options: ExportOptions) {
     // Фільтр для виключення елементів з експорту
     filter: (node: HTMLElement) => {
       // Виключаємо кнопку експорту
-      if (node.classList?.contains("export-button-exclude")) {
+      if (node.classList?.contains("export-button-exclude") || node.hasAttribute?.("data-export-ignore")) {
         return false;
       }
       return true;
@@ -57,8 +57,9 @@ export async function exportToImage(
         quality: options.quality || 0.9,
       });
     } else {
-      // webp format
-      dataUrl = await htmlToImage.toPng(element, commonOptions);
+      const canvas = await htmlToImage.toCanvas(element, commonOptions);
+      dataUrl = canvas.toDataURL("image/webp", options.quality ?? 0.9);
+      if (!dataUrl.startsWith("data:image/webp")) throw new Error("WebP export is not supported by this browser");
     }
 
     // Конвертуємо data URL в blob
@@ -103,7 +104,9 @@ export async function getImageDataUrl(
       quality: options.quality || 0.9,
     });
   } else {
-    // webp - використовуємо png як fallback
-    return await htmlToImage.toPng(element, commonOptions);
+    const canvas = await htmlToImage.toCanvas(element, commonOptions);
+    const dataUrl = canvas.toDataURL("image/webp", options.quality ?? 0.9);
+    if (!dataUrl.startsWith("data:image/webp")) throw new Error("WebP export is not supported by this browser");
+    return dataUrl;
   }
 }

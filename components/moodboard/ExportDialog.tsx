@@ -41,7 +41,7 @@ export function ExportDialog({
       {
         value: "png",
         label: "PNG",
-        description: "Good quality,transparent background",
+        description: "High quality with your selected scene",
       },
       {
         value: "jpg",

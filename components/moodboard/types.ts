@@ -1,11 +1,18 @@
-import { Product } from "@/types/product.type";
+export type Scene = "studio" | "kitchen" | "bathroom" | "living" | "custom";
 
 export interface BoardItem {
-  uniqueId: string; // Унікальний ID на дошці
-  productId: string;
+  uniqueId: string;
+  productId?: string;
+  title: string;
+  imageUrl: string;
+  price?: string;
+  isUpload?: boolean;
   x: number;
   y: number;
-  product: Product;
-  scale?: number;
-  rotation?: number;
+  scale: number;
+  rotation: number;
+  z: number;
 }
+
+export const CARD_WIDTH = 176;
+export const CARD_HEIGHT = 216;
