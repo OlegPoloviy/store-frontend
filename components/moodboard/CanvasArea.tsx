@@ -10,6 +10,7 @@ interface CanvasAreaProps {
   items: BoardItem[];
   scene: Scene;
   customBackground: string | null;
+  customBackgroundRatio?: number | null;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
   onRemoveItem: (id: string) => void;
@@ -18,7 +19,7 @@ interface CanvasAreaProps {
 }
 
 export const CanvasArea = forwardRef<HTMLDivElement, CanvasAreaProps>(
-  ({ items, scene, customBackground, selectedId, onSelect, onRemoveItem, expanded = false, expandedMaxWidth }, ref) => {
+  ({ items, scene, customBackground, customBackgroundRatio, selectedId, onSelect, onRemoveItem, expanded = false, expandedMaxWidth }, ref) => {
     const { setNodeRef, isOver } = useDroppable({ id: "canvas-area" });
     const scenePhoto = scene === "kitchen" ? "/images/moodboard/kitchen-empty.jpg" : scene === "bathroom" ? "/images/moodboard/bathroom-empty.jpg" : scene === "living" ? "/images/moodboard/living-empty.jpg" : null;
     const sceneAuthor = scene === "kitchen" ? "Alex Tyson" : scene === "bathroom" ? "Christa Grover" : scene === "living" ? "Lisa Anna" : null;
@@ -33,7 +34,7 @@ export const CanvasArea = forwardRef<HTMLDivElement, CanvasAreaProps>(
         onPointerDown={(event) => { if (event.target === event.currentTarget) onSelect(null); }}
         className={`relative w-full overflow-hidden rounded-[24px] border transition-all ${expanded ? "mx-auto" : "min-h-[620px]"} ${isOver ? "border-amber-700 ring-4 ring-amber-300/40" : "border-stone-200"}`}
         style={expanded ? {
-          aspectRatio: scene === "bathroom" ? "2 / 3" : scene === "kitchen" || scene === "living" ? "1600 / 1067" : "16 / 9",
+          aspectRatio: scene === "bathroom" ? "2 / 3" : scene === "kitchen" || scene === "living" ? "1600 / 1067" : scene === "custom" && customBackgroundRatio ? String(customBackgroundRatio) : "16 / 9",
           maxWidth: expandedMaxWidth,
         } : undefined}
       >

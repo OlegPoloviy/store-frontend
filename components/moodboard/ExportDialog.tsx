@@ -57,7 +57,7 @@ export function ExportDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="z-[111] sm:max-w-[500px]" overlayClassName="z-[110]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileImage className="w-5 h-5" />

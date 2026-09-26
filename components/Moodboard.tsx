@@ -8,7 +8,7 @@ import { SidebarItem } from "./moodboard/SidebarItem";
 import { CanvasArea } from "./moodboard/CanvasArea";
 import { DragOverlayItem } from "./moodboard/DragOverlayItem";
 import { ExportDialog } from "./moodboard/ExportDialog";
-import { ArrowDown, ArrowUp, Download, Expand, ImagePlus, Loader2, Minimize2, RotateCcw, RotateCw, Scissors, Trash2, Undo2, Upload, ZoomIn, ZoomOut } from "lucide-react";
+import { ArrowDown, ArrowUp, Download, Expand, ImagePlus, Loader2, Minimize2, RotateCcw, RotateCw, Scissors, Trash2, Undo2, Upload, X, ZoomIn, ZoomOut } from "lucide-react";
 import { exportToImage, ImageFormat } from "@/lib/util/exportToImage";
 import { getImageProxyUrl } from "@/lib/util/imageProxy";
 import { toast } from "sonner";
@@ -53,6 +53,7 @@ export function Moodboard({ products, loading = false }: MoodboardProps) {
   const [boardItems, setBoardItems] = useState<BoardItem[]>([]);
   const [scene, setScene] = useState<Scene>("studio");
   const [customBackground, setCustomBackground] = useState<string | null>(null);
+  const [customBackgroundRatio, setCustomBackgroundRatio] = useState<number | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
   const [ready, setReady] = useState(false);
@@ -91,6 +92,15 @@ export function Moodboard({ products, loading = false }: MoodboardProps) {
   }, [boardItems, scene, customBackground, ready]);
 
   useEffect(() => {
+    if (!customBackground) return;
+    let active = true;
+    const image = new window.Image();
+    image.onload = () => { if (active && image.naturalHeight) setCustomBackgroundRatio(image.naturalWidth / image.naturalHeight); };
+    image.src = customBackground;
+    return () => { active = false; };
+  }, [customBackground]);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const observer = new ResizeObserver(([entry]) => {
@@ -119,7 +129,8 @@ export function Moodboard({ products, loading = false }: MoodboardProps) {
   }, [expanded]);
 
   const selected = boardItems.find((item) => item.uniqueId === selectedId);
-  const wideCanvasMaxWidth = scene === "bathroom" ? "min(1200px, calc((100dvh - 320px) * 0.6667))" : scene === "kitchen" || scene === "living" ? "min(1200px, calc((100dvh - 320px) * 1.5))" : "min(1200px, calc((100dvh - 320px) * 1.7778))";
+  const wideRatio = scene === "bathroom" ? 2 / 3 : scene === "kitchen" || scene === "living" ? 1600 / 1067 : scene === "custom" && customBackgroundRatio ? customBackgroundRatio : 16 / 9;
+  const wideCanvasMaxWidth = `min(1200px, calc((100dvh - 320px) * ${Math.min(wideRatio, 3)}))`;
   const wideLayoutStyle = expanded ? { maxWidth: `calc(${wideCanvasMaxWidth} + 224px)` } : undefined;
   const bounds = () => canvasRef.current?.getBoundingClientRect();
   const nextZ = () => Math.max(0, ...boardItems.map((item) => item.z || 0)) + 1;
@@ -168,7 +179,7 @@ export function Moodboard({ products, loading = false }: MoodboardProps) {
     try {
       for (const [index, file] of files.entries()) {
         const imageUrl = await prepareImage(file);
-        if (asBackground) { setCustomBackground(imageUrl); setScene("custom"); break; }
+        if (asBackground) { setCustomBackground(imageUrl); setCustomBackgroundRatio(null); setScene("custom"); toast.success("Your background is ready"); break; }
         const rect = bounds();
         const item: BoardItem = {
           uniqueId: crypto.randomUUID(), title: file.name.replace(/\.[^.]+$/, ""), imageUrl, isUpload: true,
@@ -239,9 +250,14 @@ export function Moodboard({ products, loading = false }: MoodboardProps) {
       <div className="flex flex-wrap items-center gap-2">
         <span className="mr-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Set the scene</span>
         {SCENES.map((option) => <button key={option.id} type="button" onClick={() => setScene(option.id)} aria-pressed={scene === option.id} className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${scene === option.id ? "border-stone-900 bg-stone-900 text-white" : "border-stone-300 bg-white hover:border-stone-500"}`}><span className="h-4 w-4 rounded-full border border-black/10 bg-cover bg-center" style={{ backgroundColor: option.swatch, backgroundImage: option.image ? `url(${option.image})` : undefined }} />{option.label}</button>)}
-        <button type="button" onClick={() => backgroundInputRef.current?.click()} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium ${scene === "custom" ? "border-stone-900 bg-stone-900 text-white" : "border-stone-300 bg-white hover:border-stone-500"}`}><Upload size={13} /> Own background</button>
+        {customBackground ? <>
+          <button type="button" onClick={() => setScene("custom")} aria-pressed={scene === "custom"} className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium ${scene === "custom" ? "border-stone-900 bg-stone-900 text-white" : "border-stone-300 bg-white hover:border-stone-500"}`}><span className="h-4 w-4 rounded-full border border-black/10 bg-cover bg-center" style={{ backgroundImage: `url(${customBackground})` }} />My background</button>
+          <button type="button" onClick={() => backgroundInputRef.current?.click()} disabled={uploading} className="inline-flex items-center gap-1.5 rounded-full border border-stone-300 bg-white px-3 py-1.5 text-xs font-medium hover:border-stone-500 disabled:opacity-50">{uploading ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}Replace</button>
+          <button type="button" onClick={() => { setCustomBackground(null); setCustomBackgroundRatio(null); if (scene === "custom") setScene("studio"); }} aria-label="Remove my background" title="Remove my background" className="grid h-7 w-7 place-items-center rounded-full border border-stone-300 bg-white text-stone-500 hover:border-red-300 hover:text-red-700"><X size={13} /></button>
+        </> : <button type="button" onClick={() => backgroundInputRef.current?.click()} disabled={uploading} className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-amber-600 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50">{uploading ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}Upload background</button>}
       </div>
       {SCENE_SOURCES[scene] && <p className={`${expanded ? "mt-2 pl-1" : "mt-2 mb-3"} text-[11px] text-stone-500`}>Scene photo: <a href={SCENE_SOURCES[scene].url} target="_blank" rel="noreferrer" className="underline hover:text-stone-800">{SCENE_SOURCES[scene].author} / Unsplash</a> · <a href="https://unsplash.com/license" target="_blank" rel="noreferrer" className="underline hover:text-stone-800">Unsplash License</a> · resized</p>}
+      {scene === "custom" && customBackground && <p className="mt-2 pl-1 text-[11px] text-stone-500">Your photo is the room background. Wide view shows the complete image.</p>}
       </div>
 
       <div style={wideLayoutStyle} className={`grid gap-4 lg:grid-cols-[208px_minmax(0,1fr)] ${expanded ? "mx-auto w-full items-stretch" : ""}`}>
@@ -250,7 +266,7 @@ export function Moodboard({ products, loading = false }: MoodboardProps) {
           {products.length ? products.map((product) => <SidebarItem key={product.id} product={product} onAdd={addProduct} />) : <div className="rounded-xl bg-stone-50 p-4 text-center text-xs leading-5 text-stone-500">No saved products yet. Add your own photos to start.</div>}
         </aside>
         <div className={expanded ? "min-w-0 rounded-[28px] border border-stone-200/80 bg-white/85 p-2 shadow-[0_30px_80px_-35px_rgba(45,35,24,.35)]" : "min-w-0"}>
-          <CanvasArea ref={canvasRef} items={boardItems} scene={scene} customBackground={customBackground} expanded={expanded} expandedMaxWidth={wideCanvasMaxWidth} selectedId={selectedId} onSelect={setSelectedId} onRemoveItem={(id) => { setBoardItems((items) => items.filter((item) => item.uniqueId !== id)); if (selectedId === id) setSelectedId(null); }} />
+          <CanvasArea ref={canvasRef} items={boardItems} scene={scene} customBackground={customBackground} customBackgroundRatio={customBackgroundRatio} expanded={expanded} expandedMaxWidth={wideCanvasMaxWidth} selectedId={selectedId} onSelect={setSelectedId} onRemoveItem={(id) => { setBoardItems((items) => items.filter((item) => item.uniqueId !== id)); if (selectedId === id) setSelectedId(null); }} />
         </div>
       </div>
 
