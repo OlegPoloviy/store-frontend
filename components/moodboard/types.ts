@@ -5,6 +5,7 @@ export interface BoardItem {
   productId?: string;
   title: string;
   imageUrl: string;
+  originalImageUrl?: string;
   price?: string;
   isUpload?: boolean;
   x: number;

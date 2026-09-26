@@ -32,20 +32,20 @@ export function CanvasItem({ item, selected, onSelect, onRemove }: CanvasItemPro
         zIndex: isDragging ? 1000 : item.z,
       }}
       onPointerDown={() => onSelect(item.uniqueId)}
-      className={`group touch-none rounded-xl bg-white p-1.5 shadow-[0_15px_40px_rgba(40,32,23,.2)] transition-shadow ${selected ? "ring-2 ring-amber-700 shadow-[0_20px_50px_rgba(40,32,23,.3)]" : "hover:shadow-2xl"} ${isDragging ? "opacity-70" : ""}`}
+      className={`group touch-none rounded-xl p-1.5 transition-shadow ${item.originalImageUrl ? "bg-transparent" : "bg-white shadow-[0_15px_40px_rgba(40,32,23,.2)]"} ${selected ? "ring-2 ring-amber-700" : item.originalImageUrl ? "hover:ring-1 hover:ring-white/70" : "hover:shadow-2xl"} ${isDragging ? "opacity-70" : ""}`}
     >
       <div {...listeners} {...attributes} aria-label={`Move ${item.title}`} className="relative cursor-grab active:cursor-grabbing">
-        <div className="relative h-[158px] overflow-hidden rounded-lg bg-stone-100">
+        <div className={`relative overflow-hidden rounded-lg ${item.originalImageUrl ? "h-[202px]" : "h-[158px] bg-stone-100"}`}>
           {item.imageUrl ? <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={item.imageUrl} alt={item.title} draggable={false} className="h-full w-full object-cover pointer-events-none" />
+            <img src={item.imageUrl} alt={item.title} draggable={false} className={`h-full w-full pointer-events-none ${item.originalImageUrl ? "object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,.3)]" : "object-cover"}`} />
           </> : <ImagePlaceholder className="bg-stone-100 text-stone-400" textClassName="text-[10px]" />}
           <span className="absolute bottom-2 left-2 rounded-full bg-white/85 p-1 text-stone-700 opacity-0 shadow-sm backdrop-blur-sm transition-opacity group-hover:opacity-100"><Grip size={13} /></span>
         </div>
-        <div className="px-1 pb-1 pt-2">
+        {!item.originalImageUrl && <div className="px-1 pb-1 pt-2">
           <p className="truncate text-[11px] font-semibold text-stone-900">{item.title}</p>
           <p className="mt-0.5 text-[10px] text-stone-500">{item.price || (item.isUpload ? "Your image" : "")}</p>
-        </div>
+        </div>}
       </div>
       <button type="button" aria-label={`Remove ${item.title}`} data-export-ignore="true"
         onPointerDown={(event) => event.stopPropagation()}
