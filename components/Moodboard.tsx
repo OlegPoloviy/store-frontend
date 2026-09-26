@@ -119,6 +119,8 @@ export function Moodboard({ products, loading = false }: MoodboardProps) {
   }, [expanded]);
 
   const selected = boardItems.find((item) => item.uniqueId === selectedId);
+  const wideCanvasMaxWidth = scene === "bathroom" ? "min(1200px, calc((100dvh - 320px) * 0.6667))" : scene === "kitchen" || scene === "living" ? "min(1200px, calc((100dvh - 320px) * 1.5))" : "min(1200px, calc((100dvh - 320px) * 1.7778))";
+  const wideLayoutStyle = expanded ? { maxWidth: `calc(${wideCanvasMaxWidth} + 224px)` } : undefined;
   const bounds = () => canvasRef.current?.getBoundingClientRect();
   const nextZ = () => Math.max(0, ...boardItems.map((item) => item.z || 0)) + 1;
 
@@ -221,8 +223,8 @@ export function Moodboard({ products, loading = false }: MoodboardProps) {
   return <DndContext sensors={sensors} onDragStart={({ active }: DragStartEvent) => {
     if (active.data.current?.type === "sidebar") setActiveProduct(active.data.current.product as Product);
   }} onDragEnd={handleDragEnd} onDragCancel={() => setActiveProduct(null)}>
-    <section className={expanded ? "fixed inset-0 z-[100] flex h-dvh flex-col overflow-y-auto bg-[#f5f2ec] p-4 text-stone-900 sm:p-5" : "mt-7 rounded-[28px] bg-[#f5f2ec] p-4 text-stone-900 sm:p-6"}>
-      <div className={`${expanded ? "mb-3" : "mb-6"} flex flex-wrap items-end justify-between gap-4`}>
+    <section className={expanded ? "fixed inset-0 z-[100] flex h-dvh flex-col overflow-y-auto bg-[radial-gradient(circle_at_50%_8%,#fffaf3_0%,#f5f2ec_55%,#ebe6de_100%)] p-4 text-stone-900 sm:p-5" : "mt-7 rounded-[28px] bg-[#f5f2ec] p-4 text-stone-900 sm:p-6"}>
+      <div style={wideLayoutStyle} className={`${expanded ? "mx-auto mb-3 w-full border-b border-stone-300/70 pb-3" : "mb-6"} flex flex-wrap items-end justify-between gap-4`}>
         <div><p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-800">Your design studio</p><h2 className="mt-1 font-serif text-3xl sm:text-4xl">The moodboard</h2><p className="mt-1 text-sm text-stone-500">Create a space around pieces you love.</p></div>
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={() => setExpanded((value) => !value)} aria-pressed={expanded} className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-stone-50">{expanded ? <Minimize2 size={16} /> : <Expand size={16} />}{expanded ? "Close wide view" : "Wide view"}</button>
@@ -233,24 +235,26 @@ export function Moodboard({ products, loading = false }: MoodboardProps) {
       <input ref={photoInputRef} type="file" accept="image/*" multiple className="hidden" aria-label="Upload inspiration photos" onChange={(event) => handleUpload(event, false)} />
       <input ref={backgroundInputRef} type="file" accept="image/*" className="hidden" aria-label="Upload room background" onChange={(event) => handleUpload(event, true)} />
 
-      <div className="mb-4 flex flex-wrap items-center gap-2">
+      <div style={wideLayoutStyle} className={expanded ? "mx-auto mb-4 w-full rounded-[20px] border border-stone-200/80 bg-white/80 p-3 shadow-sm" : "mb-4"}>
+      <div className="flex flex-wrap items-center gap-2">
         <span className="mr-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Set the scene</span>
         {SCENES.map((option) => <button key={option.id} type="button" onClick={() => setScene(option.id)} aria-pressed={scene === option.id} className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${scene === option.id ? "border-stone-900 bg-stone-900 text-white" : "border-stone-300 bg-white hover:border-stone-500"}`}><span className="h-4 w-4 rounded-full border border-black/10 bg-cover bg-center" style={{ backgroundColor: option.swatch, backgroundImage: option.image ? `url(${option.image})` : undefined }} />{option.label}</button>)}
         <button type="button" onClick={() => backgroundInputRef.current?.click()} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium ${scene === "custom" ? "border-stone-900 bg-stone-900 text-white" : "border-stone-300 bg-white hover:border-stone-500"}`}><Upload size={13} /> Own background</button>
       </div>
-      {SCENE_SOURCES[scene] && <p className="mb-3 text-[11px] text-stone-500">Scene photo: <a href={SCENE_SOURCES[scene].url} target="_blank" rel="noreferrer" className="underline hover:text-stone-800">{SCENE_SOURCES[scene].author} / Unsplash</a> · <a href="https://unsplash.com/license" target="_blank" rel="noreferrer" className="underline hover:text-stone-800">Unsplash License</a> · resized</p>}
+      {SCENE_SOURCES[scene] && <p className={`${expanded ? "mt-2 pl-1" : "mt-2 mb-3"} text-[11px] text-stone-500`}>Scene photo: <a href={SCENE_SOURCES[scene].url} target="_blank" rel="noreferrer" className="underline hover:text-stone-800">{SCENE_SOURCES[scene].author} / Unsplash</a> · <a href="https://unsplash.com/license" target="_blank" rel="noreferrer" className="underline hover:text-stone-800">Unsplash License</a> · resized</p>}
+      </div>
 
-      <div className={`grid gap-4 lg:grid-cols-[208px_minmax(0,1fr)] ${expanded ? "mx-auto w-full max-w-[1460px] flex-1" : ""}`}>
-        <aside className={`${expanded ? "max-h-[calc(100dvh-210px)]" : "max-h-[620px]"} overflow-y-auto rounded-[22px] border border-stone-200 bg-white p-3`}>
+      <div style={wideLayoutStyle} className={`grid gap-4 lg:grid-cols-[208px_minmax(0,1fr)] ${expanded ? "mx-auto w-full items-stretch" : ""}`}>
+        <aside className={`${expanded ? "max-h-[min(calc(100dvh-320px),800px)] shadow-[0_20px_50px_-35px_rgba(45,35,24,.35)]" : "max-h-[620px]"} overflow-y-auto rounded-[22px] border border-stone-200 bg-white p-3`}>
           <div className="sticky top-0 z-10 mb-3 border-b border-stone-100 bg-white pb-3"><h3 className="font-serif text-lg">Saved pieces</h3><p className="text-xs text-stone-500">Drag or tap + to add · {products.length}</p></div>
           {products.length ? products.map((product) => <SidebarItem key={product.id} product={product} onAdd={addProduct} />) : <div className="rounded-xl bg-stone-50 p-4 text-center text-xs leading-5 text-stone-500">No saved products yet. Add your own photos to start.</div>}
         </aside>
-        <div className="min-w-0">
-          <CanvasArea ref={canvasRef} items={boardItems} scene={scene} customBackground={customBackground} expanded={expanded} selectedId={selectedId} onSelect={setSelectedId} onRemoveItem={(id) => { setBoardItems((items) => items.filter((item) => item.uniqueId !== id)); if (selectedId === id) setSelectedId(null); }} />
+        <div className={expanded ? "min-w-0 rounded-[28px] border border-stone-200/80 bg-white/85 p-2 shadow-[0_30px_80px_-35px_rgba(45,35,24,.35)]" : "min-w-0"}>
+          <CanvasArea ref={canvasRef} items={boardItems} scene={scene} customBackground={customBackground} expanded={expanded} expandedMaxWidth={wideCanvasMaxWidth} selectedId={selectedId} onSelect={setSelectedId} onRemoveItem={(id) => { setBoardItems((items) => items.filter((item) => item.uniqueId !== id)); if (selectedId === id) setSelectedId(null); }} />
         </div>
       </div>
 
-      <div className="mt-4 flex min-h-12 flex-wrap items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-xs text-stone-600">
+      <div style={wideLayoutStyle} className={`${expanded ? "mx-auto w-full shadow-[0_16px_45px_-22px_rgba(45,35,24,.4)]" : ""} mt-4 flex min-h-12 flex-wrap items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-xs text-stone-600`}>
         {selected ? <div className="flex flex-wrap items-center gap-2"><span className="max-w-36 truncate font-semibold text-stone-900">{selected.title}</span><span className="mx-1 h-5 w-px bg-stone-200" />
           <button type="button" aria-label="Make smaller" title="Make smaller" onClick={() => updateSelected({ scale: clamp(Number((selected.scale - 0.1).toFixed(1)), 0.4, 3) })} className="rounded-lg p-2 hover:bg-stone-100"><ZoomOut size={17} /></button>
           <span className="w-9 text-center tabular-nums">{Math.round(selected.scale * 100)}%</span>

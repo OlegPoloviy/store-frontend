@@ -14,10 +14,11 @@ interface CanvasAreaProps {
   onSelect: (id: string | null) => void;
   onRemoveItem: (id: string) => void;
   expanded?: boolean;
+  expandedMaxWidth?: string;
 }
 
 export const CanvasArea = forwardRef<HTMLDivElement, CanvasAreaProps>(
-  ({ items, scene, customBackground, selectedId, onSelect, onRemoveItem, expanded = false }, ref) => {
+  ({ items, scene, customBackground, selectedId, onSelect, onRemoveItem, expanded = false, expandedMaxWidth }, ref) => {
     const { setNodeRef, isOver } = useDroppable({ id: "canvas-area" });
     const scenePhoto = scene === "kitchen" ? "/images/moodboard/kitchen-empty.jpg" : scene === "bathroom" ? "/images/moodboard/bathroom-empty.jpg" : scene === "living" ? "/images/moodboard/living-empty.jpg" : null;
     const sceneAuthor = scene === "kitchen" ? "Alex Tyson" : scene === "bathroom" ? "Christa Grover" : scene === "living" ? "Lisa Anna" : null;
@@ -33,7 +34,7 @@ export const CanvasArea = forwardRef<HTMLDivElement, CanvasAreaProps>(
         className={`relative w-full overflow-hidden rounded-[24px] border transition-all ${expanded ? "mx-auto" : "min-h-[620px]"} ${isOver ? "border-amber-700 ring-4 ring-amber-300/40" : "border-stone-200"}`}
         style={expanded ? {
           aspectRatio: scene === "bathroom" ? "2 / 3" : scene === "kitchen" || scene === "living" ? "1600 / 1067" : "16 / 9",
-          maxWidth: scene === "bathroom" ? "min(1200px, calc((100dvh - 270px) * 0.6667))" : scene === "kitchen" || scene === "living" ? "min(1200px, calc((100dvh - 270px) * 1.5))" : "min(1200px, calc((100dvh - 270px) * 1.7778))",
+          maxWidth: expandedMaxWidth,
         } : undefined}
       >
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
