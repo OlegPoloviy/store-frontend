@@ -55,12 +55,9 @@ httpClientServer.interceptors.request.use(async (config) => {
       }
     );
 
-    // FIX: Використовуємо 'as any', щоб обійти помилку TypeScript.
-    // getSession прихований у типах для сервера, але необхідний для отримання access_token.
-    // Альтернатива - refreshSession(), але вона робить зайвий HTTP запит.
     const {
       data: { session },
-    } = await (supabase.auth as any).getSession();
+    } = await supabase.auth.getSession();
 
     if (session?.access_token) {
       config.headers.Authorization = `Bearer ${session.access_token}`;

@@ -24,21 +24,32 @@ export interface SendSupportMessageResult {
   message?: SupportChatMessage;
 }
 
-const toArray = (value: any): any[] => {
+type ApiRecord = Record<string, unknown>;
+
+const asRecord = (value: unknown): ApiRecord =>
+  value !== null && typeof value === "object" && !Array.isArray(value)
+    ? (value as ApiRecord)
+    : {};
+
+const toArray = (value: unknown): unknown[] => {
   if (Array.isArray(value)) return value;
-  if (Array.isArray(value?.data)) return value.data;
-  if (Array.isArray(value?.items)) return value.items;
-  if (Array.isArray(value?.messages)) return value.messages;
-  if (Array.isArray(value?.conversations)) return value.conversations;
+  const record = asRecord(value);
+  if (Array.isArray(record.data)) return record.data;
+  if (Array.isArray(record.items)) return record.items;
+  if (Array.isArray(record.messages)) return record.messages;
+  if (Array.isArray(record.conversations)) return record.conversations;
   return [];
 };
 
-const toDate = (value: any): Date => {
-  const date = value ? new Date(value) : new Date();
+const toDate = (value: unknown): Date => {
+  const date = value instanceof Date
+    ? value
+    : new Date(typeof value === "string" || typeof value === "number" ? value : Date.now());
   return Number.isNaN(date.getTime()) ? new Date() : date;
 };
 
-const normalizeSender = (raw: any): SupportChatSender => {
+const normalizeSender = (value: unknown): SupportChatSender => {
+  const raw = asRecord(value);
   const sender = String(
     raw?.sender ??
       raw?.senderType ??
@@ -98,29 +109,36 @@ const normalizeSender = (raw: any): SupportChatSender => {
 };
 
 export const normalizeSupportChatMessage = (
-  raw: any,
+  value: unknown,
   fallbackId = Date.now().toString()
-): SupportChatMessage => ({
-  id: String(raw?.id ?? raw?._id ?? fallbackId),
-  text: String(raw?.text ?? raw?.message ?? raw?.content ?? raw?.body ?? ""),
-  sender: normalizeSender(raw),
-  timestamp: toDate(raw?.timestamp ?? raw?.createdAt ?? raw?.sentAt),
-});
+): SupportChatMessage => {
+  const raw = asRecord(value);
+  return {
+    id: String(raw.id ?? raw._id ?? fallbackId),
+    text: String(raw.text ?? raw.message ?? raw.content ?? raw.body ?? ""),
+    sender: normalizeSender(raw),
+    timestamp: toDate(raw.timestamp ?? raw.createdAt ?? raw.sentAt),
+  };
+};
 
-const normalizeConversation = (raw: any): SupportChatConversation => {
+const normalizeConversation = (value: unknown): SupportChatConversation => {
+  const raw = asRecord(value);
+  const customer = asRecord(raw.customer);
   const lastRaw =
-    raw?.lastMessage ??
-    raw?.latestMessage ??
-    (Array.isArray(raw?.messages) ? raw.messages.at(-1) : null);
-  const status = String(raw?.status ?? (raw?.closedAt ? "closed" : "open"));
+    raw.lastMessage ??
+    raw.latestMessage ??
+    (Array.isArray(raw.messages) ? raw.messages.at(-1) : null);
+  const status = String(raw.status ?? (raw.closedAt ? "closed" : "open"));
+  const customerName = raw.customerName ?? raw.name ?? customer.name;
+  const customerEmail = raw.customerEmail ?? raw.email ?? customer.email;
 
   return {
-    id: String(raw?.id ?? raw?._id ?? raw?.conversationId ?? ""),
+    id: String(raw.id ?? raw._id ?? raw.conversationId ?? ""),
     status: status.toLowerCase(),
-    createdAt: raw?.createdAt ? toDate(raw.createdAt) : undefined,
-    updatedAt: raw?.updatedAt ? toDate(raw.updatedAt) : undefined,
-    customerName: raw?.customerName ?? raw?.name ?? raw?.customer?.name,
-    customerEmail: raw?.customerEmail ?? raw?.email ?? raw?.customer?.email,
+    createdAt: raw.createdAt ? toDate(raw.createdAt) : undefined,
+    updatedAt: raw.updatedAt ? toDate(raw.updatedAt) : undefined,
+    customerName: customerName == null ? undefined : String(customerName),
+    customerEmail: customerEmail == null ? undefined : String(customerEmail),
     lastMessage: lastRaw ? normalizeSupportChatMessage(lastRaw) : undefined,
   };
 };
