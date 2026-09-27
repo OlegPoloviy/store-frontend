@@ -1,3 +1,4 @@
+import { getServerTranslation } from "@/lib/i18n/server";
 import { productsApiServer } from "@/api/productApi.server";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -20,11 +21,12 @@ interface ProductPageProps {
 export default async function ProductPage({
   params: pageParams,
 }: ProductPageProps) {
+  const { t, locale } = await getServerTranslation();
   const { productId } = await pageParams;
   const product = await productsApiServer.getById(productId);
 
   const formatPrice = (price: string, currency: string) => {
-    return new Intl.NumberFormat("uk-UA", {
+    return new Intl.NumberFormat(locale === "de" ? "de-DE" : "en-US", {
       style: "currency",
       currency: currency,
     }).format(parseInt(price));
@@ -41,7 +43,7 @@ export default async function ProductPage({
       <div className="flex items-start space-x-3 py-2">
         {icon && <div className="text-gray-500 mt-1">{icon}</div>}
         <div className="flex-1">
-          <dt className="text-sm font-medium text-gray-900">{label}</dt>
+          <dt className="text-sm font-medium text-gray-900">{t(label)}</dt>
           <dd className="text-sm text-gray-600">
             {Array.isArray(value) ? value.join(", ") : value}
           </dd>
@@ -56,13 +58,9 @@ export default async function ProductPage({
         <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Breadcrumb */}
           <div className="flex items-center space-x-2 text-sm text-gray-500 mb-8">
-            <Link href="/" className="hover:text-gray-700">
-              Home
-            </Link>
+            <Link href="/" className="hover:text-gray-700">{t("Home")}</Link>
             <span>/</span>
-            <Link href="/products" className="hover:text-gray-700">
-              Products
-            </Link>
+            <Link href="/products" className="hover:text-gray-700">{t("Products")}</Link>
             <span>/</span>
             <Link
               href={`/categories/${product.category.name.toLowerCase()}`}
@@ -98,10 +96,7 @@ export default async function ProductPage({
                 {product.description ? (
                   <p className="text-gray-600">{product.description}</p>
                 ) : (
-                  <p className="text-gray-400 italic">
-                    No description available yet. Please contact us for more
-                    details.
-                  </p>
+                  <p className="text-gray-400 italic">{t("No description available yet. Please contact us for more details.")}</p>
                 )}
               </div>
 
@@ -115,9 +110,7 @@ export default async function ProductPage({
                     variant="outline"
                     className="text-amber-600 border-amber-600"
                   >
-                    <Award className="w-3 h-3 mr-1" />
-                    Handmade
-                  </Badge>
+                    <Award className="w-3 h-3 mr-1" />{t("Handmade")}</Badge>
                 )}
               </div>
 
@@ -131,19 +124,19 @@ export default async function ProductPage({
               <div className="grid grid-cols-2 gap-4 pt-6 border-t">
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
                   <Truck className="w-4 h-4" />
-                  <span>Free Shipping</span>
+                  <span>{t("Free Shipping")}</span>
                 </div>
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
                   <Shield className="w-4 h-4" />
-                  <span>Secure Payment</span>
+                  <span>{t("Secure Payment")}</span>
                 </div>
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
                   <Package className="w-4 h-4" />
-                  <span>Careful Packaging</span>
+                  <span>{t("Careful Packaging")}</span>
                 </div>
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
                   <Award className="w-4 h-4" />
-                  <span>Quality Guarantee</span>
+                  <span>{t("Quality Guarantee")}</span>
                 </div>
               </div>
             </div>
@@ -151,17 +144,13 @@ export default async function ProductPage({
 
           {/* Product Details Tabs */}
           <div className="bg-white rounded-2xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">
-              Product Details
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">{t("Product Details")}</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Specifications */}
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <Ruler className="w-5 h-5 mr-2" />
-                  Specifications
-                </h3>
+                  <Ruler className="w-5 h-5 mr-2" />{t("Specifications")}</h3>
                 <dl className="space-y-1">
                   {renderSpecification(
                     "Dimensions",
@@ -217,9 +206,7 @@ export default async function ProductPage({
 
               {/* Additional Info */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Additional Information
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("Additional Information")}</h3>
                 <dl className="space-y-1">
                   {renderSpecification("Designer", product.designer)}
                   {renderSpecification(
@@ -251,9 +238,7 @@ export default async function ProductPage({
             {/* Features and Story */}
             {product.features && product.features.length > 0 && (
               <div className="mt-8 pt-8 border-t">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Features
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("Features")}</h3>
                 <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {product.features.map((feature, index) => (
                     <li
@@ -270,18 +255,14 @@ export default async function ProductPage({
 
             {product.story && (
               <div className="mt-8 pt-8 border-t">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  The Story
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("The Story")}</h3>
                 <p className="text-gray-600 leading-relaxed">{product.story}</p>
               </div>
             )}
 
             {product.designInspiration && (
               <div className="mt-8 pt-8 border-t">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Design Inspiration
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("Design Inspiration")}</h3>
                 <p className="text-gray-600 leading-relaxed">
                   {product.designInspiration}
                 </p>

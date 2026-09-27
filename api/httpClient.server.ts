@@ -14,6 +14,18 @@ export const httpClientServer = axios.create({
   },
 });
 
+export function getServerApiErrorMessage(error: unknown): string {
+  if (!axios.isAxiosError(error)) {
+    return error instanceof Error ? error.message : "Unknown error";
+  }
+
+  const method = error.config?.method?.toUpperCase() ?? "GET";
+  const url = error.config?.url ?? "";
+  const statusOrCode = error.response?.status ?? error.code ?? "request failed";
+
+  return `${method} ${url} failed: ${statusOrCode}`;
+}
+
 // Server-side interceptor to add auth token from cookies
 httpClientServer.interceptors.request.use(async (config) => {
   try {
@@ -43,12 +55,9 @@ httpClientServer.interceptors.request.use(async (config) => {
       }
     );
 
-    // FIX: Використовуємо 'as any', щоб обійти помилку TypeScript.
-    // getSession прихований у типах для сервера, але необхідний для отримання access_token.
-    // Альтернатива - refreshSession(), але вона робить зайвий HTTP запит.
     const {
       data: { session },
-    } = await (supabase.auth as any).getSession();
+    } = await supabase.auth.getSession();
 
     if (session?.access_token) {
       config.headers.Authorization = `Bearer ${session.access_token}`;

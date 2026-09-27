@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import Link from "next/link";
 import { Product } from "@/types/product.type";
@@ -19,6 +20,7 @@ export function ProductCard({
   product,
   showFavorite = true,
 }: ProductCardProps) {
+  const { t } = useTranslation();
   const [isFavorite, setIsFavorite] = useState(product.isFavorite || false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -36,16 +38,16 @@ export function ProductCard({
     try {
       if (isFavorite) {
         await productsApi.removeFromFavorites(product.id);
-        toast.success("Removed from favorites");
+        toast.success(t("Removed from favorites"));
       } else {
         await productsApi.addToFavorite(product.id);
-        toast.success("Added to favorites");
+        toast.success(t("Added to favorites"));
       }
     } catch (error) {
       // Відкат при помилці
       setIsFavorite(previousState);
       console.error("Error toggling favorite:", error);
-      toast.error("Failed to update favorites");
+      toast.error(t("Failed to update favorites"));
     } finally {
       setIsLoading(false);
     }
@@ -66,7 +68,7 @@ export function ProductCard({
           {isNewItem && (
             <div className="absolute left-4 top-4 z-10 flex items-center gap-1 rounded-full bg-white/90 px-3 py-2 text-[11px] font-medium uppercase tracking-[0.2em] text-stone-700 shadow-sm backdrop-blur-sm">
               <Sparkles className="h-3 w-3 text-amber-500" />
-              <span>NEW</span>
+              <span>{t("NEW")}</span>
             </div>
           )}
 
@@ -113,7 +115,7 @@ export function ProductCard({
           >
             <div className="flex items-start justify-between gap-3">
               <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-stone-400">
-                {product.category?.name || "Uncategorized"}
+                {product.category?.name ||t("Uncategorized")}
               </p>
               <div className="rounded-full bg-[#f3eee7] px-3 py-1.5 text-sm font-medium text-stone-700">
                 {product.currency}
@@ -125,16 +127,13 @@ export function ProductCard({
             </h3>
 
             <p className="mt-3 line-clamp-3 text-sm leading-7 text-stone-500">
-              {product.description ||
-                "Hand-carved from natural materials, ensuring unique texture and durability."}
+              {product.description ||t("Hand-carved from natural materials, ensuring unique texture and durability.")}
             </p>
           </Link>
 
           <div className="mt-auto flex items-end justify-between gap-4 border-t border-stone-100 pt-4">
             <div className="flex flex-col">
-              <span className="mb-1 text-[10px] font-medium uppercase tracking-[0.24em] text-stone-400">
-                Price
-              </span>
+              <span className="mb-1 text-[10px] font-medium uppercase tracking-[0.24em] text-stone-400">{t("Price")}</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-semibold tracking-tight text-stone-950">
                   {product.price}

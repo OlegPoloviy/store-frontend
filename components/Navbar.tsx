@@ -14,28 +14,39 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { supabase } from "@/lib/supabase.client";
+import { getBrowserSession, supabase } from "@/lib/supabase.client";
 import { isAdminByToken } from "@/lib/util/isAdmin";
 import { User as SupabaseUser } from "@supabase/supabase-js";
+import { cartApi } from "@/api/cart.api";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
-export function Navbar() {
+interface NavbarProps {
+  supportDrawerOpen?: boolean;
+}
+
+export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
+  const { t, i18n } = useTranslation();
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+  const [cartTotal, setCartTotal] = useState(0);
+  const [cartCurrency, setCartCurrency] = useState("USD");
   const router = useRouter();
   const pathname = usePathname();
   const isHomePage = pathname === "/";
 
   useEffect(() => {
     const loadUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setUser(user);
-      setIsAdmin(isAdminByToken(session?.access_token));
+      try {
+        const session = await getBrowserSession();
+        setUser(session?.user ?? null);
+        setIsAdmin(isAdminByToken(session?.access_token));
+      } catch (error) {
+        console.error("Error loading session:", error);
+      }
     };
 
     loadUser();
@@ -52,21 +63,57 @@ export function Navbar() {
     };
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadCartSummary = async () => {
+      try {
+        const cart = await cartApi.getCart();
+        if (!isMounted) return;
+
+        const count = cart.items.reduce(
+          (sum, item) => sum + (item.quantity ?? 1),
+          0
+        );
+        const currency = cart.items.find((item) => item.currency)?.currency;
+
+        setCartCount(count);
+        setCartTotal(cart.total);
+        setCartCurrency(currency ?? "USD");
+      } catch (error) {
+        console.error("Error fetching cart summary:", error);
+        if (!isMounted) return;
+        setCartCount(0);
+        setCartTotal(0);
+      }
+    };
+
+    loadCartSummary();
+
+    window.addEventListener("cart:updated", loadCartSummary);
+    return () => {
+      isMounted = false;
+      window.removeEventListener("cart:updated", loadCartSummary);
+    };
+  }, []);
+
+  const formattedCartTotal = `${cartTotal.toLocaleString(i18n.language)} ${cartCurrency}`;
+
   return (
     <nav
-      className={`fixed w-full z-[100] transition-all duration-300 ${
+      className={`fixed z-[100] w-full overflow-visible transition-all duration-300 ${
         isHomePage
           ? "border-b-0 bg-transparent pt-3 sm:pt-4 lg:pt-5"
           : "border-b border-gray-200 bg-white"
-      }`}
+      } ${supportDrawerOpen ? "lg:w-[calc(100%_-_520px)]" : ""}`}
     >
-      <div className={`mx-auto px-4 sm:px-6 lg:px-8 ${isHomePage ? "max-w-[1760px]" : ""}`}>
+      <div className={`mx-auto min-w-0 px-4 sm:px-6 lg:px-8 ${isHomePage ? "max-w-[1760px]" : ""}`}>
         <div
-          className={`flex items-center justify-between gap-8 ${
+          className={`flex min-w-0 items-center justify-between ${
             isHomePage
-              ? "min-h-[88px] rounded-[30px] border border-white/60 bg-[#f7f4ef]/92 px-5 py-4 shadow-[0_20px_70px_rgba(70,61,50,0.12)] backdrop-blur md:px-7"
+              ? "min-h-[88px] rounded-[30px] border border-white/70 bg-[#f7f4ef]/92 px-5 py-4 shadow-[0_10px_28px_rgba(70,61,50,0.06)] ring-1 ring-stone-200/35 backdrop-blur md:px-7"
               : "h-20"
-          }`}
+          } ${supportDrawerOpen ? "gap-4" : "gap-8"}`}
         >
           {/* Logo Section */}
           <Link href="/" className="min-w-0 shrink-0 group xl:min-w-[260px] min-[1800px]:min-w-[390px]">
@@ -92,40 +139,30 @@ export function Navbar() {
               className={`hidden min-[1800px]:block text-xs mt-1 ${
                 isHomePage ? "text-stone-500" : "text-gray-500"
               }`}
-            >
-              Handcrafted excellence • Custom designs • Sustainable materials
-            </p>
+            >{t("Handcrafted excellence • Custom designs • Sustainable materials")}</p>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden flex-1 items-center justify-center gap-5 xl:flex 2xl:gap-8">
+          <div className="hidden min-w-0 flex-1 items-center justify-center gap-5 xl:flex 2xl:gap-8">
             <Link
               href="/categories"
               className="relative whitespace-nowrap text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200 group"
-            >
-              Categories
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
+            >{t("Categories")}<span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
               href="/collections"
               className="relative whitespace-nowrap text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200 group"
-            >
-              Collections
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
+            >{t("Collections")}<span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
               href="/custom-orders"
               className="relative whitespace-nowrap text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200 group"
-            >
-              Custom Orders
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
+            >{t("Custom Orders")}<span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
               href="/about"
               className="relative whitespace-nowrap text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200 group"
-            >
-              About
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
+            >{t("About")}<span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
             </Link>
             {isAdmin && (
               <Link
@@ -133,15 +170,21 @@ export function Navbar() {
                 className="relative flex shrink-0 items-center gap-1 whitespace-nowrap text-emerald-700 hover:text-emerald-900 font-medium transition-colors duration-200 group"
               >
                 <LayoutDashboard size={18} />
-                <span className="min-[1800px]:hidden">Admin</span>
-                <span className="hidden min-[1800px]:inline">Admin Dashboard</span>
+                <span className="min-[1800px]:hidden">{t("Admin")}</span>
+                <span className="hidden min-[1800px]:inline">{t("Admin Dashboard")}</span>
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-800 group-hover:w-full transition-all duration-300"></span>
               </Link>
             )}
           </div>
 
           {/* Right Side Actions */}
-          <div className="flex shrink-0 items-center gap-1 sm:gap-2 xl:ml-3 xl:gap-2 2xl:ml-6 2xl:gap-4">
+          <div
+            className={`flex shrink-0 items-center gap-1 sm:gap-2 xl:ml-3 xl:gap-2 2xl:ml-6 2xl:gap-4 ${
+              supportDrawerOpen ? "lg:hidden" : ""
+            }`}
+          >
+            <LanguageSwitcher className="hidden sm:inline-flex" />
+            <ThemeToggle className="hidden sm:inline-flex" />
             {/* Enhanced Search */}
             <div
               className={`relative transition-all duration-300 ${
@@ -155,7 +198,7 @@ export function Navbar() {
                 />
                 <Input
                   type="text"
-                  placeholder="Search furniture..."
+                  placeholder={t("Search furniture...")}
                   onFocus={() => setIsSearchFocused(true)}
                   onBlur={() => setIsSearchFocused(false)}
                   className={`pl-10 border-stone-200 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 text-sm ${
@@ -196,9 +239,7 @@ export function Navbar() {
                   size={20}
                   className="text-stone-600 group-hover:text-emerald-700 transition-colors duration-200"
                 />
-                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200 hidden min-[1800px]:inline">
-                  Account
-                </span>
+                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200 hidden min-[1800px]:inline">{t("Account")}</span>
               </Button>
             )}
 
@@ -216,16 +257,17 @@ export function Navbar() {
                   size={20}
                   className="text-stone-600 group-hover:text-emerald-700 transition-colors duration-200"
                 />
-                {/* Enhanced Badge */}
-                <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-md animate-pulse">
-                  2
-                </span>
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-red-600 px-1 text-xs font-bold text-white shadow-md">
+                    {cartCount > 99 ? "99+" : cartCount}
+                  </span>
+                )}
               </div>
               <div className="hidden min-[1800px]:block">
-                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200">
-                  Cart
-                </span>
-                <div className="text-xs text-stone-500">₦15,240.00</div>
+                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200">{t("Cart")}</span>
+                <div className="text-xs text-stone-500">
+                  {cartCount > 0 ? formattedCartTotal : "Empty"}
+                </div>
               </div>
             </Button>
 
@@ -244,9 +286,7 @@ export function Navbar() {
                 />
               </div>
               <div className="hidden min-[1800px]:block">
-                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200">
-                  Favorites
-                </span>
+                <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors duration-200">{t("Favorites")}</span>
               </div>
             </Button>
 
@@ -266,41 +306,31 @@ export function Navbar() {
               <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                 <div className="py-6">
                   <div className="mb-6">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                      Menu
-                    </h2>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4">{t("Menu")}</h2>
                     <div className="space-y-4 border-t border-stone-200 pt-4">
                       <Link href="/shop">
                         <Button
                           variant="ghost"
                           className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
-                        >
-                          Shop
-                        </Button>
+                        >{t("Shop")}</Button>
                       </Link>
                       <Link href="/collections">
                         <Button
                           variant="ghost"
                           className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
-                        >
-                          Collections
-                        </Button>
+                        >{t("Collections")}</Button>
                       </Link>
                       <Link href="/custom-orders">
                         <Button
                           variant="ghost"
                           className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
-                        >
-                          Custom Orders
-                        </Button>
+                        >{t("Custom Orders")}</Button>
                       </Link>
                       <Link href="/about">
                         <Button
                           variant="ghost"
                           className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
-                        >
-                          About
-                        </Button>
+                        >{t("About")}</Button>
                       </Link>
                       {isAdmin && (
                         <Link href="/dashboard">
@@ -308,9 +338,7 @@ export function Navbar() {
                             variant="ghost"
                             className="w-full justify-start text-left px-4 py-2 text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50 rounded-lg transition-colors duration-200 font-medium flex items-center"
                           >
-                            <LayoutDashboard size={20} className="mr-2" />
-                            Admin Dashboard
-                          </Button>
+                            <LayoutDashboard size={20} className="mr-2" />{t("Admin Dashboard")}</Button>
                         </Link>
                       )}
                     </div>
@@ -325,7 +353,7 @@ export function Navbar() {
                       />
                       <Input
                         type="text"
-                        placeholder="Search furniture..."
+                        placeholder={t("Search furniture...")}
                         className="pl-10 bg-stone-50 border-stone-200 focus:ring-emerald-500 focus:border-transparent text-sm"
                       />
                     </div>
@@ -333,19 +361,21 @@ export function Navbar() {
 
                   {/* Mobile Account & Cart */}
                   <div className="space-y-2">
+                    <LanguageSwitcher fullWidth />
+                    <ThemeToggle fullWidth className="mt-3" />
                     <Button
                       variant="ghost"
                       className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
                     >
-                      <User size={20} className="mr-2 text-stone-600" />
-                      Account
-                    </Button>
+                      <User size={20} className="mr-2 text-stone-600" />{t("Account")}</Button>
                     <Button
                       variant="ghost"
+                      onClick={() => router.push("/cart")}
                       className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
                     >
                       <ShoppingCart size={20} className="mr-2 text-stone-600" />
-                      Cart (2) - ₦15,240.00
+                      Cart ({cartCount}) -{" "}
+                      {cartCount > 0 ? formattedCartTotal : "Empty"}
                     </Button>
                   </div>
                 </div>
@@ -363,7 +393,7 @@ export function Navbar() {
             />
             <Input
               type="text"
-              placeholder="Search furniture..."
+              placeholder={t("Search furniture...")}
               className={`pl-10 border-stone-200 focus:ring-emerald-500 focus:border-transparent text-sm ${
                 isHomePage ? "bg-white" : "bg-stone-50"
               }`}

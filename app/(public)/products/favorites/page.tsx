@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 import { Product } from "@/types/product.type";
 import { Collection } from "@/types/collection.type";
 import { useEffect, useState } from "react";
@@ -12,6 +13,7 @@ import { CreateCollectionDialog } from "@/components/CreateCollectionDialog";
 import { toast } from "sonner";
 
 export default function FavoritesPage() {
+  const { t } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [view, setView] = useState<"list" | "moodboard">("list");
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -77,7 +79,7 @@ export default function FavoritesPage() {
       }
     } catch (error) {
       console.error("Error fetching products for collection:", error);
-      toast.error("Failed to load products");
+      toast.error(t("Failed to load products"));
       setProducts([]);
     } finally {
       setLoading(false);
@@ -102,13 +104,8 @@ export default function FavoritesPage() {
       <div className="px-4 py-8">
         <div className="flex justify-between w-full">
           <div>
-            <h2 className="text-3xl font-serif text-stone-900 mb-1">
-              Your saved ideas
-            </h2>
-            <p className="text-stone-500">
-              This is where your favorite items are stored. Combine them to
-              create the perfect space.
-            </p>
+            <h2 className="text-3xl font-serif text-stone-900 mb-1">{t("Your saved ideas")}</h2>
+            <p className="text-stone-500">{t("This is where your favorite items are stored. Combine them to create the perfect space.")}</p>
           </div>
           <ViewToggle view={view} onViewChange={setView} />
         </div>

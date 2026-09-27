@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "react-i18next";
 import { Message } from "./types";
 
 interface ChatMessageProps {
@@ -5,30 +7,41 @@ interface ChatMessageProps {
 }
 
 export function ChatMessage({ message }: ChatMessageProps) {
+  const { t, i18n } = useTranslation();
   const isUser = message.sender === "user";
 
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+    <div
+      className={`flex items-end gap-2 ${
+        isUser ? "justify-end" : "justify-start"
+      }`}
+    >
+      {!isUser && (
+        <div className="mb-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-stone-950 text-[11px] font-semibold text-white shadow-sm">
+          CF
+        </div>
+      )}
       <div
-        className={`p-3 rounded-lg max-w-[85%] text-sm ${
+        className={`max-w-[82%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm ${
           isUser
-            ? "bg-emerald-600 text-white rounded-br-none"
-            : "bg-stone-100 text-stone-800 rounded-bl-none"
+            ? "rounded-br-md bg-stone-950 text-white"
+            : "rounded-bl-md border border-stone-200 bg-white text-stone-800"
         }`}
       >
-        {message.text}
+        <p>{t(message.text)}</p>
         <div
-          className={`text-[10px] mt-1 opacity-70 ${
-            isUser ? "text-right" : "text-left"
+          className={`mt-1 text-[10px] font-medium ${
+            isUser ? "text-right text-white/62" : "text-left text-stone-400"
           }`}
         >
-          {message.timestamp.toLocaleTimeString([], {
+          {message.timestamp.toLocaleTimeString(i18n.language, {
             hour: "2-digit",
             minute: "2-digit",
           })}
+          {message.status === "sending" ? t(" · Sending") : ""}
+          {message.status === "error" ? t(" · Not sent") : ""}
         </div>
       </div>
     </div>
   );
 }
-

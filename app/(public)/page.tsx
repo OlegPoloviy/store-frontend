@@ -8,11 +8,13 @@ import { Category } from "@/types/category.type";
 
 export default async function HomePage() {
   let products: Product[] = [];
+  let latestProducts: Product[] = [];
   let categories: Category[] = [];
 
   try {
-    [products, categories] = await Promise.all([
+    [products, latestProducts, categories] = await Promise.all([
       productsApiServer.getAll(),
+      productsApiServer.getLatest(10),
       categoryApiServer.getAll(),
     ]);
   } catch (error) {
@@ -22,7 +24,11 @@ export default async function HomePage() {
   return (
     <>
       <div className="bg-[#FAFAFA] min-h-screen">
-        <HomeShowcase categories={categories} products={products} />
+        <HomeShowcase
+          categories={categories}
+          products={products}
+          latestProducts={latestProducts}
+        />
         <ProductsList products={products} />
         <FooterSection />
       </div>

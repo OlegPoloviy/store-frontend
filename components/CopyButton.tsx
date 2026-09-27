@@ -1,10 +1,12 @@
 "use client";
+import { useTranslation } from "react-i18next";
 import { usePathname } from "next/navigation";
 import { Button } from "./ui/button";
 import { Share2 } from "lucide-react";
 import { toast } from "sonner";
 
 export function CopyButton() {
+  const { t } = useTranslation();
   const pathName = usePathname();
 
   const handleCopy = async () => {
@@ -12,10 +14,10 @@ export function CopyButton() {
 
     try {
       await navigator.clipboard.writeText(url);
-      toast.success("Link has been copied to clipboard");
+      toast.success(t("Link has been copied to clipboard"));
     } catch (error) {
       console.error("Failed to copy: ", error);
-      toast.error("We have troubles with copying this link");
+      toast.error(t("We have troubles with copying this link"));
     }
   };
 

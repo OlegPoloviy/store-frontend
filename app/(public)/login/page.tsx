@@ -1,6 +1,8 @@
+import { getServerTranslation } from "@/lib/i18n/server";
 import { LoginForm } from "@/components/LoginForm";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const { t } = await getServerTranslation();
   return (
     <div className="bg-[#FAFAFA]">
       <div>
@@ -10,12 +12,8 @@ export default function LoginPage() {
             <div className="w-full max-w-2xl mx-auto">
               {/* Header */}
               <div className="text-center mb-6">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
-                  Welcome Back
-                </h1>
-                <p className="text-base lg:text-lg text-gray-600 max-w-xl mx-auto">
-                  Sign in to continue exploring premium hand-made furniture
-                </p>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3">{t("Welcome Back")}</h1>
+                <p className="text-base lg:text-lg text-gray-600 max-w-xl mx-auto">{t("Sign in to continue exploring premium hand-made furniture")}</p>
               </div>
 
               {/* Login Form Component */}

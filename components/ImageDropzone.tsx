@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import { useState, useCallback, useEffect } from "react";
 import { Upload, X, Image as ImageIcon, CheckCircle2 } from "lucide-react";
@@ -25,6 +26,7 @@ export function ImageDropzone({
   maxImages = 10,
   maxSize = 5,
 }: ImageDropzoneProps) {
+  const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -218,9 +220,7 @@ export function ImageDropzone({
             onClick={() => document.getElementById("image-upload")?.click()}
             className="relative z-20"
           >
-            <ImageIcon className="w-4 h-4 mr-2" />
-            Browse Files
-          </Button>
+            <ImageIcon className="w-4 h-4 mr-2" />{t("Browse Files")}</Button>
           <p className="text-xs text-gray-400 mt-4">
             Maximum {maxImages} images, up to {maxSize}MB each
           </p>
@@ -241,9 +241,7 @@ export function ImageDropzone({
             <p className="text-sm font-medium text-gray-700">
               Uploaded Images ({images.length}/{maxImages})
             </p>
-            <p className="text-xs text-gray-500">
-              Click on an image to set it as the main product image
-            </p>
+            <p className="text-xs text-gray-500">{t("Click on an image to set it as the main product image")}</p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 w-full min-w-0">
@@ -271,18 +269,14 @@ export function ImageDropzone({
                   {/* Hover Overlay */}
                   <div className="absolute inset-0  bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center pointer-events-none">
                     {!image.isMain && (
-                      <span className="text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                        Set as Main
-                      </span>
+                      <span className="text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">{t("Set as Main")}</span>
                     )}
                   </div>
 
                   {/* Main Badge */}
                   {image.isMain && (
                     <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-md flex items-center gap-1 pointer-events-none">
-                      <CheckCircle2 className="w-3 h-3" />
-                      Main
-                    </div>
+                      <CheckCircle2 className="w-3 h-3" />{t("Main")}</div>
                   )}
 
                   {/* File Info */}

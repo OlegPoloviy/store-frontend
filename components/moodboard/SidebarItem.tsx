@@ -5,12 +5,15 @@ import { Product } from "@/types/product.type";
 import Image from "next/image";
 import { Heart } from "lucide-react";
 import { ImagePlaceholder } from "@/components/ImagePlaceholder";
+import { getImageProxyUrl } from "@/lib/util/imageProxy";
+import { Plus } from "lucide-react";
 
 interface SidebarItemProps {
   product: Product;
+  onAdd?: (product: Product) => void;
 }
 
-export function SidebarItem({ product }: SidebarItemProps) {
+export function SidebarItem({ product, onAdd }: SidebarItemProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `sidebar-${product.id}`,
     data: { type: "sidebar", product },
@@ -21,14 +24,14 @@ export function SidebarItem({ product }: SidebarItemProps) {
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className={`p-2 mb-3 bg-white border-2 rounded-lg cursor-grab active:cursor-grabbing hover:shadow-lg transition-all ${
+      className={`group relative p-2 mb-3 bg-white border border-stone-200 rounded-xl cursor-grab active:cursor-grabbing hover:shadow-lg transition-all ${
         isDragging ? "opacity-50" : "opacity-100"
       }`}
     >
       <div className="relative w-full aspect-square bg-gray-50 rounded overflow-hidden mb-2">
         {product.images && product.images.length > 0 ? (
           <Image
-            src={product.images[0].url}
+            src={getImageProxyUrl(product.images[0].url)}
             alt={product.title}
             fill
             className="object-cover"
@@ -55,6 +58,7 @@ export function SidebarItem({ product }: SidebarItemProps) {
       <p className="text-xs text-center text-gray-500 mt-1">
         {product.price} {product.currency}
       </p>
+      <button type="button" aria-label={`Add ${product.title} to board`} onPointerDown={(event) => event.stopPropagation()} onClick={(event) => { event.stopPropagation(); onAdd?.(product); }} className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-white text-stone-900 opacity-0 shadow-md transition-opacity group-hover:opacity-100 focus:opacity-100"><Plus size={17} /></button>
     </div>
   );
 }

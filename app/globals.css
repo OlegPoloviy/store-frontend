@@ -79,37 +79,47 @@
 }
 
 .dark {
-  --background: oklch(0.147 0.004 49.25);
-  --foreground: oklch(0.985 0.001 106.423);
-  --card: oklch(0.216 0.006 56.043);
-  --card-foreground: oklch(0.985 0.001 106.423);
-  --popover: oklch(0.216 0.006 56.043);
-  --popover-foreground: oklch(0.985 0.001 106.423);
-  --primary: oklch(0.923 0.003 48.717);
-  --primary-foreground: oklch(0.216 0.006 56.043);
-  --secondary: oklch(0.268 0.007 34.298);
-  --secondary-foreground: oklch(0.985 0.001 106.423);
-  --muted: oklch(0.268 0.007 34.298);
-  --muted-foreground: oklch(0.709 0.01 56.259);
-  --accent: oklch(0.268 0.007 34.298);
-  --accent-foreground: oklch(0.985 0.001 106.423);
+  color-scheme: dark;
+  --theme-page: #171b1a;
+  --theme-surface: #232927;
+  --theme-surface-raised: #2b332f;
+  --theme-surface-soft: #303a35;
+  --theme-border: #435049;
+  --theme-text: #f0ede5;
+  --theme-text-soft: #c3c9bf;
+  --theme-text-muted: #a8b2a8;
+  --theme-accent: #a3c8aa;
+  --background: var(--theme-page);
+  --foreground: var(--theme-text);
+  --card: var(--theme-surface);
+  --card-foreground: var(--theme-text);
+  --popover: var(--theme-surface-raised);
+  --popover-foreground: var(--theme-text);
+  --primary: var(--theme-accent);
+  --primary-foreground: var(--theme-page);
+  --secondary: var(--theme-surface-soft);
+  --secondary-foreground: var(--theme-text);
+  --muted: var(--theme-surface-soft);
+  --muted-foreground: var(--theme-text-muted);
+  --accent: var(--theme-surface-soft);
+  --accent-foreground: var(--theme-text);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.553 0.013 58.071);
+  --border: var(--theme-border);
+  --input: var(--theme-border);
+  --ring: var(--theme-accent);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.216 0.006 56.043);
-  --sidebar-foreground: oklch(0.985 0.001 106.423);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0.001 106.423);
-  --sidebar-accent: oklch(0.268 0.007 34.298);
-  --sidebar-accent-foreground: oklch(0.985 0.001 106.423);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.553 0.013 58.071);
+  --sidebar: var(--theme-surface);
+  --sidebar-foreground: var(--theme-text);
+  --sidebar-primary: var(--theme-accent);
+  --sidebar-primary-foreground: var(--theme-page);
+  --sidebar-accent: var(--theme-surface-soft);
+  --sidebar-accent-foreground: var(--theme-text);
+  --sidebar-border: var(--theme-border);
+  --sidebar-ring: var(--theme-accent);
 }
 
 @layer base {
@@ -119,6 +129,158 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.admin-dashboard {
+  --dashboard-grid: #e7e0d8;
+  --dashboard-axis: #625a53;
+  --dashboard-tooltip-bg: #fffdf9;
+  --dashboard-tooltip-text: #292524;
+  --dashboard-chart-1: #171412;
+  --dashboard-chart-2: #b87a48;
+  --dashboard-chart-3: #0f766e;
+  --dashboard-chart-4: #c46e52;
+  --dashboard-chart-5: #77716b;
+  --dashboard-chart-6: #dcc7af;
+}
+
+.dark .admin-dashboard {
+  --dashboard-grid: #46544d;
+  --dashboard-axis: #b5bfb4;
+  --dashboard-tooltip-bg: #303a35;
+  --dashboard-tooltip-text: #f0ede5;
+  --dashboard-chart-1: #b9d2b9;
+  --dashboard-chart-2: #e2a875;
+  --dashboard-chart-3: #56b9ab;
+  --dashboard-chart-4: #db8f77;
+  --dashboard-chart-5: #a9b4a8;
+  --dashboard-chart-6: #d9c1a6;
+}
+
+.dark .admin-dashboard .admin-metric {
+  border: 1px solid #536159;
+  color: #f0ede5;
+}
+.dark .admin-dashboard .admin-metric:nth-child(1) { background: #26362e; }
+.dark .admin-dashboard .admin-metric:nth-child(2) { background: #333d34; }
+.dark .admin-dashboard .admin-metric:nth-child(3) { background: #24463d; }
+.dark .admin-dashboard .admin-metric:nth-child(4) { background: #493a35; }
+.dark .admin-dashboard .admin-metric p { opacity: .82; }
+.dark .admin-dashboard .admin-metric .text-3xl { opacity: 1; }
+
+/* The storefront uses fixed light Tailwind colors throughout its pages. Keep the
+   existing light design and remap those surface and ink utilities in dark mode. */
+@layer utilities {
+  .dark [class~="bg-white"],
+  .dark [class~="bg-white/90"],
+  .dark [class~="bg-white/92"],
+  .dark [class~="bg-white/88"],
+  .dark [class~="bg-white/86"],
+  .dark [class~="bg-white/84"],
+  .dark [class~="bg-white/85"],
+  .dark [class~="bg-white/82"],
+  .dark [class~="bg-white/80"],
+  .dark [class~="bg-white/75"],
+  .dark [class~="bg-white/65"],
+  .dark [class~="bg-white/50"],
+  .dark [class~="bg-white/40"],
+  .dark [class~="bg-white/32"],
+  .dark [class~="bg-white/28"] { background-color: var(--theme-surface); }
+
+  .dark [class~="bg-stone-50"],
+  .dark [class~="bg-gray-50"],
+  .dark [class~="bg-[#FAFAFA]"],
+  .dark [class~="bg-[#FAFAF9]"],
+  .dark [class~="bg-[#fbfaf8]"],
+  .dark [class~="bg-[#fbf8f4]"],
+  .dark [class~="bg-[#faf6f1]"] { background-color: var(--theme-page); }
+
+  .dark [class~="bg-stone-100"],
+  .dark [class~="bg-gray-100"],
+  .dark [class~="bg-[#f7f4ef]"],
+  .dark [class~="bg-[#f7f4ef]/88"],
+  .dark [class~="bg-[#f7f4ef]/92"],
+  .dark [class~="bg-[#f5f1e9]"],
+  .dark [class~="bg-[#f5f2ec]"],
+  .dark [class~="bg-[#f3eee7]"],
+  .dark [class~="bg-[#f3efe8]"],
+  .dark [class~="bg-[#f2eee8]"],
+  .dark [class~="bg-[#f1e7dc]"],
+  .dark [class~="bg-[#f0ebe4]"],
+  .dark [class~="bg-[#eee7dc]"],
+  .dark [class~="bg-[#ede7de]"],
+  .dark [class~="bg-[#efe7dc]"],
+  .dark [class~="bg-[#ebe4da]"] { background-color: var(--theme-surface-raised); }
+
+  .dark [class~="bg-stone-200"],
+  .dark [class~="bg-gray-200"],
+  .dark [class~="bg-[#eadfd2]"],
+  .dark [class~="bg-[#e9ded0]"],
+  .dark [class~="bg-[#e6dccf]"],
+  .dark [class~="bg-[#d9d6d1]"],
+  .dark [class~="bg-[#d8d1c8]"],
+  .dark [class~="bg-[#d8ccbb]"],
+  .dark [class~="bg-[#d5cec5]"],
+  .dark [class~="bg-[#d7c6b3]"] { background-color: var(--theme-surface-soft); }
+
+  .dark [class~="bg-[#dcebe6]"],
+  .dark [class~="bg-emerald-50/50"],
+  .dark [class~="bg-emerald-50/60"] { background-color: #263d34; }
+
+  .dark [class~="bg-[#f4e4dc]"],
+  .dark [class~="bg-red-50"],
+  .dark [class~="bg-red-100"] { background-color: #422d2b; }
+
+  .dark [class~="bg-amber-50"],
+  .dark [class~="bg-amber-100"],
+  .dark [class~="bg-amber-200"] { background-color: #453c2a; }
+
+  .dark [class~="text-stone-950"],
+  .dark [class~="text-stone-900"],
+  .dark [class~="text-stone-800"],
+  .dark [class~="text-gray-900"],
+  .dark [class~="text-gray-800"] { color: var(--theme-text); }
+
+  .dark [class~="text-stone-700"],
+  .dark [class~="text-stone-600"],
+  .dark [class~="text-gray-700"],
+  .dark [class~="text-gray-600"] { color: var(--theme-text-soft); }
+
+  .dark [class~="text-stone-500"],
+  .dark [class~="text-stone-400"],
+  .dark [class~="text-gray-500"],
+  .dark [class~="text-gray-400"] { color: var(--theme-text-muted); }
+
+  .dark [class~="text-emerald-700"],
+  .dark [class~="text-emerald-800"],
+  .dark [class~="text-emerald-900"] { color: var(--theme-accent); }
+
+  .dark [class~="bg-emerald-50"],
+  .dark [class~="bg-emerald-100"] { background-color: #263d34; }
+
+  .dark [class~="border-stone-100"],
+  .dark [class~="border-stone-200"],
+  .dark [class~="border-stone-300"],
+  .dark [class~="border-gray-200"],
+  .dark [class~="border-gray-300"],
+  .dark [class~="border-white"],
+  .dark [class~="border-white/70"],
+  .dark [class~="border-white/60"],
+  .dark [class~="border-white/80"],
+  .dark [class~="border-white/30"],
+  .dark [class~="border-black/10"],
+  .dark [class~="border-stone-200/70"],
+  .dark [class~="border-stone-200/80"],
+  .dark [class~="border-stone-200/90"] { border-color: var(--theme-border); }
+
+  .dark [class~="hover:bg-white"]:hover,
+  .dark [class~="hover:bg-stone-50"]:hover,
+  .dark [class~="hover:bg-gray-50"]:hover,
+  .dark [class~="hover:bg-stone-100"]:hover { background-color: var(--theme-surface-soft); }
+
+  .dark [class~="hover:text-stone-900"]:hover,
+  .dark [class~="hover:text-gray-900"]:hover,
+  .dark [class~="hover:text-stone-700"]:hover { color: var(--theme-text); }
 }
 
 @layer base {

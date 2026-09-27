@@ -8,6 +8,13 @@ export const productsApi = {
     return response.data;
   },
 
+  getLatest: async (limit = 10): Promise<Product[]> => {
+    const response = await httpClient.get("/products/latest", {
+      params: { limit },
+    });
+    return response.data;
+  },
+
   getById: async (id: string): Promise<Product> => {
     const response = await httpClient.get(`/products/id/${id}`);
     return response.data;
@@ -20,6 +27,17 @@ export const productsApi = {
 
   createProduct: async (formData: FormData): Promise<Product> => {
     const response = await httpClient.post("/products", formData);
+    return response.data;
+  },
+
+  updateProduct: async (
+    productId: string,
+    formData: FormData
+  ): Promise<Product> => {
+    const response = await httpClient.patch(
+      `/products/id/${productId}`,
+      formData
+    );
     return response.data;
   },
 

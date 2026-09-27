@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import { Box } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,7 @@ export function ImagePlaceholder({
   iconClassName?: string;
   textClassName?: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div
       className={cn(
@@ -22,7 +24,7 @@ export function ImagePlaceholder({
       )}
     >
       <Box className={cn("w-8 h-8 mb-2", iconClassName)} />
-      <p className={cn("text-xs font-medium", textClassName)}>{text}</p>
+      <p className={cn("text-xs font-medium", textClassName)}>{t(text)}</p>
     </div>
   );
 }

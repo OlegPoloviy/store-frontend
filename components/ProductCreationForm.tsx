@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -41,10 +42,62 @@ import {
 } from "@/schemas/product.schema";
 import { productsApi } from "@/api/productApi";
 import { categoryApi } from "@/api/category.api";
-import { ProductCategory } from "@/types/product.type";
+import { Product, ProductCategory } from "@/types/product.type";
 import { ImageDropzone, ImageFile } from "@/components/ImageDropzone";
+import Image from "next/image";
 
-export function ProductCreationForm() {
+interface ProductCreationFormProps {
+  mode?: "create" | "edit";
+  product?: Product;
+}
+
+const toFormString = (value: string | null | undefined) => value ?? "";
+const toFormBoolean = (value: unknown) => value === true || value === "true";
+
+const productToFormValues = (
+  product?: Product
+): Partial<ProductCreationFormData> => ({
+  title: toFormString(product?.title),
+  description: toFormString(product?.description),
+  price: toFormString(product?.price),
+  currency: product?.currency || "USD",
+  categoryId: product?.categoryId || product?.category?.id || "",
+  material: toFormString(product?.material),
+  color: toFormString(product?.color),
+  style: toFormString(product?.style),
+  width: toFormString(product?.width),
+  height: toFormString(product?.height),
+  depth: toFormString(product?.depth),
+  unitOfMeasure: product?.unitOfMeasure || "cm",
+  weight: toFormString(product?.weight),
+  weightUnit: product?.weightUnit || "kg",
+  primaryMaterial: toFormString(product?.primaryMaterial),
+  secondaryMaterials: product?.secondaryMaterials || [],
+  finish: toFormString(product?.finish),
+  pattern: toFormString(product?.pattern),
+  texture: toFormString(product?.texture),
+  handmade: Boolean(product?.handmade),
+  designer: toFormString(product?.designer),
+  originOfMaterial: toFormString(product?.originOfMaterial),
+  craftsmanshipDetails: product?.craftsmanshipDetails || [],
+  features: product?.features || [],
+  seatingCapacity: toFormString(product?.seatingCapacity),
+  storageCapacity: toFormString(product?.storageCapacity),
+  careInstructions: toFormString(product?.careInstructions),
+  assemblyRequired: toFormBoolean(product?.assemblyRequired),
+  warranty: toFormString(product?.warranty),
+  story: toFormString(product?.story),
+  designInspiration: toFormString(product?.designInspiration),
+  woodTreatment: toFormString(product?.woodTreatment),
+  uniqueIdentifier: toFormString(product?.uniqueIdentifier),
+});
+
+export function ProductCreationForm({
+  mode = "create",
+  product,
+}: ProductCreationFormProps) {
+  const { t } = useTranslation();
+  const isEditMode = mode === "edit";
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
@@ -67,6 +120,7 @@ export function ProductCreationForm() {
       features: [],
       craftsmanshipDetails: [],
       secondaryMaterials: [],
+      ...productToFormValues(product),
     },
   });
 
@@ -76,7 +130,7 @@ export function ProductCreationForm() {
         const data = await categoryApi.getAll();
         setCategories(data as ProductCategory[]);
       } catch {
-        toast.error("Failed to load categories");
+        toast.error(t("Failed to load categories"));
       } finally {
         setLoadingCategories(false);
       }
@@ -89,9 +143,17 @@ export function ProductCreationForm() {
     try {
       setIsLoading(true);
 
+      const hasExistingImages = Boolean(product?.images?.length);
+
       // Validate images
-      if (productImages.length === 0) {
-        toast.error("Please add at least one product image");
+      if (!isEditMode && productImages.length === 0) {
+        toast.error(t("Please add at least one product image"));
+        setIsLoading(false);
+        return;
+      }
+
+      if (isEditMode && !hasExistingImages && productImages.length === 0) {
+        toast.error(t("Please add at least one product image"));
         setIsLoading(false);
         return;
       }
@@ -101,7 +163,7 @@ export function ProductCreationForm() {
         (cat) => cat.id === data.categoryId
       );
       if (!selectedCategory) {
-        toast.error("Please select a valid category");
+        toast.error(t("Please select a valid category"));
         setIsLoading(false);
         return;
       }
@@ -148,19 +210,29 @@ export function ProductCreationForm() {
         }))
       );
 
-      // Send to backend
-      await productsApi.createProduct(formData);
-
-      toast.success("Product created successfully!");
+      if (isEditMode && product) {
+        await productsApi.updateProduct(product.id, formData);
+        toast.success(t("Product updated successfully!"));
+      } else {
+        await productsApi.createProduct(formData);
+        toast.success(t("Product created successfully!"));
+      }
 
       // Clean up image URLs
       productImages.forEach((img) => URL.revokeObjectURL(img.preview));
 
       router.push("/products-managment");
     } catch (error) {
-      console.error("Product creation error:", error);
+      console.error(
+        isEditMode ? "Product update error:" : "Product creation error:",
+        error
+      );
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to create product";
+        error instanceof Error
+          ? error.message
+          : isEditMode
+          ? "Failed to update product"
+          : "Failed to create product";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -194,10 +266,12 @@ export function ProductCreationForm() {
     <Card className="shadow-lg border-0 max-w-5xl mx-auto">
       <CardHeader className="text-center pb-4">
         <CardTitle className="text-2xl font-semibold text-gray-900">
-          Create New Product
+          {isEditMode ? "Edit Product" : "Create New Product"}
         </CardTitle>
         <CardDescription className="text-gray-600">
-          Fill in the details to add a new product to your store
+          {isEditMode
+            ? "Update product details and save the changes"
+            : "Fill in the details to add a new product to your store"}
         </CardDescription>
       </CardHeader>
 
@@ -207,18 +281,16 @@ export function ProductCreationForm() {
             {/* Basic Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                <Package className="w-5 h-5 mr-2" />
-                Basic Information
-              </h3>
+                <Package className="w-5 h-5 mr-2" />{t("Basic Information")}</h3>
 
               <FormField
                 control={form.control}
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Product Title *</FormLabel>
+                    <FormLabel>{t("Product Title *")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter product title" {...field} />
+                      <Input placeholder={t("Enter product title")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -230,10 +302,10 @@ export function ProductCreationForm() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description *</FormLabel>
+                    <FormLabel>{t("Description *")}</FormLabel>
                     <FormControl>
                       <textarea
-                        placeholder="Enter product description"
+                        placeholder={t("Enter product description")}
                         className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
                         {...field}
                       />
@@ -249,14 +321,14 @@ export function ProductCreationForm() {
                   name="categoryId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category *</FormLabel>
+                      <FormLabel>{t("Category *")}</FormLabel>
                       <FormControl>
                         <select
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
                           {...field}
                           disabled={loadingCategories}
                         >
-                          <option value="">Select a category</option>
+                          <option value="">{t("Select a category")}</option>
                           {categories.map((cat) => (
                             <option key={cat.id} value={cat.id}>
                               {cat.name}
@@ -274,9 +346,9 @@ export function ProductCreationForm() {
                   name="uniqueIdentifier"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>SKU / Product Code</FormLabel>
+                      <FormLabel>{t("SKU / Product Code")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., PROD-001" {...field} />
+                        <Input placeholder={t("e.g., PROD-001")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -288,9 +360,35 @@ export function ProductCreationForm() {
             {/* Product Images */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                <Package className="w-5 h-5 mr-2" />
-                Product Images
-              </h3>
+                <Package className="w-5 h-5 mr-2" />{t("Product Images")}</h3>
+              {isEditMode && product?.images?.length ? (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-gray-700">
+                    Current Images ({product.images.length})
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 w-full min-w-0">
+                    {product.images.map((image) => (
+                      <div
+                        key={image.id}
+                        className="relative rounded-lg overflow-hidden border border-gray-200"
+                      >
+                        <div className="relative w-full aspect-square overflow-hidden">
+                          <Image
+                            src={image.url}
+                            alt={image.altText || product.title}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 50vw, 25vw"
+                          />
+                          {image.isMain && (
+                            <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-md">{t("Main")}</div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
               <ImageDropzone
                 images={productImages}
                 onChange={setProductImages}
@@ -302,9 +400,7 @@ export function ProductCreationForm() {
             {/* Pricing */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                <DollarSign className="w-5 h-5 mr-2" />
-                Pricing
-              </h3>
+                <DollarSign className="w-5 h-5 mr-2" />{t("Pricing")}</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
@@ -312,13 +408,11 @@ export function ProductCreationForm() {
                   name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Price *</FormLabel>
+                      <FormLabel>{t("Price *")}</FormLabel>
                       <FormControl>
                         <Input type="text" placeholder="99.99" {...field} />
                       </FormControl>
-                      <FormDescription>
-                        Enter price in decimal format
-                      </FormDescription>
+                      <FormDescription>{t("Enter price in decimal format")}</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -329,7 +423,7 @@ export function ProductCreationForm() {
                   name="currency"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Currency *</FormLabel>
+                      <FormLabel>{t("Currency *")}</FormLabel>
                       <FormControl>
                         <select
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
@@ -351,9 +445,7 @@ export function ProductCreationForm() {
             {/* Dimensions & Weight */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                <Ruler className="w-5 h-5 mr-2" />
-                Dimensions & Weight
-              </h3>
+                <Ruler className="w-5 h-5 mr-2" />{t("Dimensions & Weight")}</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <FormField
@@ -361,7 +453,7 @@ export function ProductCreationForm() {
                   name="width"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Width</FormLabel>
+                      <FormLabel>{t("Width")}</FormLabel>
                       <FormControl>
                         <Input placeholder="e.g., 120" {...field} />
                       </FormControl>
@@ -375,7 +467,7 @@ export function ProductCreationForm() {
                   name="height"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Height</FormLabel>
+                      <FormLabel>{t("Height")}</FormLabel>
                       <FormControl>
                         <Input placeholder="e.g., 80" {...field} />
                       </FormControl>
@@ -389,7 +481,7 @@ export function ProductCreationForm() {
                   name="depth"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Depth</FormLabel>
+                      <FormLabel>{t("Depth")}</FormLabel>
                       <FormControl>
                         <Input placeholder="e.g., 60" {...field} />
                       </FormControl>
@@ -403,7 +495,7 @@ export function ProductCreationForm() {
                   name="unitOfMeasure"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Unit</FormLabel>
+                      <FormLabel>{t("Unit")}</FormLabel>
                       <FormControl>
                         <select
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
@@ -426,7 +518,7 @@ export function ProductCreationForm() {
                   name="weight"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Weight</FormLabel>
+                      <FormLabel>{t("Weight")}</FormLabel>
                       <FormControl>
                         <Input placeholder="e.g., 15.5" {...field} />
                       </FormControl>
@@ -440,7 +532,7 @@ export function ProductCreationForm() {
                   name="weightUnit"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Weight Unit</FormLabel>
+                      <FormLabel>{t("Weight Unit")}</FormLabel>
                       <FormControl>
                         <select
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
@@ -461,9 +553,7 @@ export function ProductCreationForm() {
             {/* Materials & Style */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                <Palette className="w-5 h-5 mr-2" />
-                Materials & Style
-              </h3>
+                <Palette className="w-5 h-5 mr-2" />{t("Materials & Style")}</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
@@ -471,9 +561,9 @@ export function ProductCreationForm() {
                   name="primaryMaterial"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Primary Material</FormLabel>
+                      <FormLabel>{t("Primary Material")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Oak Wood" {...field} />
+                        <Input placeholder={t("e.g., Oak Wood")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -485,9 +575,9 @@ export function ProductCreationForm() {
                   name="color"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Color</FormLabel>
+                      <FormLabel>{t("Color")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Natural Brown" {...field} />
+                        <Input placeholder={t("e.g., Natural Brown")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -499,9 +589,9 @@ export function ProductCreationForm() {
                   name="style"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Style</FormLabel>
+                      <FormLabel>{t("Style")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Modern, Rustic" {...field} />
+                        <Input placeholder={t("e.g., Modern, Rustic")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -513,9 +603,9 @@ export function ProductCreationForm() {
                   name="finish"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Finish</FormLabel>
+                      <FormLabel>{t("Finish")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Matte, Glossy" {...field} />
+                        <Input placeholder={t("e.g., Matte, Glossy")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -527,9 +617,9 @@ export function ProductCreationForm() {
                   name="pattern"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Pattern</FormLabel>
+                      <FormLabel>{t("Pattern")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Striped, Solid" {...field} />
+                        <Input placeholder={t("e.g., Striped, Solid")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -541,9 +631,9 @@ export function ProductCreationForm() {
                   name="texture"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Texture</FormLabel>
+                      <FormLabel>{t("Texture")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Smooth, Rough" {...field} />
+                        <Input placeholder={t("e.g., Smooth, Rough")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -553,10 +643,10 @@ export function ProductCreationForm() {
 
               {/* Secondary Materials Array */}
               <div className="space-y-2">
-                <FormLabel>Secondary Materials</FormLabel>
+                <FormLabel>{t("Secondary Materials")}</FormLabel>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Add secondary material"
+                    placeholder={t("Add secondary material")}
                     value={materialInput}
                     onChange={(e) => setMaterialInput(e.target.value)}
                     onKeyDown={(e) => {
@@ -611,9 +701,7 @@ export function ProductCreationForm() {
             {/* Manufacturing & Origin */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                <Sparkles className="w-5 h-5 mr-2" />
-                Manufacturing & Origin
-              </h3>
+                <Sparkles className="w-5 h-5 mr-2" />{t("Manufacturing & Origin")}</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
@@ -628,10 +716,8 @@ export function ProductCreationForm() {
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
-                        <FormLabel>Handmade Product</FormLabel>
-                        <FormDescription>
-                          Check if this product is handcrafted
-                        </FormDescription>
+                        <FormLabel>{t("Handmade Product")}</FormLabel>
+                        <FormDescription>{t("Check if this product is handcrafted")}</FormDescription>
                       </div>
                     </FormItem>
                   )}
@@ -642,9 +728,9 @@ export function ProductCreationForm() {
                   name="designer"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Designer</FormLabel>
+                      <FormLabel>{t("Designer")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Designer name" {...field} />
+                        <Input placeholder={t("Designer name")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -656,9 +742,9 @@ export function ProductCreationForm() {
                   name="originOfMaterial"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Origin of Material</FormLabel>
+                      <FormLabel>{t("Origin of Material")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Italy, Germany" {...field} />
+                        <Input placeholder={t("e.g., Italy, Germany")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -670,10 +756,10 @@ export function ProductCreationForm() {
                   name="woodTreatment"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Wood Treatment</FormLabel>
+                      <FormLabel>{t("Wood Treatment")}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="e.g., Varnished, Oil-treated"
+                          placeholder={t("e.g., Varnished, Oil-treated")}
                           {...field}
                         />
                       </FormControl>
@@ -685,10 +771,10 @@ export function ProductCreationForm() {
 
               {/* Craftsmanship Details Array */}
               <div className="space-y-2">
-                <FormLabel>Craftsmanship Details</FormLabel>
+                <FormLabel>{t("Craftsmanship Details")}</FormLabel>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Add craftsmanship detail"
+                    placeholder={t("Add craftsmanship detail")}
                     value={craftInput}
                     onChange={(e) => setCraftInput(e.target.value)}
                     onKeyDown={(e) => {
@@ -743,9 +829,7 @@ export function ProductCreationForm() {
             {/* Features & Capacity */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                <Info className="w-5 h-5 mr-2" />
-                Features & Capacity
-              </h3>
+                <Info className="w-5 h-5 mr-2" />{t("Features & Capacity")}</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
@@ -753,7 +837,7 @@ export function ProductCreationForm() {
                   name="seatingCapacity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Seating Capacity</FormLabel>
+                      <FormLabel>{t("Seating Capacity")}</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="e.g., 4" {...field} />
                       </FormControl>
@@ -767,9 +851,9 @@ export function ProductCreationForm() {
                   name="storageCapacity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Storage Capacity</FormLabel>
+                      <FormLabel>{t("Storage Capacity")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., 3 drawers" {...field} />
+                        <Input placeholder={t("e.g., 3 drawers")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -779,10 +863,10 @@ export function ProductCreationForm() {
 
               {/* Features Array */}
               <div className="space-y-2">
-                <FormLabel>Product Features</FormLabel>
+                <FormLabel>{t("Product Features")}</FormLabel>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Add a feature"
+                    placeholder={t("Add a feature")}
                     value={featureInput}
                     onChange={(e) => setFeatureInput(e.target.value)}
                     onKeyDown={(e) => {
@@ -825,19 +909,17 @@ export function ProductCreationForm() {
             {/* Care & Assembly */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                <Wrench className="w-5 h-5 mr-2" />
-                Care & Assembly
-              </h3>
+                <Wrench className="w-5 h-5 mr-2" />{t("Care & Assembly")}</h3>
 
               <FormField
                 control={form.control}
                 name="careInstructions"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Care Instructions</FormLabel>
+                    <FormLabel>{t("Care Instructions")}</FormLabel>
                     <FormControl>
                       <textarea
-                        placeholder="How to care for this product..."
+                        placeholder={t("How to care for this product...")}
                         className="w-full min-h-[80px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
                         {...field}
                       />
@@ -853,7 +935,7 @@ export function ProductCreationForm() {
                   name="assemblyRequired"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Assembly Required</FormLabel>
+                      <FormLabel>{t("Assembly Required")}</FormLabel>
                       <FormControl>
                         <select
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
@@ -863,7 +945,7 @@ export function ProductCreationForm() {
                           }
                         >
                           <option value="false">No</option>
-                          <option value="true">Yes</option>
+                          <option value="true">{t("Yes")}</option>
                         </select>
                       </FormControl>
                       <FormMessage />
@@ -876,9 +958,9 @@ export function ProductCreationForm() {
                   name="warranty"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Warranty</FormLabel>
+                      <FormLabel>{t("Warranty")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., 2 years" {...field} />
+                        <Input placeholder={t("e.g., 2 years")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -890,19 +972,17 @@ export function ProductCreationForm() {
             {/* Story & Design */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                <Sparkles className="w-5 h-5 mr-2" />
-                Story & Design
-              </h3>
+                <Sparkles className="w-5 h-5 mr-2" />{t("Story & Design")}</h3>
 
               <FormField
                 control={form.control}
                 name="story"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Product Story</FormLabel>
+                    <FormLabel>{t("Product Story")}</FormLabel>
                     <FormControl>
                       <textarea
-                        placeholder="Tell the story behind this product..."
+                        placeholder={t("Tell the story behind this product...")}
                         className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
                         {...field}
                       />
@@ -917,10 +997,10 @@ export function ProductCreationForm() {
                 name="designInspiration"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Design Inspiration</FormLabel>
+                    <FormLabel>{t("Design Inspiration")}</FormLabel>
                     <FormControl>
                       <textarea
-                        placeholder="What inspired this design..."
+                        placeholder={t("What inspired this design...")}
                         className="w-full min-h-[80px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
                         {...field}
                       />
@@ -938,9 +1018,7 @@ export function ProductCreationForm() {
                 variant="outline"
                 onClick={() => router.back()}
                 className="flex-1"
-              >
-                Cancel
-              </Button>
+              >{t("Cancel")}</Button>
               <Button
                 type="submit"
                 disabled={isLoading}
@@ -949,12 +1027,18 @@ export function ProductCreationForm() {
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Creating Product...</span>
+                    <span>
+                      {isEditMode
+                        ? "Updating Product..."
+                        : "Creating Product..."}
+                    </span>
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
                     <Package className="w-5 h-5" />
-                    <span>Create Product</span>
+                    <span>
+                      {isEditMode ? "Update Product" : "Create Product"}
+                    </span>
                   </div>
                 )}
               </Button>
