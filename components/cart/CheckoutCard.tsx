@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
-import { checkoutApi, CheckoutOrder, CheckoutQuote, PaymentInstruction, ShippingDetails } from "@/api/checkout.api";
+import { checkoutApi, CheckoutOrder, CheckoutQuote, PaymentInstruction, ShippingDetails } from "@/lib/api/checkout.api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth";

@@ -1,5 +1,5 @@
 import { ProductsList } from "@/components/ProductsList";
-import { productsApiServer } from "@/api/productApi.server";
+import { productsApiServer } from "@/lib/api/productApi.server";
 import { Product } from "@/types/product.type";
 import { getServerTranslation } from "@/lib/i18n/server";
 

@@ -6,7 +6,7 @@ import {
   supportChatApi,
   SupportChatConversation,
   SupportChatMessage,
-} from "@/api/support-chat.api";
+} from "@/lib/api/support-chat.api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

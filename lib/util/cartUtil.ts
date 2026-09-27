@@ -1,4 +1,4 @@
-import { type CartItemApi } from "@/api/cart.api";
+import { type CartItemApi } from "@/lib/api/cart.api";
 import { type CartItemVM } from "@/types/cart-item.type";
 import { Product } from "@/types/product.type";
 

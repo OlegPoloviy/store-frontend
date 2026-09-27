@@ -1,8 +1,8 @@
 import { HomeShowcase } from "@/components/HomeShowcase";
 import { ProductsList } from "@/components/ProductsList";
 import { FooterSection } from "@/components/FooterSection";
-import { productsApiServer } from "@/api/productApi.server";
-import { categoryApiServer } from "@/api/category.api.server";
+import { productsApiServer } from "@/lib/api/productApi.server";
+import { categoryApiServer } from "@/lib/api/category.api.server";
 import { Product } from "@/types/product.type";
 import { Category } from "@/types/category.type";
 

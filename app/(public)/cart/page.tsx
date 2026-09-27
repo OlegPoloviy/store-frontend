@@ -1,7 +1,7 @@
 "use client";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
-import { cartApi } from "@/api/cart.api";
+import { cartApi } from "@/lib/api/cart.api";
 import axios from "axios";
 import { toast } from "sonner";
 import { CartItemsList } from "@/components/cart/ProductsCard";

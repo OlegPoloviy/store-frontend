@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Heart, ShoppingCart, Sparkles } from "lucide-react";
 import Image from "next/image";
-import { productsApi } from "@/api/productApi";
+import { productsApi } from "@/lib/api/productApi";
 import { toast } from "sonner";
 import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 

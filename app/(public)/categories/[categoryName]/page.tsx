@@ -1,7 +1,7 @@
 "use client";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
-import { productsApi } from "@/api/productApi";
+import { productsApi } from "@/lib/api/productApi";
 import { Product } from "@/types/product.type";
 import { ProductsList } from "@/components/ProductsList";
 import { useParams } from "next/navigation";

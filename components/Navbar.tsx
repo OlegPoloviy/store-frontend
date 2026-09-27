@@ -17,7 +17,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { getBrowserSession, supabase } from "@/lib/supabase.client";
 import { isAdminByToken } from "@/lib/util/isAdmin";
 import { User as SupabaseUser } from "@supabase/supabase-js";
-import { cartApi } from "@/api/cart.api";
+import { cartApi } from "@/lib/api/cart.api";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";

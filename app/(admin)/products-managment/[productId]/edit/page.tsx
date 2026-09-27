@@ -1,4 +1,4 @@
-import { productsApiServer } from "@/api/productApi.server";
+import { productsApiServer } from "@/lib/api/productApi.server";
 import { ProductCreationForm } from "@/components/ProductCreationForm";
 
 interface EditProductPageProps {

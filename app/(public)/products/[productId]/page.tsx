@@ -1,5 +1,5 @@
 import { getServerTranslation } from "@/lib/i18n/server";
-import { productsApiServer } from "@/api/productApi.server";
+import { productsApiServer } from "@/lib/api/productApi.server";
 import { Badge } from "@/components/ui/badge";
 import {
   Star,

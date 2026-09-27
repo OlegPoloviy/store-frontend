@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { CategoryCard } from "@/components/CategoryCard";
 import { Button } from "@/components/ui/button";
 import { Category } from "@/types/category.type";
-import { categoryApi } from "@/api/category.api";
+import { categoryApi } from "@/lib/api/category.api";
 import { Loader } from "@/components/Loader";
 import { ArrowRight } from "lucide-react";
 

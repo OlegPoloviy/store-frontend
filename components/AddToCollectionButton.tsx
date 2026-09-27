@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Collection } from "@/types/collection.type";
-import { collectionApi } from "@/api/collections.api";
+import { collectionApi } from "@/lib/api/collections.api";
 import { CreateCollectionDialog } from "@/components/CreateCollectionDialog";
 import { FolderPlus, Check } from "lucide-react";
 import { toast } from "sonner";

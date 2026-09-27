@@ -40,8 +40,8 @@ import {
   productCreationSchema,
   ProductCreationFormData,
 } from "@/schemas/product.schema";
-import { productsApi } from "@/api/productApi";
-import { categoryApi } from "@/api/category.api";
+import { productsApi } from "@/lib/api/productApi";
+import { categoryApi } from "@/lib/api/category.api";
 import { Product, ProductCategory } from "@/types/product.type";
 import { ImageDropzone, ImageFile } from "@/components/ImageDropzone";
 import Image from "next/image";

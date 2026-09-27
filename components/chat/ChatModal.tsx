@@ -15,7 +15,7 @@ import { ChatMessage } from "./ChatMessage";
 import { ChatSuggestions } from "./ChatSuggestions";
 import { ChatInput } from "./ChatInput";
 import { Headphones, MessageSquare, Sparkles } from "lucide-react";
-import { supportChatApi } from "@/api/support-chat.api";
+import { supportChatApi } from "@/lib/api/support-chat.api";
 
 const SAMPLE_QUESTIONS = [
   "How long does delivery take?",
