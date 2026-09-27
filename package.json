@@ -2,6 +2,7 @@
   "name": "internet-store",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.15.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -19,8 +20,8 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tabs": "^1.1.13",
-    "@supabase/ssr": "^0.7.0",
-    "@supabase/supabase-js": "^2.57.4",
+    "@supabase/ssr": "0.7.0",
+    "@supabase/supabase-js": "2.57.4",
     "@tanstack/react-table": "^8.21.3",
     "axios": "^1.11.0",
     "class-variance-authority": "^0.7.1",
