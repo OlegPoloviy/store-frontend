@@ -1,6 +1,21 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async rewrites() {
+    const apiUrl = (
+      process.env.API_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      process.env.NEXT_PUBLIC_API_DEPLOY_URL ||
+      "http://localhost:3001"
+    ).replace(/\/$/, "");
+
+    return [
+      {
+        source: "/api/backend/:path*",
+        destination: `${apiUrl}/:path*`,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

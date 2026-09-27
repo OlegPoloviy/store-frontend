@@ -3,13 +3,8 @@
 import axios from "axios";
 import { getBrowserSession } from "@/lib/supabase.client";
 
-const baseURL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  process.env.NEXT_PUBLIC_API_DEPLOY_URL ||
-  "http://localhost:3001";
-
 export const httpClient = axios.create({
-  baseURL,
+  baseURL: "/api/backend",
   headers: {
     "Content-Type": "application/json",
   },
