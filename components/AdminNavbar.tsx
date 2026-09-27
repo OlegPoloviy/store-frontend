@@ -75,6 +75,11 @@ export function AdminNavbar() {
             >{t("Create Product")}<span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
+              href="/categories-managment"
+              className="relative text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200 group"
+            >{t("Manage categories")}<span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
+            </Link>
+            <Link
               href="/orders"
               className="relative text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200 group"
             >{t("Orders")}<span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
@@ -204,17 +209,20 @@ export function AdminNavbar() {
                           className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
                         >{t("Dashboard")}</Button>
                       </Link>
-                      <Link href="/admin/products">
+                      <Link href="/products-managment">
                         <Button
                           variant="ghost"
                           className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
                         >{t("Products")}</Button>
                       </Link>
-                      <Link href="/admin/products/new">
+                      <Link href="/products-managment/create">
                         <Button
                           variant="ghost"
                           className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
                         >{t("Create Product")}</Button>
+                      </Link>
+                      <Link href="/categories-managment">
+                        <Button variant="ghost" className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium">{t("Manage categories")}</Button>
                       </Link>
                       <Link href="/admin/orders">
                         <Button

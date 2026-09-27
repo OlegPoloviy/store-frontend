@@ -17,6 +17,8 @@ export async function proxy(req: NextRequest) {
     path.startsWith("/dashboard/") ||
     path === "/products-managment" ||
     path.startsWith("/products-managment/") ||
+    path === "/categories-managment" ||
+    path.startsWith("/categories-managment/") ||
     path.startsWith("/admin");
 
   if (!user && (path.startsWith("/user") || isAdminRoute)) {
@@ -41,5 +43,6 @@ export const config = {
     "/admin/:path*",
     "/dashboard/:path*",
     "/products-managment/:path*",
+    "/categories-managment/:path*",
   ],
 };

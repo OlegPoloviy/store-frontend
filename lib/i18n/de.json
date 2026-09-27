@@ -607,5 +607,20 @@
   "Title": "Titel",
   "Description": "Beschreibung",
   "Image": "Bild",
-  "Member": "Mitglied"
+  "Member": "Mitglied",
+  "Manage categories": "Kategorien verwalten",
+  "Add category": "Kategorie hinzufügen",
+  "Create category": "Kategorie erstellen",
+  "Edit category": "Kategorie bearbeiten",
+  "Category name": "Kategoriename",
+  "Category image": "Kategoriebild",
+  "Category name is required": "Ein Kategoriename ist erforderlich",
+  "Choose an image file": "Bitte eine Bilddatei auswählen",
+  "Category created": "Kategorie erstellt",
+  "Category updated": "Kategorie aktualisiert",
+  "Failed to save category": "Kategorie konnte nicht gespeichert werden",
+  "No categories yet": "Noch keine Kategorien vorhanden",
+  "Enter a name and optionally choose an image.": "Geben Sie einen Namen ein und wählen Sie optional ein Bild aus.",
+  "Leave empty to keep the current image.": "Leer lassen, um das aktuelle Bild beizubehalten.",
+  "Try again": "Erneut versuchen"
 }
