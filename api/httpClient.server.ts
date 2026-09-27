@@ -1,7 +1,6 @@
 import axios from "axios";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
-import type { Session } from "@supabase/supabase-js";
 
 const baseURL =
   process.env.NEXT_PUBLIC_API_URL ||
@@ -59,7 +58,9 @@ httpClientServer.interceptors.request.use(async (config) => {
     // getSession is available at runtime, but some builds lose the inherited
     // method from the SupabaseAuthClient declaration.
     const auth = supabase.auth as {
-      getSession: () => Promise<{ data: { session: Session | null } }>;
+      getSession: () => Promise<{
+        data: { session: { access_token: string } | null };
+      }>;
     };
     const {
       data: { session },
