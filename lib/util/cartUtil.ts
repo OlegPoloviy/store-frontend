@@ -1,4 +1,4 @@
-import { type CartItemApi } from "@/api/cart.api";
+import { type CartItemApi } from "@/lib/api/cart.api";
 import { type CartItemVM } from "@/types/cart-item.type";
 import { Product } from "@/types/product.type";
 
@@ -77,7 +77,7 @@ export function mapCartItem(item: CartItemApi): CartItemVM {
   const title = item.product?.title ?? "Product";
   const currency = item.product?.currency ?? "USD";
   const price =
-    toNumber(item.priceSnapshot) ?? toNumber(item.product?.price) ?? 0;
+    toNumber(item.product?.price) ?? toNumber(item.priceSnapshot) ?? 0;
 
   const imageUrl =
     (item.product?.images?.[0] as { url: string })?.url ?? // images are typed, but product is Partial<>

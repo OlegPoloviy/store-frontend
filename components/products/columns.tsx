@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import Image from "next/image";
+import { productDescriptionText } from "@/lib/util/productDescription";
 
 interface ColumnsProps {
   onEditAction?: (product: Product) => void;
@@ -55,7 +56,7 @@ export const createProductColumns = ({
       const description = row.getValue("description") as string;
       return (
         <div className="max-w-[300px] truncate text-muted-foreground">
-          {description}
+          {productDescriptionText(description)}
         </div>
       );
     },

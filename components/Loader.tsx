@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface LoaderProps {
@@ -6,6 +8,7 @@ interface LoaderProps {
 }
 
 export function Loader({ message = "Loading...", size = "md" }: LoaderProps) {
+  const { t } = useTranslation();
   const sizeClasses = {
     sm: "w-8 h-8",
     md: "w-12 h-12",
@@ -28,10 +31,10 @@ export function Loader({ message = "Loading...", size = "md" }: LoaderProps) {
           {/* Loading Message */}
           <div className="text-center">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              {message}
+            {t(message)}
             </h3>
             <p className="text-sm text-gray-500">
-              Please wait while we fetch the latest products
+              {t("Please wait while we fetch the latest products")}
             </p>
           </div>
 

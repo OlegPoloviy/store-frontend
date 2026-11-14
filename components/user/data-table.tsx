@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import React from "react";
 import {
@@ -25,6 +26,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const { t } = useTranslation();
   const table = useReactTable({
     data,
     columns,
@@ -72,9 +74,7 @@ export function DataTable<TData, TValue>({
               <TableCell
                 colSpan={columns.length}
                 className="h-24 px-4 text-center text-stone-500"
-              >
-                No results.
-              </TableCell>
+              >{t("No results.")}</TableCell>
             </TableRow>
           )}
         </TableBody>

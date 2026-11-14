@@ -1,16 +1,9 @@
-import { Navbar } from "@/components/Navbar";
-import { OpenChatButton } from "@/components/chat/OpenChatButton";
+import { PublicLayoutShell } from "@/components/PublicLayoutShell";
 
 export default function PublicLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <>
-      <Navbar />
-      {children}
-      <OpenChatButton />
-    </>
-  );
+  return <PublicLayoutShell>{children}</PublicLayoutShell>;
 }

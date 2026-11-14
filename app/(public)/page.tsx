@@ -1,18 +1,19 @@
 import { HomeShowcase } from "@/components/HomeShowcase";
-import { ProductsList } from "@/components/ProductsList";
 import { FooterSection } from "@/components/FooterSection";
-import { productsApiServer } from "@/api/productApi.server";
-import { categoryApiServer } from "@/api/category.api.server";
+import { productsApiServer } from "@/lib/api/productApi.server";
+import { categoryApiServer } from "@/lib/api/category.api.server";
 import { Product } from "@/types/product.type";
 import { Category } from "@/types/category.type";
 
 export default async function HomePage() {
   let products: Product[] = [];
+  let latestProducts: Product[] = [];
   let categories: Category[] = [];
 
   try {
-    [products, categories] = await Promise.all([
+    [products, latestProducts, categories] = await Promise.all([
       productsApiServer.getAll(),
+      productsApiServer.getLatest(10),
       categoryApiServer.getAll(),
     ]);
   } catch (error) {
@@ -21,9 +22,12 @@ export default async function HomePage() {
 
   return (
     <>
-      <div className="bg-[#FAFAFA] min-h-screen">
-        <HomeShowcase categories={categories} products={products} />
-        <ProductsList products={products} />
+      <div className="min-h-screen bg-background text-foreground">
+        <HomeShowcase
+          categories={categories}
+          products={products}
+          latestProducts={latestProducts}
+        />
         <FooterSection />
       </div>
     </>

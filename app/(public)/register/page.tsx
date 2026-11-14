@@ -1,6 +1,8 @@
+import { getServerTranslation } from "@/lib/i18n/server";
 import { RegistrationForm } from "@/components/RegistrationForm";
 
-export default function RegisterPage() {
+export default async function RegisterPage() {
+  const { t } = await getServerTranslation();
   return (
     <div className="bg-[#FAFAFA]">
       <div>
@@ -10,12 +12,8 @@ export default function RegisterPage() {
             <div className="w-full max-w-2xl mx-auto">
               {/* Header */}
               <div className="text-center mb-6">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
-                  Create Your Account
-                </h1>
-                <p className="text-base lg:text-lg text-gray-600 max-w-xl mx-auto">
-                  Join our community and discover premium hand-made furniture
-                </p>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3">{t("Create Your Account")}</h1>
+                <p className="text-base lg:text-lg text-gray-600 max-w-xl mx-auto">{t("Join our community and discover premium hand-made furniture")}</p>
               </div>
 
               {/* Registration Form Component */}

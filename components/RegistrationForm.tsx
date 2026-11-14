@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -35,6 +36,7 @@ import { registerUser } from "@/lib/auth";
 type RegistrationFormData = z.infer<typeof registrationSchema>;
 
 export function RegistrationForm() {
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -52,7 +54,7 @@ export function RegistrationForm() {
       setIsLoading(true);
       await registerUser(data);
 
-      toast.success("Account created! Check your email to confirm.");
+      toast.success(t("Account created! Check your email to confirm."));
       router.push("/");
     } catch (error) {
       const errorMessage =
@@ -66,12 +68,8 @@ export function RegistrationForm() {
   return (
     <Card className="w-full shadow-lg border-0">
       <CardHeader className="text-center pb-4">
-        <CardTitle className="text-xl lg:text-2xl font-semibold text-gray-900">
-          Sign Up
-        </CardTitle>
-        <CardDescription className="text-gray-600">
-          Fill in your details to get started
-        </CardDescription>
+        <CardTitle className="text-xl lg:text-2xl font-semibold text-gray-900">{t("Sign Up")}</CardTitle>
+        <CardDescription className="text-gray-600">{t("Fill in your details to get started")}</CardDescription>
       </CardHeader>
 
       <CardContent className="p-4 sm:p-6 lg:p-8">
@@ -80,9 +78,7 @@ export function RegistrationForm() {
             {/* Personal Information */}
             <div className="space-y-3">
               <h3 className="text-base lg:text-lg font-semibold text-gray-900 flex items-center">
-                <User className="w-4 h-4 mr-2" />
-                Personal Information
-              </h3>
+                <User className="w-4 h-4 mr-2" />{t("Personal Information")}</h3>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 <FormField
@@ -90,14 +86,12 @@ export function RegistrationForm() {
                   name="firstName"
                   render={({ field }) => (
                     <FormItem className="relative">
-                      <FormLabel className="text-sm font-medium text-gray-700">
-                        First Name *
-                      </FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t("First Name *")}</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                           <Input
-                            placeholder="Enter your first name"
+                            placeholder={t("Enter your first name")}
                             className="pl-10"
                             {...field}
                           />
@@ -113,14 +107,12 @@ export function RegistrationForm() {
                   name="lastName"
                   render={({ field }) => (
                     <FormItem className="relative">
-                      <FormLabel className="text-sm font-medium text-gray-700">
-                        Last Name *
-                      </FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t("Last Name *")}</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                           <Input
-                            placeholder="Enter your last name"
+                            placeholder={t("Enter your last name")}
                             className="pl-10"
                             {...field}
                           />
@@ -136,9 +128,7 @@ export function RegistrationForm() {
             {/* Contact Information */}
             <div className="space-y-3">
               <h3 className="text-base lg:text-lg font-semibold text-gray-900 flex items-center">
-                <Mail className="w-4 h-4 mr-2" />
-                Contact Information
-              </h3>
+                <Mail className="w-4 h-4 mr-2" />{t("Contact Information")}</h3>
 
               <div className="space-y-3">
                 <FormField
@@ -146,15 +136,13 @@ export function RegistrationForm() {
                   name="email"
                   render={({ field }) => (
                     <FormItem className="relative">
-                      <FormLabel className="text-sm font-medium text-gray-700">
-                        Email Address *
-                      </FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t("Email Address *")}</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                           <Input
                             type="email"
-                            placeholder="Enter your email address"
+                            placeholder={t("Enter your email address")}
                             className="pl-10"
                             {...field}
                           />
@@ -170,9 +158,7 @@ export function RegistrationForm() {
                   name="phone"
                   render={({ field }) => (
                     <FormItem className="relative">
-                      <FormLabel className="text-sm font-medium text-gray-700">
-                        Phone Number
-                      </FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t("Phone Number")}</FormLabel>
                       <FormControl>
                         <PhoneInput
                           defaultCountry={getDefaultCountry()}
@@ -191,9 +177,7 @@ export function RegistrationForm() {
             {/* Security */}
             <div className="space-y-3">
               <h3 className="text-base lg:text-lg font-semibold text-gray-900 flex items-center">
-                <Lock className="w-4 h-4 mr-2" />
-                Security
-              </h3>
+                <Lock className="w-4 h-4 mr-2" />{t("Security")}</h3>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 <FormField
@@ -201,15 +185,13 @@ export function RegistrationForm() {
                   name="password"
                   render={({ field }) => (
                     <FormItem className="relative">
-                      <FormLabel className="text-sm font-medium text-gray-700">
-                        Password *
-                      </FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t("Password *")}</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                           <Input
                             type={showPassword ? "text" : "password"}
-                            placeholder="Create a password"
+                            placeholder={t("Create a password")}
                             className="pl-10 pr-10"
                             {...field}
                           />
@@ -236,15 +218,13 @@ export function RegistrationForm() {
                   name="confirmPassword"
                   render={({ field }) => (
                     <FormItem className="relative">
-                      <FormLabel className="text-sm font-medium text-gray-700">
-                        Confirm Password *
-                      </FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t("Confirm Password *")}</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                           <Input
                             type={showConfirmPassword ? "text" : "password"}
-                            placeholder="Confirm your password"
+                            placeholder={t("Confirm your password")}
                             className="pl-10 pr-10"
                             {...field}
                           />
@@ -273,9 +253,7 @@ export function RegistrationForm() {
             {/* Address Information */}
             <div className="space-y-3">
               <h3 className="text-base lg:text-lg font-semibold text-gray-900 flex items-center">
-                <MapPin className="w-4 h-4 mr-2" />
-                Address Information
-              </h3>
+                <MapPin className="w-4 h-4 mr-2" />{t("Address Information")}</h3>
 
               <div className="space-y-3">
                 <FormField
@@ -283,15 +261,13 @@ export function RegistrationForm() {
                   name="address"
                   render={({ field }) => (
                     <FormItem className="relative">
-                      <FormLabel className="text-sm font-medium text-gray-700">
-                        Street Address
-                      </FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t("Street Address")}</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                           <Input
                             type="text"
-                            placeholder="Enter your street address"
+                            placeholder={t("Enter your street address")}
                             className="pl-10"
                             {...field}
                           />
@@ -308,11 +284,9 @@ export function RegistrationForm() {
                     name="city"
                     render={({ field }) => (
                       <FormItem className="relative">
-                        <FormLabel className="text-sm font-medium text-gray-700">
-                          City
-                        </FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t("City")}</FormLabel>
                         <FormControl>
-                          <Input type="text" placeholder="City" {...field} />
+                          <Input type="text" placeholder={t("City")} {...field} />
                         </FormControl>
                         <FormMessage className="absolute top-full left-0 text-xs text-red-500 mt-1 opacity-100 transition-opacity duration-200" />
                       </FormItem>
@@ -324,13 +298,11 @@ export function RegistrationForm() {
                     name="postalCode"
                     render={({ field }) => (
                       <FormItem className="relative">
-                        <FormLabel className="text-sm font-medium text-gray-700">
-                          Postal Code
-                        </FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t("Postal Code")}</FormLabel>
                         <FormControl>
                           <Input
                             type="text"
-                            placeholder="Postal Code"
+                            placeholder={t("Postal Code")}
                             {...field}
                           />
                         </FormControl>
@@ -344,11 +316,9 @@ export function RegistrationForm() {
                     name="country"
                     render={({ field }) => (
                       <FormItem className="relative">
-                        <FormLabel className="text-sm font-medium text-gray-700">
-                          Country
-                        </FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t("Country")}</FormLabel>
                         <FormControl>
-                          <Input type="text" placeholder="Country" {...field} />
+                          <Input type="text" placeholder={t("Country")} {...field} />
                         </FormControl>
                         <FormMessage className="absolute top-full left-0 text-xs text-red-500 mt-1 opacity-100 transition-opacity duration-200" />
                       </FormItem>
@@ -363,13 +333,9 @@ export function RegistrationForm() {
               <Checkbox id="terms" required />
               <Label htmlFor="terms" className="text-sm text-gray-600">
                 I agree to the{" "}
-                <Link href="/terms" className="text-gray-900 hover:underline">
-                  Terms of Service
-                </Link>{" "}
+                <Link href="/terms" className="text-gray-900 hover:underline">{t("Terms of Service")}</Link>{" "}
                 and{" "}
-                <Link href="/privacy" className="text-gray-900 hover:underline">
-                  Privacy Policy
-                </Link>
+                <Link href="/privacy" className="text-gray-900 hover:underline">{t("Privacy Policy")}</Link>
               </Label>
             </div>
 
@@ -382,12 +348,12 @@ export function RegistrationForm() {
               {isLoading ? (
                 <div className="flex items-center space-x-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Creating Account...</span>
+                  <span>{t("Creating Account...")}</span>
                 </div>
               ) : (
                 <div className="flex items-center space-x-2">
                   <UserCheck className="w-5 h-5" />
-                  <span>Create Account</span>
+                  <span>{t("Create Account")}</span>
                 </div>
               )}
             </Button>
@@ -395,13 +361,11 @@ export function RegistrationForm() {
             {/* Login Link */}
             <div className="text-center pt-4">
               <p className="text-gray-600">
-                Already have an account?{" "}
+                {t("Already have an account?")}{" "}
                 <Link
                   href="/login"
                   className="text-gray-900 hover:underline font-medium"
-                >
-                  Sign in here
-                </Link>
+                >{t("Sign in here")}</Link>
               </p>
             </div>
           </form>

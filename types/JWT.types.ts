@@ -3,5 +3,5 @@ export interface CustomJWTPayload {
   user_metadata?: {
     role?: string;
   };
-  [key: string]: any;
+  [key: string]: unknown;
 }

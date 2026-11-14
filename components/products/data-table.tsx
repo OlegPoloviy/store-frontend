@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import React from "react";
 import {
@@ -32,6 +33,7 @@ export function ProductDataTable<TData, TValue>({
   columns,
   data,
 }: ProductDataTableProps<TData, TValue>) {
+  const { t } = useTranslation();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -56,7 +58,7 @@ export function ProductDataTable<TData, TValue>({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <Input
-          placeholder="Filter products by title..."
+          placeholder={t("Filter products by title...")}
           value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("title")?.setFilterValue(event.target.value)
@@ -107,9 +109,7 @@ export function ProductDataTable<TData, TValue>({
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"
-                >
-                  No products found.
-                </TableCell>
+                >{t("No products found.")}</TableCell>
               </TableRow>
             )}
           </TableBody>
@@ -122,17 +122,13 @@ export function ProductDataTable<TData, TValue>({
           size="sm"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
+        >{t("Previous")}</Button>
         <Button
           variant="outline"
           size="sm"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+        >{t("Next")}</Button>
       </div>
     </div>
   );

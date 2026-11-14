@@ -2,8 +2,10 @@ import { Phone, Mail, MapPin } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card, CardContent } from "./ui/card";
+import { getServerTranslation } from "@/lib/i18n/server";
 
-export function FooterSection() {
+export async function FooterSection() {
+  const { t } = await getServerTranslation();
   return (
     <footer className="bg-gray-100 text-gray-700 py-12 px-6">
       <div className="max-w-6xl mx-auto">
@@ -24,7 +26,7 @@ export function FooterSection() {
               <div className="flex items-start space-x-3">
                 <MapPin className="w-5 h-5 text-gray-500 mt-1 flex-shrink-0" />
                 <div className="text-sm">
-                  <div>New York</div>
+                  <div>{t("New York")}</div>
                   <div className="text-gray-500">
                     123 Furniture Street, NY 10001
                   </div>
@@ -36,49 +38,37 @@ export function FooterSection() {
           {/* Catalog */}
           <Card className="bg-white/50 border-gray-200">
             <CardContent className="p-4">
-              <h3 className="text-gray-900 font-semibold mb-4 text-sm uppercase tracking-wide">
-                Categories
-              </h3>
+              <h3 className="text-gray-900 font-semibold mb-4 text-sm uppercase tracking-wide">{t("Categories")}</h3>
               <ul className="space-y-2 text-sm">
                 <li>
                   <a
                     href="#"
                     className="hover:text-gray-900 transition-colors text-gray-600"
-                  >
-                    Living Room
-                  </a>
+                  >{t("Living Room")}</a>
                 </li>
                 <li>
                   <a
                     href="#"
                     className="hover:text-gray-900 transition-colors text-gray-600"
-                  >
-                    Dining Room
-                  </a>
+                  >{t("Dining Room")}</a>
                 </li>
                 <li>
                   <a
                     href="#"
                     className="hover:text-gray-900 transition-colors text-gray-600"
-                  >
-                    Bedroom
-                  </a>
+                  >{t("Bedroom")}</a>
                 </li>
                 <li>
                   <a
                     href="#"
                     className="hover:text-gray-900 transition-colors text-gray-600"
-                  >
-                    Office
-                  </a>
+                  >{t("Office")}</a>
                 </li>
                 <li>
                   <a
                     href="#"
                     className="hover:text-gray-900 transition-colors text-gray-600"
-                  >
-                    Outdoor
-                  </a>
+                  >{t("Outdoor")}</a>
                 </li>
               </ul>
             </CardContent>
@@ -87,57 +77,43 @@ export function FooterSection() {
           {/* Information */}
           <Card className="bg-white/50 border-gray-200">
             <CardContent className="p-4">
-              <h3 className="text-gray-900 font-semibold mb-4 text-sm uppercase tracking-wide">
-                Company
-              </h3>
+              <h3 className="text-gray-900 font-semibold mb-4 text-sm uppercase tracking-wide">{t("Company")}</h3>
               <ul className="space-y-2 text-sm">
                 <li>
                   <a
                     href="#"
                     className="hover:text-gray-900 transition-colors text-gray-600"
-                  >
-                    About Us
-                  </a>
+                  >{t("About Us")}</a>
                 </li>
                 <li>
                   <a
                     href="#"
                     className="hover:text-gray-900 transition-colors text-gray-600"
-                  >
-                    Our Story
-                  </a>
+                  >{t("Our Story")}</a>
                 </li>
                 <li>
                   <a
                     href="#"
                     className="hover:text-gray-900 transition-colors text-gray-600"
-                  >
-                    Careers
-                  </a>
+                  >{t("Careers")}</a>
                 </li>
                 <li>
                   <a
                     href="#"
                     className="hover:text-gray-900 transition-colors text-gray-600"
-                  >
-                    Shipping Info
-                  </a>
+                  >{t("Shipping Info")}</a>
                 </li>
                 <li>
                   <a
                     href="#"
                     className="hover:text-gray-900 transition-colors text-gray-600"
-                  >
-                    Returns
-                  </a>
+                  >{t("Returns")}</a>
                 </li>
                 <li>
                   <a
                     href="#"
                     className="hover:text-gray-900 transition-colors text-gray-600"
-                  >
-                    Contact
-                  </a>
+                  >{t("Contact")}</a>
                 </li>
               </ul>
             </CardContent>
@@ -146,26 +122,22 @@ export function FooterSection() {
           {/* Consultation Form */}
           <Card className="bg-white/50 border-gray-200">
             <CardContent className="p-4">
-              <h3 className="text-gray-900 font-semibold mb-4 text-sm uppercase tracking-wide">
-                Get Updates
-              </h3>
+              <h3 className="text-gray-900 font-semibold mb-4 text-sm uppercase tracking-wide">{t("Get Updates")}</h3>
               <div className="space-y-3">
                 <Input
                   type="text"
-                  placeholder="Your name"
+                  placeholder={t("Your name")}
                   className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-500"
                 />
                 <Input
                   type="email"
-                  placeholder="Email address"
+                  placeholder={t("Email address")}
                   className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-500"
                 />
                 <Button
                   variant="secondary"
                   className="w-full bg-gray-700 hover:bg-gray-800 text-white"
-                >
-                  Subscribe
-                </Button>
+                >{t("Subscribe")}</Button>
               </div>
             </CardContent>
           </Card>

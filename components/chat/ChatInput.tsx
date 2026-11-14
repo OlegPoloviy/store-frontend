@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "react-i18next";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Send } from "lucide-react";
@@ -6,24 +8,36 @@ interface ChatInputProps {
   value: string;
   onChange: (value: string) => void;
   onSend: (text: string) => void;
+  disabled?: boolean;
 }
 
-export function ChatInput({ value, onChange, onSend }: ChatInputProps) {
+export function ChatInput({
+  value,
+  onChange,
+  onSend,
+  disabled = false,
+}: ChatInputProps) {
+  const { t } = useTranslation();
   return (
-    <div className="border-t mb-4 pt-4 flex gap-2">
-      <Input
-        placeholder="Type your message..."
-        className="flex-1"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") onSend(value);
-        }}
-      />
+    <div className="flex items-center gap-2 rounded-2xl border border-stone-200 bg-[#f7f4ef] p-2 shadow-sm">
+      <div className="min-w-0 flex-1">
+        <Input
+          placeholder={t("Type your message...")}
+          className="h-11 border-0 bg-transparent px-3 text-sm text-stone-900 shadow-none placeholder:text-stone-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !disabled) onSend(value);
+          }}
+          disabled={disabled}
+        />
+      </div>
       <Button
         size="icon"
-        className="rounded-full"
+        className="h-11 w-11 shrink-0 rounded-full bg-stone-950 text-white shadow-sm hover:bg-stone-800"
         onClick={() => onSend(value)}
+        disabled={disabled || !value.trim()}
+        aria-label={t("Send message")}
       >
         <Send className="h-4 w-4" />
       </Button>

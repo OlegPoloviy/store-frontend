@@ -3,6 +3,7 @@ export interface Message {
   text: string;
   sender: "user" | "support";
   timestamp: Date;
+  status?: "sending" | "sent" | "error";
 }
 
 export interface ChatModalProps {

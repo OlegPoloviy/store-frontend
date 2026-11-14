@@ -1,18 +1,18 @@
+import { getServerTranslation } from "@/lib/i18n/server";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Home, Search } from "lucide-react";
 
-export default function NotFound() {
+export default async function NotFound() {
+  const { t } = await getServerTranslation();
   return (
-    <html lang="en">
-      <body>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
           <div className="max-w-2xl mx-auto text-center">
-            <Card className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-gray-200/50">
+            <Card className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-gray-200/50 dark:border-border">
               <CardContent className="p-0 space-y-8">
                 {/* 404 Icon */}
-                <div className="mx-auto w-32 h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center relative overflow-hidden">
+                <div className="mx-auto w-32 h-32 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[#2b332f] dark:to-[#435049] rounded-full flex items-center justify-center relative overflow-hidden">
                   {/* Decorative background pattern */}
                   <div className="absolute inset-0 opacity-20">
                     <div className="absolute top-2 left-2 w-4 h-4 border-2 border-gray-300 rounded-full"></div>
@@ -30,24 +30,16 @@ export default function NotFound() {
 
                 {/* Error Message */}
                 <div className="space-y-4">
-                  <h1 className="text-4xl lg:text-5xl font-bold text-gray-800 leading-tight">
-                    Page Not Found
-                  </h1>
+                  <h1 className="text-4xl lg:text-5xl font-bold text-gray-800 leading-tight">{t("Page Not Found")}</h1>
 
-                  <p className="text-lg text-gray-600 leading-relaxed max-w-md mx-auto">
-                    Sorry, we couldn&apos;t find the page you&apos;re looking
-                    for. It might have been moved, deleted, or doesn&apos;t
-                    exist.
-                  </p>
+                  <p className="text-lg text-gray-600 leading-relaxed max-w-md mx-auto">{t("Sorry, we couldn't find the page you're looking for. It might have been moved, deleted, or doesn't exist.")}</p>
                 </div>
 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button asChild className="px-8 py-3">
                     <Link href="/" className="flex items-center gap-2">
-                      <Home className="w-4 h-4" />
-                      Go Home
-                    </Link>
+                      <Home className="w-4 h-4" />{t("Go Home")}</Link>
                   </Button>
 
                   <Button variant="outline" asChild className="px-8 py-3">
@@ -55,9 +47,7 @@ export default function NotFound() {
                       href="/categories"
                       className="flex items-center gap-2"
                     >
-                      <Search className="w-4 h-4" />
-                      Browse Categories
-                    </Link>
+                      <Search className="w-4 h-4" />{t("Browse Categories")}</Link>
                   </Button>
                 </div>
 
@@ -68,9 +58,7 @@ export default function NotFound() {
                     <Link
                       href="/contact"
                       className="text-gray-700 hover:text-gray-900 underline"
-                    >
-                      Contact our support team
-                    </Link>
+                    >{t("Contact our support team")}</Link>
                   </p>
                 </div>
               </CardContent>
@@ -85,7 +73,5 @@ export default function NotFound() {
             </div>
           </div>
         </div>
-      </body>
-    </html>
   );
 }

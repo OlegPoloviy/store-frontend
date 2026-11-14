@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createMiddlewareClient } from "./lib/supabase.server";
 import { decodeJWT } from "./lib/util/JWTUtil";
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const res = NextResponse.next();
   const supabase = createMiddlewareClient(req, res);
 
@@ -17,6 +17,8 @@ export async function middleware(req: NextRequest) {
     path.startsWith("/dashboard/") ||
     path === "/products-managment" ||
     path.startsWith("/products-managment/") ||
+    path === "/categories-managment" ||
+    path.startsWith("/categories-managment/") ||
     path.startsWith("/admin");
 
   if (!user && (path.startsWith("/user") || isAdminRoute)) {
@@ -41,5 +43,6 @@ export const config = {
     "/admin/:path*",
     "/dashboard/:path*",
     "/products-managment/:path*",
+    "/categories-managment/:path*",
   ],
 };

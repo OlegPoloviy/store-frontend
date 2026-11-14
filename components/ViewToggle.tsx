@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LayoutGrid, CircuitBoard } from "lucide-react";
@@ -9,6 +10,7 @@ interface ViewToggleProps {
 }
 
 export function ViewToggle({ view, onViewChange }: ViewToggleProps) {
+  const { t } = useTranslation();
   return (
     <Tabs
       value={view}
@@ -26,7 +28,7 @@ export function ViewToggle({ view, onViewChange }: ViewToggleProps) {
           "
         >
           <LayoutGrid className="w-4 h-4" />
-          <span>List</span>
+          <span>{t("List")}</span>
         </TabsTrigger>
 
         {/* --- Кнопка "Мудборд" --- */}
@@ -39,7 +41,7 @@ export function ViewToggle({ view, onViewChange }: ViewToggleProps) {
           "
         >
           <CircuitBoard className="w-4 h-4" />
-          <span>Moodboard</span>
+          <span>{t("Moodboard")}</span>
         </TabsTrigger>
       </TabsList>
     </Tabs>

@@ -1,247 +1,294 @@
 "use client";
+import { useTranslation } from "react-i18next";
 
-import { useState, useRef } from "react";
-import {
-  DndContext,
-  DragEndEvent,
-  DragStartEvent,
-  DragOverlay,
-  DragMoveEvent,
-} from "@dnd-kit/core";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { Product } from "@/types/product.type";
-import { BoardItem } from "./moodboard/types";
+import { BoardItem, CARD_HEIGHT, CARD_WIDTH, Scene } from "./moodboard/types";
 import { SidebarItem } from "./moodboard/SidebarItem";
 import { CanvasArea } from "./moodboard/CanvasArea";
 import { DragOverlayItem } from "./moodboard/DragOverlayItem";
 import { ExportDialog } from "./moodboard/ExportDialog";
-import { Loader2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Download, Expand, ImagePlus, Loader2, Minimize2, RotateCcw, RotateCw, Scissors, Trash2, Undo2, Upload, X, ZoomIn, ZoomOut } from "lucide-react";
 import { exportToImage, ImageFormat } from "@/lib/util/exportToImage";
+import { getImageProxyUrl } from "@/lib/util/imageProxy";
 import { toast } from "sonner";
 
-interface MoodboardProps {
-  products: Product[];
-  loading?: boolean;
-}
+interface MoodboardProps { products: Product[]; loading?: boolean }
+interface SavedBoard { items: BoardItem[]; scene: Scene; customBackground: string | null }
+const STORAGE_KEY = "moodboard-studio-v1";
+const SCENES: { id: Scene; label: string; swatch: string; image?: string }[] = [
+  { id: "studio", label: "Studio", swatch: "#f5f1e9" },
+  { id: "kitchen", label: "Kitchen", swatch: "#e8e2d7", image: "/images/moodboard/kitchen-empty.jpg" },
+  { id: "bathroom", label: "Bathroom", swatch: "#e5e6e1", image: "/images/moodboard/bathroom-empty.jpg" },
+  { id: "living", label: "Living room", swatch: "#e7dfd0", image: "/images/moodboard/living-empty.jpg" },
+];
+const SCENE_SOURCES: Partial<Record<Scene, { url: string; author: string }>> = {
+  kitchen: { url: "https://unsplash.com/photos/an-empty-kitchen-with-white-cabinets-and-wood-floors-t0tpZNlkaOU", author: "Alex Tyson" },
+  bathroom: { url: "https://unsplash.com/photos/white-empty-bathroom-LGJ6MkX-la4", author: "Christa Grover" },
+  living: { url: "https://unsplash.com/photos/an-empty-room-with-wooden-floors-and-large-windows-1YWEopougis", author: "Lisa Anna" },
+};
 
-function getExportErrorMessage(error: unknown) {
-  if (error instanceof Error) {
-    return error.message;
-  }
+function clamp(value: number, min: number, max: number) { return Math.min(Math.max(value, min), Math.max(min, max)); }
 
-  if (error instanceof Event) {
-    const target = error.target as HTMLImageElement | null;
-    return target?.currentSrc || target?.src || error.type;
-  }
-
-  return String(error);
+async function prepareImage(file: File): Promise<string> {
+  if (!file.type.startsWith("image/")) throw new Error("Choose an image file");
+  if (file.size > 8 * 1024 * 1024) throw new Error("Images must be under 8 MB");
+  const url = URL.createObjectURL(file);
+  try {
+    const image = new window.Image();
+    image.src = url;
+    await image.decode();
+    const ratio = Math.min(1, 1800 / Math.max(image.width, image.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(image.width * ratio));
+    canvas.height = Math.max(1, Math.round(image.height * ratio));
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Could not process image");
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL("image/jpeg", 0.78);
+  } finally { URL.revokeObjectURL(url); }
 }
 
 export function Moodboard({ products, loading = false }: MoodboardProps) {
+  const { t } = useTranslation();
   const [boardItems, setBoardItems] = useState<BoardItem[]>([]);
+  const [scene, setScene] = useState<Scene>("studio");
+  const [customBackground, setCustomBackground] = useState<string | null>(null);
+  const [customBackgroundRatio, setCustomBackgroundRatio] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
-  const canvasRef = useRef<HTMLDivElement>(null);
-  const canvasAreaRef = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [cuttingId, setCuttingId] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const previousCanvasSize = useRef<{ width: number; height: number } | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const backgroundInputRef = useRef<HTMLInputElement>(null);
+  const storageWarningShown = useRef(false);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-  const handleDragStart = (event: DragStartEvent) => {
-    const { active } = event;
-    const activeType = active.data.current?.type;
-
-    if (activeType === "sidebar" && active.data.current) {
-      setActiveProduct(active.data.current.product);
-    }
-  };
-
-  const handleDragMove = (event: DragMoveEvent) => {
-    const { active, over } = event;
-
-    if (over?.id === "canvas-area" && active.data.current?.type === "sidebar") {
-      // Зберігаємо поточну позицію для відображення
-      const canvasElement = canvasRef.current;
-      if (canvasElement) {
-        // Position logic removed as it's not currently used for rendering anything
-      }
-    }
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over, delta } = event;
-
-    setActiveProduct(null);
-
-    if (!over || !active.data.current) return;
-
-    const activeType = active.data.current.type;
-
-    // СЦЕНАРІЙ 1: Додаємо новий продукт з сайдбару
-    if (activeType === "sidebar" && over.id === "canvas-area") {
-      const product = active.data.current.product as Product;
-      const canvasElement = canvasRef.current;
-
-      if (canvasElement) {
-        const rect = canvasElement.getBoundingClientRect();
-
-        const clientX = (event.activatorEvent as MouseEvent).clientX || 0;
-        const clientY = (event.activatorEvent as MouseEvent).clientY || 0;
-
-        const x = clientX - rect.left + delta.x;
-        const y = clientY - rect.top + delta.y;
-
-        const newItem: BoardItem = {
-          uniqueId: `${product.id}-${Date.now()}`,
-          productId: product.id,
-          product: product,
-          x: Math.max(0, x - 96),
-          y: Math.max(0, y - 96),
-        };
-        setBoardItems((prev) => [...prev, newItem]);
-      }
-    }
-
-    // СЦЕНАРІЙ 2: Рухаємо продукт на канвасі
-    if (activeType === "board" && over.id === "canvas-area") {
-      const uniqueId = active.data.current.uniqueId;
-      setBoardItems((prev) =>
-        prev.map((item) => {
-          if (item.uniqueId === uniqueId) {
-            return {
-              ...item,
-              x: Math.max(0, item.x + delta.x),
-              y: Math.max(0, item.y + delta.y),
-            };
-          }
-          return item;
-        })
-      );
-    }
-  };
-
-  const handleRemoveItem = (uniqueId: string) => {
-    setBoardItems((prev) => prev.filter((item) => item.uniqueId !== uniqueId));
-  };
-
-  const handleExportClick = () => {
-    if (boardItems.length === 0) {
-      toast.error("Add some products to the canvas first");
-      return;
-    }
-    setIsExportDialogOpen(true);
-  };
-
-  const handleExport = async (
-    format: ImageFormat,
-    filename: string,
-    quality: number
-  ) => {
-    if (!canvasAreaRef.current) {
-      toast.error("Canvas not found");
-      return;
-    }
-
+  useEffect(() => {
     try {
-      setIsExporting(true);
-
-      await exportToImage(
-        canvasAreaRef.current,
-        {
-          format,
-          quality,
-          backgroundColor: "#ffffff",
-          scale: 2,
-        },
-        filename
-      );
-
-      toast.success(`Moodboard exported as ${format.toUpperCase()}`);
-      setIsExportDialogOpen(false);
-    } catch (error) {
-      console.error("Export error:", error);
-
-      const errorMessage = getExportErrorMessage(error);
-      if (
-        errorMessage.includes("CORS") ||
-        errorMessage.includes("cross-origin") ||
-        errorMessage.includes("NetworkError")
-      ) {
-        toast.error(
-          "Export failed due to CORS restrictions. Please ensure your S3 bucket allows cross-origin requests.",
-          { duration: 5000 }
-        );
-      } else {
-        toast.error("Failed to export moodboard");
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw) as SavedBoard;
+        if (Array.isArray(saved.items)) setBoardItems(saved.items.filter((item) => item && typeof item.imageUrl === "string"));
+        if (SCENES.some((entry) => entry.id === saved.scene) || saved.scene === "custom") setScene(saved.scene);
+        if (typeof saved.customBackground === "string") setCustomBackground(saved.customBackground);
       }
-    } finally {
-      setIsExporting(false);
+    } catch { /* Invalid or unavailable storage starts a fresh board. */ }
+    setReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ items: boardItems, scene, customBackground } satisfies SavedBoard)); }
+    catch {
+      if (!storageWarningShown.current) toast.error(t("This board is too large to save in this browser. Export an image to keep a copy."));
+      storageWarningShown.current = true;
+    }
+  }, [boardItems, scene, customBackground, ready]);
+
+  useEffect(() => {
+    if (!customBackground) return;
+    let active = true;
+    const image = new window.Image();
+    image.onload = () => { if (active && image.naturalHeight) setCustomBackgroundRatio(image.naturalWidth / image.naturalHeight); };
+    image.src = customBackground;
+    return () => { active = false; };
+  }, [customBackground]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      if (!width || !height) return;
+      const previous = previousCanvasSize.current;
+      previousCanvasSize.current = { width, height };
+      if (!previous || (Math.abs(previous.width - width) < 1 && Math.abs(previous.height - height) < 1)) return;
+      setBoardItems((items) => items.map((item) => ({
+        ...item,
+        x: clamp(item.x * width / previous.width, 0, width - CARD_WIDTH),
+        y: clamp(item.y * height / previous.height, 0, height - CARD_HEIGHT),
+      })));
+    });
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!expanded) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setExpanded(false); };
+    window.addEventListener("keydown", onKeyDown);
+    return () => { document.body.style.overflow = previousOverflow; window.removeEventListener("keydown", onKeyDown); };
+  }, [expanded]);
+
+  const selected = boardItems.find((item) => item.uniqueId === selectedId);
+  const wideRatio = scene === "bathroom" ? 2 / 3 : scene === "kitchen" || scene === "living" ? 1600 / 1067 : scene === "custom" && customBackgroundRatio ? customBackgroundRatio : 16 / 9;
+  const wideCanvasMaxWidth = `min(1200px, calc((100dvh - 320px) * ${Math.min(wideRatio, 3)}))`;
+  const wideLayoutStyle = expanded ? { maxWidth: `calc(${wideCanvasMaxWidth} + 224px)` } : undefined;
+  const bounds = () => canvasRef.current?.getBoundingClientRect();
+  const nextZ = () => Math.max(0, ...boardItems.map((item) => item.z || 0)) + 1;
+
+  const addProduct = (product: Product, position?: { x: number; y: number }) => {
+    const rect = bounds();
+    const offset = (boardItems.length % 5) * 26;
+    const item: BoardItem = {
+      uniqueId: crypto.randomUUID(), productId: product.id, title: product.title,
+      imageUrl: product.images?.[0]?.url ? getImageProxyUrl(product.images[0].url) : "",
+      price: `${product.price} ${product.currency}`,
+      x: clamp(position?.x ?? ((rect?.width || 800) - CARD_WIDTH) / 2 + offset, 0, (rect?.width || 800) - CARD_WIDTH),
+      y: clamp(position?.y ?? ((rect?.height || 620) - CARD_HEIGHT) / 2 + offset, 0, (rect?.height || 620) - CARD_HEIGHT),
+      scale: 1.15, rotation: 0, z: nextZ(),
+    };
+    setBoardItems((items) => [...items, item]);
+    setSelectedId(item.uniqueId);
+  };
+
+  const handleDragEnd = ({ active, over, delta }: DragEndEvent) => {
+    setActiveProduct(null);
+    if (over?.id !== "canvas-area" || !active.data.current) return;
+    const rect = bounds();
+    if (!rect) return;
+    if (active.data.current.type === "sidebar") {
+      // dnd-kit already translated the source rectangle; the original click plus delta
+      // placed cards incorrectly when the user grabbed them away from the top-left corner.
+      const translated = active.rect.current.translated;
+      if (!translated) return;
+      addProduct(active.data.current.product as Product, { x: translated.left - rect.left, y: translated.top - rect.top });
+    } else if (active.data.current.type === "board") {
+      const id = active.data.current.uniqueId as string;
+      setBoardItems((items) => items.map((item) => item.uniqueId === id ? {
+        ...item,
+        x: clamp(item.x + delta.x, 0, rect.width - CARD_WIDTH),
+        y: clamp(item.y + delta.y, 0, rect.height - CARD_HEIGHT),
+      } : item));
     }
   };
 
-  const handleClearCanvas = () => {
-    setBoardItems([]);
+  const handleUpload = async (event: ChangeEvent<HTMLInputElement>, asBackground: boolean) => {
+    const files = Array.from(event.target.files || []);
+    event.target.value = "";
+    if (!files.length) return;
+    setUploading(true);
+    try {
+      for (const [index, file] of files.entries()) {
+        const imageUrl = await prepareImage(file);
+        if (asBackground) { setCustomBackground(imageUrl); setCustomBackgroundRatio(null); setScene("custom"); toast.success(t("Your background is ready")); break; }
+        const rect = bounds();
+        const item: BoardItem = {
+          uniqueId: crypto.randomUUID(), title: file.name.replace(/\.[^.]+$/, ""), imageUrl, isUpload: true,
+          x: clamp(((rect?.width || 800) - CARD_WIDTH) / 2 + (boardItems.length + index) * 18, 0, (rect?.width || 800) - CARD_WIDTH),
+          y: clamp(((rect?.height || 620) - CARD_HEIGHT) / 2 + (boardItems.length + index) * 18, 0, (rect?.height || 620) - CARD_HEIGHT),
+          scale: 1.15, rotation: 0, z: Date.now(),
+        };
+        setBoardItems((items) => [...items, item]);
+        setSelectedId(item.uniqueId);
+      }
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Could not add image"); }
+    finally { setUploading(false); }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-12 h-12 animate-spin text-gray-400" />
-        <p className="ml-4 text-gray-500">Loading products...</p>
-      </div>
-    );
-  }
+  const updateSelected = (change: Partial<BoardItem>) => {
+    if (!selectedId) return;
+    setBoardItems((items) => items.map((item) => item.uniqueId === selectedId ? { ...item, ...change } : item));
+  };
 
-  return (
-    <DndContext
-      onDragStart={handleDragStart}
-      onDragMove={handleDragMove}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="flex gap-6 py-4 mt-8">
-        {/* Sidebar з продуктами */}
-        <div className="w-64 bg-white shadow-xl rounded-2xl p-4 overflow-y-auto max-h-[calc(100vh-280px)] border border-gray-100 flex-shrink-0 ">
-          <div className="sticky top-0 bg-white p-4 mb-3  z-100 rounded-2xl border border-gray-100">
-            <h2 className="font-bold text-lg text-gray-900 ">Products</h2>
-            <p className="text-xs text-gray-500 mt-1">
-              Drag to canvas ({products.length})
-            </p>
-          </div>
+  const handleCutout = async () => {
+    if (!selected || !selected.imageUrl || cuttingId) return;
+    const id = selected.uniqueId;
+    const originalImageUrl = selected.originalImageUrl || selected.imageUrl;
+    setCuttingId(id);
+    try {
+      const { removeImageBackground } = await import("@/lib/util/removeBackground");
+      const imageUrl = await removeImageBackground(originalImageUrl);
+      setBoardItems((items) => items.map((item) => item.uniqueId === id ? { ...item, imageUrl, originalImageUrl } : item));
+      toast.success(t("Background removed. You can restore the original anytime."));
+    } catch (error) {
+      console.error("Background removal failed:", error);
+      toast.error(error instanceof Error ? error.message : "Could not remove the background");
+    } finally { setCuttingId(null); }
+  };
 
-          {products.length === 0 ? (
-            <div className="text-center py-8 text-gray-400">
-              <p className="text-sm">No products available</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {products.map((product) => (
-                <SidebarItem key={product.id} product={product} />
-              ))}
-            </div>
-          )}
+  const handleExport = async (format: ImageFormat, filename: string, quality: number) => {
+    if (!canvasRef.current) return;
+    setIsExporting(true);
+    const previousSelection = selectedId;
+    try {
+      setSelectedId(null);
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      await exportToImage(canvasRef.current, { format, quality, backgroundColor: "#f5f1e9", scale: 2 }, filename);
+      toast.success(t("Moodboard downloaded"));
+      setIsExportDialogOpen(false);
+    } catch { toast.error(t("Could not export the board. One of the product images may block downloads.")); }
+    finally { setSelectedId(previousSelection); setIsExporting(false); }
+  };
+
+  if (loading) return <div className="flex items-center justify-center gap-3 py-20 text-stone-500"><Loader2 className="animate-spin" />{t("Loading your saved pieces...")}</div>;
+
+  return <DndContext sensors={sensors} onDragStart={({ active }: DragStartEvent) => {
+    if (active.data.current?.type === "sidebar") setActiveProduct(active.data.current.product as Product);
+  }} onDragEnd={handleDragEnd} onDragCancel={() => setActiveProduct(null)}>
+    <section className={expanded ? "fixed inset-0 z-[100] flex h-dvh flex-col overflow-y-auto bg-[radial-gradient(circle_at_50%_8%,#fffaf3_0%,#f5f2ec_55%,#ebe6de_100%)] p-4 text-stone-900 sm:p-5" : "mt-7 rounded-[28px] bg-[#f5f2ec] p-4 text-stone-900 sm:p-6"}>
+      <div style={wideLayoutStyle} className={`${expanded ? "mx-auto mb-3 w-full border-b border-stone-300/70 pb-3" : "mb-6"} flex flex-wrap items-end justify-between gap-4`}>
+        <div><p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-800">{t("Your design studio")}</p><h2 className="mt-1 font-serif text-3xl sm:text-4xl">{t("The moodboard")}</h2><p className="mt-1 text-sm text-stone-500">{t("Create a space around pieces you love.")}</p></div>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={() => setExpanded((value) => !value)} aria-pressed={expanded} className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-stone-50">{expanded ? <Minimize2 size={16} /> : <Expand size={16} />}{expanded ? "Close wide view" : "Wide view"}</button>
+          <button type="button" onClick={() => photoInputRef.current?.click()} disabled={uploading} className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-stone-50"><ImagePlus size={16} />{t("Add photo")}</button>
+          <button type="button" onClick={() => { if (boardItems.length) setIsExportDialogOpen(true); else toast.error(t("Add a piece or photo first")); }} className="inline-flex items-center gap-2 rounded-full bg-stone-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-stone-700"><Download size={16} />{t("Export board")}</button>
         </div>
+      </div>
+      <input ref={photoInputRef} type="file" accept="image/*" multiple className="hidden" aria-label={t("Upload inspiration photos")} onChange={(event) => handleUpload(event, false)} />
+      <input ref={backgroundInputRef} type="file" accept="image/*" className="hidden" aria-label={t("Upload room background")} onChange={(event) => handleUpload(event, true)} />
 
-        {/* Canvas */}
-        <div ref={canvasRef} className="flex-1">
-          <CanvasArea
-            ref={canvasAreaRef}
-            items={boardItems}
-            onRemoveItem={handleRemoveItem}
-            onRemoveItems={handleClearCanvas}
-            onExportClick={handleExportClick}
-          />
+      <div style={wideLayoutStyle} className={expanded ? "mx-auto mb-4 w-full rounded-[20px] border border-stone-200/80 bg-white/80 p-3 shadow-sm" : "mb-4"}>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="mr-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">{t("Set the scene")}</span>
+        {SCENES.map((option) => <button key={option.id} type="button" onClick={() => setScene(option.id)} aria-pressed={scene === option.id} className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${scene === option.id ? "border-stone-900 bg-stone-900 text-white" : "border-stone-300 bg-white hover:border-stone-500"}`}><span className="h-4 w-4 rounded-full border border-black/10 bg-cover bg-center" style={{ backgroundColor: option.swatch, backgroundImage: option.image ? `url(${option.image})` : undefined }} />{t(option.label)}</button>)}
+        {customBackground ? <>
+          <button type="button" onClick={() => setScene("custom")} aria-pressed={scene === "custom"} className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium ${scene === "custom" ? "border-stone-900 bg-stone-900 text-white" : "border-stone-300 bg-white hover:border-stone-500"}`}><span className="h-4 w-4 rounded-full border border-black/10 bg-cover bg-center" style={{ backgroundImage: `url(${customBackground})` }} />{t("My background")}</button>
+          <button type="button" onClick={() => backgroundInputRef.current?.click()} disabled={uploading} className="inline-flex items-center gap-1.5 rounded-full border border-stone-300 bg-white px-3 py-1.5 text-xs font-medium hover:border-stone-500 disabled:opacity-50">{uploading ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}Replace</button>
+          <button type="button" onClick={() => { setCustomBackground(null); setCustomBackgroundRatio(null); if (scene === "custom") setScene("studio"); }} aria-label={t("Remove my background")} title={t("Remove my background")} className="grid h-7 w-7 place-items-center rounded-full border border-stone-300 bg-white text-stone-500 hover:border-red-300 hover:text-red-700"><X size={13} /></button>
+        </> : <button type="button" onClick={() => backgroundInputRef.current?.click()} disabled={uploading} className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-amber-600 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50">{uploading ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}Upload background</button>}
+      </div>
+      {SCENE_SOURCES[scene] && <p className={`${expanded ? "mt-2 pl-1" : "mt-2 mb-3"} text-[11px] text-stone-500`}>{t("Scene photo:")}<a href={SCENE_SOURCES[scene].url} target="_blank" rel="noreferrer" className="underline hover:text-stone-800">{SCENE_SOURCES[scene].author} / Unsplash</a> · <a href="https://unsplash.com/license" target="_blank" rel="noreferrer" className="underline hover:text-stone-800">Unsplash License</a>{t("· resized")}</p>}
+      {scene === "custom" && customBackground && <p className="mt-2 pl-1 text-[11px] text-stone-500">{t("Your photo is the room background. Wide view shows the complete image.")}</p>}
+      </div>
+
+      <div style={wideLayoutStyle} className={`grid gap-4 lg:grid-cols-[208px_minmax(0,1fr)] ${expanded ? "mx-auto w-full items-stretch" : ""}`}>
+        <aside className={`${expanded ? "max-h-[min(calc(100dvh-320px),800px)] shadow-[0_20px_50px_-35px_rgba(45,35,24,.35)]" : "max-h-[620px]"} overflow-y-auto rounded-[22px] border border-stone-200 bg-white p-3`}>
+          <div className="sticky top-0 z-10 mb-3 border-b border-stone-100 bg-white pb-3"><h3 className="font-serif text-lg">{t("Saved pieces")}</h3><p className="text-xs text-stone-500">Drag or tap + to add · {products.length}</p></div>
+          {products.length ? products.map((product) => <SidebarItem key={product.id} product={product} onAdd={addProduct} />) : <div className="rounded-xl bg-stone-50 p-4 text-center text-xs leading-5 text-stone-500">{t("No saved products yet. Add your own photos to start.")}</div>}
+        </aside>
+        <div className={expanded ? "min-w-0 rounded-[28px] border border-stone-200/80 bg-white/85 p-2 shadow-[0_30px_80px_-35px_rgba(45,35,24,.35)]" : "min-w-0"}>
+          <CanvasArea ref={canvasRef} items={boardItems} scene={scene} customBackground={customBackground} customBackgroundRatio={customBackgroundRatio} expanded={expanded} expandedMaxWidth={wideCanvasMaxWidth} selectedId={selectedId} onSelect={setSelectedId} onRemoveItem={(id) => { setBoardItems((items) => items.filter((item) => item.uniqueId !== id)); if (selectedId === id) setSelectedId(null); }} />
         </div>
       </div>
 
-      {/* DragOverlay для візуалізації перетягування */}
-      <DragOverlay>
-        {activeProduct ? <DragOverlayItem product={activeProduct} /> : null}
-      </DragOverlay>
-
-      {/* Export Dialog */}
-      <ExportDialog
-        open={isExportDialogOpen}
-        onOpenChange={setIsExportDialogOpen}
-        onExport={handleExport}
-        loading={isExporting}
-      />
-    </DndContext>
-  );
+      <div style={wideLayoutStyle} className={`${expanded ? "mx-auto w-full shadow-[0_16px_45px_-22px_rgba(45,35,24,.4)]" : ""} mt-4 flex min-h-12 flex-wrap items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-xs text-stone-600`}>
+        {selected ? <div className="flex flex-wrap items-center gap-2"><span className="max-w-36 truncate font-semibold text-stone-900">{selected.title}</span><span className="mx-1 h-5 w-px bg-stone-200" />
+          <button type="button" aria-label={t("Make smaller")} title={t("Make smaller")} onClick={() => updateSelected({ scale: clamp(Number((selected.scale - 0.1).toFixed(1)), 0.4, 3) })} className="rounded-lg p-2 hover:bg-stone-100"><ZoomOut size={17} /></button>
+          <span className="w-9 text-center tabular-nums">{Math.round(selected.scale * 100)}%</span>
+          <button type="button" aria-label={t("Make larger")} title={t("Make larger")} onClick={() => updateSelected({ scale: clamp(Number((selected.scale + 0.1).toFixed(1)), 0.4, 3) })} className="rounded-lg p-2 hover:bg-stone-100"><ZoomIn size={17} /></button>
+          <button type="button" aria-label={t("Rotate left")} title={t("Rotate left")} onClick={() => updateSelected({ rotation: selected.rotation - 5 })} className="rounded-lg p-2 hover:bg-stone-100"><RotateCcw size={17} /></button>
+          <button type="button" aria-label={t("Rotate right")} title={t("Rotate right")} onClick={() => updateSelected({ rotation: selected.rotation + 5 })} className="rounded-lg p-2 hover:bg-stone-100"><RotateCw size={17} /></button>
+          <button type="button" aria-label={t("Send backward")} title={t("Send backward")} onClick={() => updateSelected({ z: Math.min(...boardItems.map((item) => item.z)) - 1 })} className="rounded-lg p-2 hover:bg-stone-100"><ArrowDown size={17} /></button>
+          <button type="button" aria-label={t("Bring to front")} title={t("Bring to front")} onClick={() => updateSelected({ z: nextZ() })} className="rounded-lg p-2 hover:bg-stone-100"><ArrowUp size={17} /></button>
+          <span className="mx-1 h-5 w-px bg-stone-200" />
+          {selected.originalImageUrl && <button type="button" onClick={() => updateSelected({ imageUrl: selected.originalImageUrl, originalImageUrl: undefined })} className="inline-flex items-center gap-1.5 rounded-lg bg-stone-100 px-3 py-2 font-medium text-stone-900 hover:bg-stone-200"><Undo2 size={15} />{t("Restore photo")}</button>}
+          <button type="button" onClick={handleCutout} disabled={!selected.imageUrl || !!cuttingId} className="inline-flex items-center gap-1.5 rounded-lg bg-amber-100 px-3 py-2 font-semibold text-amber-900 hover:bg-amber-200 disabled:opacity-50">{cuttingId === selected.uniqueId ? <Loader2 size={15} className="animate-spin" /> : <Scissors size={15} />}{cuttingId === selected.uniqueId ? "Cutting out…" : selected.originalImageUrl ? "Refine cutout" : "Remove background"}</button>
+        </div> : <p>{t("Select a piece to resize, rotate or change its layer.")}</p>}
+        {boardItems.length > 0 && <button type="button" onClick={() => { setBoardItems([]); setSelectedId(null); }} className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-stone-500 hover:bg-red-50 hover:text-red-700"><Trash2 size={15} />{t("Clear board")}</button>}
+      </div>
+    </section>
+    <DragOverlay>{activeProduct ? <DragOverlayItem product={activeProduct} /> : null}</DragOverlay>
+    <ExportDialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen} onExport={handleExport} loading={isExporting} />
+  </DndContext>;
 }
