@@ -1,5 +1,23 @@
 import { httpClient } from "./httpClient";
 import { Product } from "@/types/product.type";
+import { z } from "zod";
+
+const importIssueSchema = z.object({
+  row: z.number().int().positive(),
+  sku: z.string().optional(),
+  message: z.string(),
+});
+
+const importReportSchema = z.object({
+  total: z.number().int().nonnegative(),
+  valid: z.number().int().nonnegative(),
+  imported: z.number().int().nonnegative(),
+  dryRun: z.boolean(),
+  errors: z.array(importIssueSchema),
+  warnings: z.array(importIssueSchema),
+});
+
+export type ProductImportReport = z.infer<typeof importReportSchema>;
 
 export const productsApi = {
   getAll: async (): Promise<Product[]> => {
@@ -28,6 +46,14 @@ export const productsApi = {
   createProduct: async (formData: FormData): Promise<Product> => {
     const response = await httpClient.post("/products", formData);
     return response.data;
+  },
+
+  importProducts: async (body: string): Promise<ProductImportReport> => {
+    const response = await httpClient.post<unknown>("/products/import", body, {
+      headers: { "Content-Type": "application/json" },
+      validateStatus: (status) => (status >= 200 && status < 300) || status === 422,
+    });
+    return importReportSchema.parse(response.data);
   },
 
   updateProduct: async (

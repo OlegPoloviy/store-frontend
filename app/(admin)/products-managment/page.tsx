@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, ImageOff, PackagePlus, Pencil, Search, SlidersHorizontal, Trash2 } from "lucide-react";
 import { productsApi } from "@/lib/api/productApi";
 import { categoryApi } from "@/lib/api/category.api";
+import { ProductImportDialog } from "@/components/ProductImportDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,7 +60,19 @@ export default function ProductsManagmentPage() {
   }
 
   return <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 lg:py-9" onClickCapture={(event) => { const link = (event.target as HTMLElement).closest('a[href*="/edit"]'); if (!link) return; const product = products.find((item) => link.getAttribute("href")?.includes(item.id)); if (product) { event.preventDefault(); setEditingProduct(product); } }}>
-    <header className="mb-8 flex flex-col justify-between gap-5 sm:flex-row sm:items-end"><div><p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">{t("Catalog")}</p><h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">{t("Product management")}</h1><p className="mt-2 text-sm leading-6 text-stone-500 sm:text-base">{t("Keep your catalog clear, current, and ready for customers.")}</p></div><Button asChild className="rounded-full bg-stone-950 px-5 text-white hover:bg-stone-800"><Link href="/products-managment/create"><PackagePlus className="mr-2 h-4 w-4" />{t("Add product")}</Link></Button></header>
+    <header className="mb-8 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+      <div>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">{t("Catalog")}</p>
+        <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">{t("Product management")}</h1>
+        <p className="mt-2 text-sm leading-6 text-stone-500 sm:text-base">{t("Keep your catalog clear, current, and ready for customers.")}</p>
+      </div>
+      <div className="flex shrink-0 flex-wrap gap-2">
+        <ProductImportDialog onImported={() => void getAllProducts()} />
+        <Button asChild className="rounded-full bg-stone-950 px-5 text-white hover:bg-stone-800">
+          <Link href="/products-managment/create"><PackagePlus />{t("Add product")}</Link>
+        </Button>
+      </div>
+    </header>
 
     <section className="rounded-[26px] border border-stone-200/80 bg-white p-4 shadow-sm sm:p-5"><div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"><div className="relative min-w-0 flex-1 lg:max-w-xl"><Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" /><Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("Search by title, category or material…")} className="h-12 rounded-full border-stone-200 bg-stone-50 pl-11 pr-4 shadow-none focus-visible:ring-stone-400" /></div><div className="flex items-center gap-3"><span className="hidden text-sm text-stone-500 sm:inline">{visibleProducts.length} of {products.length} products</span><div className="relative"><SlidersHorizontal className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-500" /><select value={sort} onChange={(event) => setSort(event.target.value as SortOption)} className="h-12 appearance-none rounded-full border border-stone-200 bg-white py-0 pl-10 pr-9 text-sm font-medium text-stone-700 outline-none transition focus:border-stone-400"><option value="newest">{t("Newest first")}</option><option value="oldest">{t("Oldest first")}</option><option value="price-high">{t("Price: high to low")}</option><option value="price-low">{t("Price: low to high")}</option></select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-500" /></div></div></div>
       <div className="mt-4 flex gap-2 overflow-x-auto pb-1">{categories.map((category) => <button key={category} type="button" onClick={() => setSelectedCategory(category)} className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition ${selectedCategory === category ? "bg-stone-950 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"}`}>{category}</button>)}</div>
