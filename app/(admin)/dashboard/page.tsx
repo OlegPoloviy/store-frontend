@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, Boxes, ChartNoAxesCombined, CircleDollarSign, PackagePlus, PieChart, Users } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Cell, Line, LineChart, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 import { userApi } from "@/lib/api/users.api";
 import { productsApi } from "@/lib/api/productApi";
@@ -52,6 +52,9 @@ export default function DashboardPage() {
     return { usersToday, productsThisMonth, inventoryValue, countryCount, dailyData, categoryData, latestProducts };
   }, [products, users]);
 
+  const categoriesByValue = [...insights.categoryData].sort((a, b) => b.value - a.value);
+  const maxCategoryValue = categoriesByValue[0]?.value || 0;
+
   const metrics = [
     ["Registered customers", users.length.toLocaleString(i18n.language), t("{{count}} joined today", { count: insights.usersToday }), Users, "bg-stone-950 text-white"],
     ["Catalog products", products.length.toLocaleString(i18n.language), t("{{count}} added this month", { count: insights.productsThisMonth }), Boxes, "bg-[#e9ded0] text-stone-950"],
@@ -64,7 +67,35 @@ export default function DashboardPage() {
     <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{metrics.map(([title, value, detail, Icon, tone]) => <Card key={title} className={`${tone} admin-metric gap-0 rounded-[24px] border-0 py-0 shadow-none`}><CardContent className="p-5 sm:p-6"><div className="mb-10 flex justify-between"><p className="text-sm font-medium opacity-70">{t(title)}</p><span className="grid h-10 w-10 place-items-center rounded-full bg-white/20"><Icon className="h-5 w-5" /></span></div><p className="text-3xl font-semibold tracking-tight">{value}</p><p className="mt-2 text-xs font-medium opacity-65">{t(detail)}</p></CardContent></Card>)}</section>
     <section className="mt-6 grid gap-6 xl:grid-cols-[1.55fr_0.85fr]"><Card className="rounded-[26px] border-stone-200/80 bg-white py-0 shadow-sm"><CardContent className="p-5 sm:p-6"><div className="mb-6 flex justify-between"><div><p className="text-lg font-semibold tracking-tight">{t("New activity")}</p><p className="mt-1 text-sm text-stone-500">{t("Customers and products added each day.")}</p></div><span className="rounded-full bg-stone-100 p-2.5"><ChartNoAxesCombined className="h-4 w-4" /></span></div><div className="h-[290px]"><ResponsiveContainer width="100%" height="100%"><LineChart data={insights.dailyData} margin={{ top: 8, right: 8, left: -20 }}><CartesianGrid vertical={false} stroke="var(--dashboard-grid)" /><XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: "var(--dashboard-axis)", fontSize: 12 }} /><YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: "var(--dashboard-axis)", fontSize: 12 }} /><Tooltip contentStyle={{ borderRadius: 14, border: "1px solid var(--dashboard-grid)", backgroundColor: "var(--dashboard-tooltip-bg)", color: "var(--dashboard-tooltip-text)" }} /><Line type="monotone" dataKey="users" name="New customers" stroke={palette[0]} strokeWidth={3} dot={{ r: 4, fill: palette[0], strokeWidth: 0 }} /><Line type="monotone" dataKey="products" name="New products" stroke={palette[1]} strokeWidth={3} dot={{ r: 4, fill: palette[1], strokeWidth: 0 }} /></LineChart></ResponsiveContainer></div><div className="mt-2 flex gap-4 text-xs font-medium text-stone-600"><span className="flex items-center gap-2"><i className="h-2 w-2 rounded-full" style={{ backgroundColor: palette[0] }} />{t("New customers")}</span><span className="flex items-center gap-2"><i className="h-2 w-2 rounded-full" style={{ backgroundColor: palette[1] }} />{t("New products")}</span></div></CardContent></Card>
     <Card className="rounded-[26px] border-stone-200/80 bg-white py-0 shadow-sm"><CardContent className="p-5 sm:p-6"><div className="flex justify-between"><div><p className="text-lg font-semibold tracking-tight">{t("Catalog mix")}</p><p className="mt-1 text-sm text-stone-500">{t("Products by category.")}</p></div><span className="rounded-full bg-[#f1e7dc] p-2.5"><PieChart className="h-4 w-4" /></span></div>{insights.categoryData.length ? <><div className="h-[190px]"><ResponsiveContainer width="100%" height="100%"><RechartsPieChart><Pie data={insights.categoryData} dataKey="products" nameKey="name" innerRadius={54} outerRadius={78} paddingAngle={4} stroke="none">{insights.categoryData.map((item, index) => <Cell key={item.name} fill={palette[index % palette.length]} />)}</Pie><Tooltip contentStyle={{ borderRadius: 14, border: "1px solid var(--dashboard-grid)", backgroundColor: "var(--dashboard-tooltip-bg)", color: "var(--dashboard-tooltip-text)" }} /></RechartsPieChart></ResponsiveContainer></div><div className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs">{insights.categoryData.slice(0, 6).map((item, index) => <div key={item.name} className="flex justify-between gap-2 text-stone-600"><span className="flex min-w-0 items-center gap-2 truncate"><i className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: palette[index % palette.length] }} />{item.name}</span><b className="text-stone-900">{item.products}</b></div>)}</div></> : <p className="grid h-[248px] place-items-center text-sm text-stone-500">{t("No catalog categories yet.")}</p>}</CardContent></Card></section>
-    <section className="mt-6 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]"><Card className="rounded-[26px] border-stone-200/80 bg-white py-0 shadow-sm"><CardContent className="p-5 sm:p-6"><div className="mb-6"><p className="text-lg font-semibold tracking-tight">{t("Category value")}</p><p className="mt-1 text-sm text-stone-500">{t("Listed value of each catalog category.")}</p></div><div className="h-[260px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={insights.categoryData} layout="vertical" margin={{ right: 10, left: 0 }}><CartesianGrid horizontal={false} stroke="var(--dashboard-grid)" /><XAxis type="number" hide /><YAxis type="category" dataKey="name" width={85} axisLine={false} tickLine={false} tick={{ fill: "var(--dashboard-axis)", fontSize: 12 }} /><Tooltip formatter={(value) => money(Number(value))} contentStyle={{ borderRadius: 14, border: "1px solid var(--dashboard-grid)", backgroundColor: "var(--dashboard-tooltip-bg)", color: "var(--dashboard-tooltip-text)" }} /><Bar dataKey="value" name="Listed value" fill={palette[2]} radius={[0, 7, 7, 0]} barSize={20} /></BarChart></ResponsiveContainer></div></CardContent></Card>
+    <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+      <Card className="min-w-0 rounded-[26px] border-stone-200/80 bg-white py-0 shadow-sm">
+        <CardContent className="p-5 sm:p-6">
+          <figure aria-labelledby="category-value-title" aria-describedby="category-value-description">
+            <figcaption className="mb-6">
+              <h2 id="category-value-title" className="text-lg font-semibold tracking-tight">{t("Category value")}</h2>
+              <p id="category-value-description" className="mt-1 text-sm text-stone-500">{t("Listed value of each catalog category.")}</p>
+            </figcaption>
+            {categoriesByValue.length ? (
+              <ul className="grid gap-4">
+                {categoriesByValue.map(({ name, value }) => (
+                  <li key={name} className="space-y-2">
+                    <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 text-sm">
+                      <span className="min-w-0 text-stone-700 [overflow-wrap:anywhere]">{t(name)}</span>
+                      <span className="ml-auto whitespace-nowrap font-medium tabular-nums text-stone-950">{money(value)}</span>
+                    </div>
+                    <div aria-hidden="true" className="h-2 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full bg-[var(--dashboard-chart-3)]"
+                        style={{ width: maxCategoryValue > 0 ? `${Math.max(0, value) / maxCategoryValue * 100}%` : "0%" }}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : <p className="py-8 text-center text-sm text-stone-500">{t("No catalog categories yet.")}</p>}
+          </figure>
+        </CardContent>
+      </Card>
     <Card className="rounded-[26px] border-stone-200/80 bg-white py-0 shadow-sm"><CardContent className="p-5 sm:p-6"><div className="mb-5 flex justify-between"><div><p className="text-lg font-semibold tracking-tight">{t("Recently added")}</p><p className="mt-1 text-sm text-stone-500">{t("Newest items in the catalog.")}</p></div><Link href="/products-managment" className="text-sm font-semibold underline-offset-4 hover:underline">{t("See all")}</Link></div><div className="space-y-1">{insights.latestProducts.length ? insights.latestProducts.map((product) => { const createdAt = toDate(product.createdAt); return <Link key={product.id} href={`/products-managment/${product.id}/edit`} className="flex items-center justify-between gap-4 rounded-2xl px-3 py-3 transition hover:bg-stone-50"><div className="min-w-0"><p className="truncate text-sm font-semibold text-stone-900">{product.title}</p><p className="mt-1 text-xs text-stone-500">{product.category?.name || "Uncategorized"}{createdAt ? ` · ${label(createdAt, { month: "short", day: "numeric" })}` : ""}</p></div><p className="shrink-0 text-sm font-semibold text-stone-700">{product.currency || "USD"} {Number.parseFloat(product.price || "0").toLocaleString("en-US")}</p></Link>; }) : <p className="py-16 text-center text-sm text-stone-500">{t("No products have been added yet.")}</p>}</div></CardContent></Card></section>
     {loading && <div className="fixed inset-x-0 top-20 z-50 h-0.5 overflow-hidden bg-stone-200"><div className="h-full w-1/3 animate-pulse bg-stone-950" /></div>}
   </div>;
