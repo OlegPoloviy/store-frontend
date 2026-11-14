@@ -15,6 +15,7 @@ export interface ProductCategory {
 
 export interface Product {
   id: string;
+  sku?: string | null;
   title: string;
   description: string;
   price: string;

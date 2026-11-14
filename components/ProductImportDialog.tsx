@@ -1,7 +1,6 @@
 "use client";
 
-import { isAxiosError } from "axios";
-import { Upload } from "lucide-react";
+import { Check, Database, FileCheck, PackagePlus, Upload } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -15,11 +14,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { productsApi, type ProductImportReport } from "@/lib/api/productApi";
+import { productsApi, type ProductImportProgress, type ProductImportReport } from "@/lib/api/productApi";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const MAX_PRODUCTS = 500;
 const FILE_TOO_LARGE = "The JSON file and request must fit within 5 MiB.";
+const IMPORT_STEPS = [
+  { phase: "validating", label: "Validate", icon: FileCheck },
+  { phase: "writing", label: "Prepare products", icon: PackagePlus },
+  { phase: "committing", label: "Save batch", icon: Database },
+] as const;
 
 export function ProductImportDialog({ onImported }: { onImported: () => void }) {
   const { t } = useTranslation();
@@ -28,6 +32,7 @@ export function ProductImportDialog({ onImported }: { onImported: () => void }) 
   const [report, setReport] = useState<ProductImportReport | null>(null);
   const [error, setError] = useState("");
   const [pending, setPending] = useState<"validate" | "import" | null>(null);
+  const [progress, setProgress] = useState<ProductImportProgress | null>(null);
 
   const canImport = report?.dryRun && report.valid === report.total && !report.errors.length;
 
@@ -44,7 +49,8 @@ export function ProductImportDialog({ onImported }: { onImported: () => void }) 
   async function submit(dryRun: boolean) {
     if (!file || pending || (!dryRun && !canImport)) return;
     setError("");
-    setReport(null);
+    if (dryRun) setReport(null);
+    setProgress(null);
     setPending(dryRun ? "validate" : "import");
 
     try {
@@ -79,19 +85,11 @@ export function ProductImportDialog({ onImported }: { onImported: () => void }) 
         return;
       }
 
-      const result = await productsApi.importProducts(body);
+      const result = await productsApi.importProducts(body, setProgress);
       setReport(result);
       if (!result.dryRun && result.imported > 0) onImported();
     } catch (err) {
-      const response = isAxiosError<{ message?: unknown }>(err) ? err.response : undefined;
-      if (response?.status === 401 || response?.status === 403) {
-        setError(t("Sign in with an admin account to import products."));
-      } else if (response?.status === 413) {
-        setError(t("The server rejected this upload as too large. Try a smaller batch."));
-      } else {
-        const message = response?.data?.message;
-        setError(typeof message === "string" ? message : t("The product import request failed."));
-      }
+      setError(t(err instanceof Error ? err.message : "The product import request failed."));
     } finally {
       setPending(null);
     }
@@ -138,7 +136,11 @@ export function ProductImportDialog({ onImported }: { onImported: () => void }) 
 
         {error && <p role="alert" className="break-words text-sm text-red-800">{error}</p>}
 
-        {report && (
+        {pending && (
+          <ImportProgress progress={progress} validationOnly={pending === "validate"} />
+        )}
+
+        {report && !pending && (
           <section aria-label={t("Import report")} className="min-w-0 space-y-4 rounded-xl border border-stone-200 p-4 text-sm">
             <div role="status">
               <h3 className="font-semibold">
@@ -171,6 +173,76 @@ export function ProductImportDialog({ onImported }: { onImported: () => void }) 
   );
 }
 
+function ImportProgress({ progress, validationOnly }: {
+  progress: ProductImportProgress | null;
+  validationOnly: boolean;
+}) {
+  const { t } = useTranslation();
+  const steps = validationOnly ? IMPORT_STEPS.slice(0, 1) : IMPORT_STEPS;
+  const activeIndex = steps.findIndex(({ phase }) => phase === progress?.phase);
+  const Icon = steps[activeIndex]?.icon ?? Upload;
+  const detail = progress && progress.phase !== "committing" ? progress : null;
+  const fraction = detail ? Math.min(detail.processed / detail.total, 1) : null;
+  const status = !progress
+    ? t("Preparing import request…")
+    : progress.phase === "committing"
+      ? t("Committing the batch…")
+      : t(progress.phase === "validating" ? "Validating products…" : "Preparing products…");
+  const count = detail ? t("{{processed}} of {{total}} products", detail) : null;
+
+  return (
+    <section className="space-y-4 rounded-2xl border border-border bg-gradient-to-br from-emerald-50 to-card p-4 text-card-foreground dark:from-emerald-950/45 sm:p-5">
+      <div className="flex items-center gap-4">
+        <div
+          role="progressbar"
+          aria-labelledby="product-import-status"
+          aria-valuemin={detail ? 0 : undefined}
+          aria-valuemax={detail?.total}
+          aria-valuenow={detail ? Math.min(detail.processed, detail.total) : undefined}
+          aria-valuetext={count ?? undefined}
+          className="relative grid size-16 shrink-0 place-items-center text-emerald-700 dark:text-emerald-300"
+        >
+          <div
+            aria-hidden="true"
+            className={`absolute inset-0 rounded-full bg-muted ${fraction === null ? "border-[3px] border-transparent border-t-current border-r-current motion-safe:animate-spin" : ""}`}
+            style={fraction === null ? undefined : {
+              backgroundImage: `conic-gradient(currentColor ${fraction}turn, transparent 0turn)`,
+            }}
+          />
+          <div className="relative grid size-14 place-items-center rounded-full bg-card">
+            <Icon aria-hidden="true" className="size-6" />
+          </div>
+        </div>
+        <div className="min-w-0">
+          <p id="product-import-status" role="status" className="text-sm font-semibold">{status}</p>
+          {count && <p className="mt-1 text-sm text-muted-foreground tabular-nums">{count}</p>}
+        </div>
+      </div>
+
+      {!validationOnly && (
+        <ol className="grid grid-cols-3 gap-2 border-t border-border/70 pt-3">
+          {steps.map(({ phase, label, icon: StepIcon }, index) => {
+            const complete = index < activeIndex;
+            const active = index === activeIndex;
+            return (
+              <li
+                key={phase}
+                aria-current={active ? "step" : undefined}
+                className={`flex min-w-0 flex-col items-center gap-1.5 rounded-lg px-1 py-2 text-center text-xs leading-tight sm:flex-row sm:px-2 sm:text-left ${active ? "bg-emerald-100 font-semibold text-emerald-950 dark:bg-emerald-900/60 dark:text-emerald-100" : "text-muted-foreground"}`}
+              >
+                {complete
+                  ? <Check aria-hidden="true" className="size-4 shrink-0 text-emerald-700 dark:text-emerald-300" />
+                  : <StepIcon aria-hidden="true" className="size-4 shrink-0" />}
+                <span>{t(label)}{complete && <span className="sr-only"> ({t("Complete")})</span>}</span>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </section>
+  );
+}
+
 function ImportIssues({ label, issues, className }: {
   label: string;
   issues: ProductImportReport["errors"];
@@ -182,7 +254,7 @@ function ImportIssues({ label, issues, className }: {
   return (
     <div className={className}>
       <h4 className="font-semibold">{label} ({issues.length})</h4>
-      <ul className="mt-1 space-y-1 break-words">
+      <ul className="mt-1 max-h-44 space-y-1 overflow-y-auto break-words">
         {issues.map(({ row, sku, message }, index) => (
           <li key={`${row}-${index}`}>
             <span className="font-medium">{t("Row {{row}}", { row })}{sku && ` (${sku})`}</span>

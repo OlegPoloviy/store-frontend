@@ -45,6 +45,7 @@ import { categoryApi } from "@/lib/api/category.api";
 import { Product, ProductCategory } from "@/types/product.type";
 import { ImageDropzone, ImageFile } from "@/components/ImageDropzone";
 import Image from "next/image";
+import { productDescriptionEditorText } from "@/lib/util/productDescription";
 
 interface ProductCreationFormProps {
   mode?: "create" | "edit";
@@ -58,7 +59,7 @@ const productToFormValues = (
   product?: Product
 ): Partial<ProductCreationFormData> => ({
   title: toFormString(product?.title),
-  description: toFormString(product?.description),
+  description: productDescriptionEditorText(product?.description),
   price: toFormString(product?.price),
   currency: product?.currency || "USD",
   categoryId: product?.categoryId || product?.category?.id || "",
@@ -173,6 +174,9 @@ export function ProductCreationForm({
         {};
 
       Object.entries(data).forEach(([key, value]) => {
+        if (key === "description" && isEditMode && value === productDescriptionEditorText(product?.description)) {
+          return;
+        }
         if (key === "categoryId") {
           // Replace categoryId with category name
           productData.category = selectedCategory.name;
@@ -348,7 +352,12 @@ export function ProductCreationForm({
                     <FormItem>
                       <FormLabel>{t("SKU / Product Code")}</FormLabel>
                       <FormControl>
-                        <Input placeholder={t("e.g., PROD-001")} {...field} />
+                        <Input
+                          placeholder={t("e.g., PROD-001")}
+                          {...field}
+                          value={product?.sku ?? field.value ?? ""}
+                          readOnly={Boolean(product?.sku)}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -433,6 +442,10 @@ export function ProductCreationForm({
                           <option value="EUR">EUR</option>
                           <option value="GBP">GBP</option>
                           <option value="CAD">CAD</option>
+                          <option value="UAH">UAH</option>
+                          {field.value && !["USD", "EUR", "GBP", "CAD", "UAH"].includes(field.value) && (
+                            <option value={field.value}>{field.value}</option>
+                          )}
                         </select>
                       </FormControl>
                       <FormMessage />

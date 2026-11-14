@@ -19,7 +19,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
     <Card
       key={category.id}
       className="group cursor-pointer overflow-hidden rounded-[28px] border border-white/70 bg-white/92 p-0 shadow-[0_18px_50px_rgba(84,72,57,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(84,72,57,0.14)]"
-      onClick={() => router.push(`/categories/${category.name}`)}
+      onClick={() => router.push(`/categories/${encodeURIComponent(category.name)}`)}
     >
       <CardContent className="p-0">
         <div className="relative mb-0 aspect-[4/3] overflow-hidden bg-[#f0ebe4]">
@@ -77,7 +77,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
               className="h-12 w-12 rounded-full bg-[#f3eee7] text-stone-700 hover:bg-[#e6dccf]"
               onClick={(e) => {
                 e.stopPropagation();
-                router.push(`/categories/${category.name}`);
+                router.push(`/categories/${encodeURIComponent(category.name)}`);
               }}
             >
               <ArrowRight className="h-4 w-4" />

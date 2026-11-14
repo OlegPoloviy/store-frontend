@@ -2,76 +2,49 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 
-interface ProductImage {
+interface GalleryImage {
   url: string;
+  altText?: string | null;
+  isMain?: boolean;
 }
 
-interface ProductImageGalleryProps {
-  images: ProductImage[];
+export function ProductImageGallery({ images, productTitle }: {
+  images: GalleryImage[];
   productTitle: string;
-}
-
-export function ProductImageGallery({
-  images,
-  productTitle,
-}: ProductImageGalleryProps) {
-  const [displayedImages, setDisplayedImages] =
-    useState<ProductImage[]>(images);
-
-  const handleThumbnailClick = (clickedIndex: number) => {
-    // Create a new array with the clicked image at the front
-    const newImages = [...displayedImages];
-    const clickedImage = newImages[clickedIndex + 1]; // +1 because index 0 is the main image
-
-    // Swap: put clicked image at position 0, and move the current main image to the clicked position
-    newImages[clickedIndex + 1] = newImages[0];
-    newImages[0] = clickedImage;
-
-    setDisplayedImages(newImages);
-  };
-
-  if (!images || images.length === 0) {
-    return (
-      <div className="space-y-4">
-        <div className="aspect-square bg-white rounded-2xl overflow-hidden shadow-lg">
-          <ImagePlaceholder className="text-gray-400" text="No image available" />
-        </div>
-      </div>
-    );
-  }
+}) {
+  const { t } = useTranslation();
+  const [selected, setSelected] = useState(() => Math.max(0, images.findIndex((image) => image.isMain)));
+  const current = images[selected] ?? images[0];
 
   return (
-    <div className="space-y-4">
-      {/* Main Image */}
-      <div className="aspect-square bg-white rounded-2xl overflow-hidden shadow-lg">
-        <Image
-          src={displayedImages[0].url}
-          alt={productTitle}
-          width={600}
-          height={600}
-          className="w-full h-full object-cover"
-          priority
-        />
+    <div className="min-w-0 overflow-hidden rounded-[28px] border border-border bg-card p-2 sm:p-3">
+      <div className="relative aspect-[5/4] overflow-hidden rounded-[20px] bg-muted">
+        {current ? (
+          <Image
+            src={current.url}
+            alt={current.altText || productTitle}
+            fill
+            sizes="(max-width: 1023px) 100vw, (max-width: 1280px) 52vw, 660px"
+            className="object-contain"
+            priority={selected === Math.max(0, images.findIndex((image) => image.isMain))}
+          />
+        ) : <ImagePlaceholder />}
       </div>
-
-      {/* Thumbnail Images */}
-      {displayedImages.length > 1 && (
-        <div className="grid grid-cols-4 gap-2">
-          {displayedImages.slice(1, 5).map((image, index) => (
+      {images.length > 1 && (
+        <div className="mt-2 flex gap-2 overflow-x-auto p-1 sm:mt-3" role="group" aria-label={t("Product photos")}>
+          {images.map((image, index) => (
             <button
-              key={index}
-              onClick={() => handleThumbnailClick(index)}
-              className="aspect-square bg-white rounded-lg overflow-hidden shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all"
+              key={`${image.url}-${index}`}
+              type="button"
+              onClick={() => setSelected(index)}
+              aria-label={t("Show photo {{number}}", { number: index + 1 })}
+              aria-pressed={index === selected}
+              className="relative size-14 shrink-0 overflow-hidden rounded-xl border-2 border-transparent bg-muted transition-colors hover:border-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring aria-pressed:border-primary sm:size-16"
             >
-              <Image
-                src={image.url}
-                alt={`${productTitle} ${index + 2}`}
-                width={150}
-                height={150}
-                className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
-              />
+              <Image src={image.url} alt="" fill sizes="64px" className="object-cover" />
             </button>
           ))}
         </div>

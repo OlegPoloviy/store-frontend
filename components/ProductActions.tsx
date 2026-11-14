@@ -74,7 +74,7 @@ export function ProductActions({
         <Button
           onClick={handleAddToCart}
           size="lg"
-          className="flex-1 bg-gray-900 hover:bg-gray-800"
+          className="flex-1"
         >{t("Add to Cart")}</Button>
         <Button
           onClick={handleFavoriteToggle}

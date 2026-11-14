@@ -127,12 +127,12 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
                 ></div>
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-800 leading-tight">
+                <span className="block text-xl sm:text-2xl font-bold text-gray-800 leading-tight">
                   Carpathians
-                </h1>
-                <h2 className="text-sm font-semibold text-gray-600 -mt-1">
+                </span>
+                <span className="block text-sm font-semibold text-gray-600 -mt-1">
                   FURNITURE
-                </h2>
+                </span>
               </div>
             </div>
             <p
@@ -155,7 +155,7 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
             >{t("Collections")}<span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
-              href="/custom-orders"
+              href="/#custom-orders"
               className="relative whitespace-nowrap text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200 group"
             >{t("Custom Orders")}<span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-800 group-hover:w-full transition-all duration-300"></span>
             </Link>
@@ -191,13 +191,13 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
                 isSearchFocused ? "w-60" : "w-44"
               } hidden min-[1800px]:block`}
             >
-              <div className="relative">
+              <form action="/products" role="search" className="relative">
                 <Search
                   size={18}
                   className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400"
                 />
                 <Input
-                  type="text"
+                  type="search" name="q" aria-label={t("Search furniture...")}
                   placeholder={t("Search furniture...")}
                   onFocus={() => setIsSearchFocused(true)}
                   onBlur={() => setIsSearchFocused(false)}
@@ -205,7 +205,7 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
                     isHomePage ? "bg-white" : "bg-stone-50"
                   }`}
                 />
-              </div>
+              </form>
             </div>
 
             {/* Account */}
@@ -308,7 +308,7 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
                   <div className="mb-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4">{t("Menu")}</h2>
                     <div className="space-y-4 border-t border-stone-200 pt-4">
-                      <Link href="/shop">
+                      <Link href="/products">
                         <Button
                           variant="ghost"
                           className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
@@ -320,7 +320,7 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
                           className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
                         >{t("Collections")}</Button>
                       </Link>
-                      <Link href="/custom-orders">
+                      <Link href="/#custom-orders">
                         <Button
                           variant="ghost"
                           className="w-full justify-start text-left px-4 py-2 text-stone-700 hover:text-emerald-700 hover:bg-stone-50 rounded-lg transition-colors duration-200 font-medium"
@@ -346,17 +346,17 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
 
                   {/* Mobile Search */}
                   <div className="mb-6">
-                    <div className="relative">
+                    <form action="/products" role="search" className="relative">
                       <Search
                         size={18}
                         className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400"
                       />
                       <Input
-                        type="text"
+                        type="search" name="q" aria-label={t("Search furniture...")}
                         placeholder={t("Search furniture...")}
                         className="pl-10 bg-stone-50 border-stone-200 focus:ring-emerald-500 focus:border-transparent text-sm"
                       />
-                    </div>
+                    </form>
                   </div>
 
                   {/* Mobile Account & Cart */}
@@ -386,19 +386,19 @@ export function Navbar({ supportDrawerOpen = false }: NavbarProps) {
 
         {/* Mobile Search (visible when menu is closed) */}
         <div className={`sm:hidden ${isHomePage ? "pt-3" : "pb-4"}`}>
-          <div className="relative">
+          <form action="/products" role="search" className="relative">
             <Search
               size={18}
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400"
             />
             <Input
-              type="text"
+              type="search" name="q" aria-label={t("Search furniture...")}
               placeholder={t("Search furniture...")}
               className={`pl-10 border-stone-200 focus:ring-emerald-500 focus:border-transparent text-sm ${
                 isHomePage ? "bg-white" : "bg-stone-50"
               }`}
             />
-          </div>
+          </form>
         </div>
       </div>
     </nav>
