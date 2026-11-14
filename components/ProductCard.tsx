@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Heart, ShoppingCart, Sparkles } from "lucide-react";
 import Image from "next/image";
 import { productsApi } from "@/lib/api/productApi";
+import { productDescriptionText } from "@/lib/util/productDescription";
 import { toast } from "sonner";
 import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 
@@ -127,7 +128,7 @@ export function ProductCard({
             </h3>
 
             <p className="mt-3 line-clamp-3 text-sm leading-7 text-stone-500">
-              {product.description ||t("Hand-carved from natural materials, ensuring unique texture and durability.")}
+              {productDescriptionText(product.description) || t("Hand-carved from natural materials, ensuring unique texture and durability.")}
             </p>
           </Link>
 

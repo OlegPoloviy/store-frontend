@@ -1,5 +1,6 @@
 "use client";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
 
 import {
   Sheet,
@@ -25,6 +26,11 @@ const SAMPLE_QUESTIONS = [
 ];
 
 const CONVERSATION_STORAGE_KEY = "support-chat-conversation-id";
+const isMissingConversation = (error: unknown) =>
+  axios.isAxiosError(error) &&
+  error.response?.status === 404 &&
+  (error.response.data?.message === "Support conversation not found" ||
+    error.response.data?.message === "Open support conversation not found");
 
 export function ChatModal({ open, onOpenChange }: ChatModalProps) {
   const { t } = useTranslation();
@@ -98,6 +104,26 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
         }
       } catch (error) {
         if (!ignore) {
+          if (isMissingConversation(error)) {
+            const storedId = window.localStorage.getItem(
+              CONVERSATION_STORAGE_KEY
+            );
+            if (storedId && storedId !== conversationId) return;
+            window.localStorage.removeItem(CONVERSATION_STORAGE_KEY);
+            setConversationId((current) =>
+              current === conversationId ? null : current
+            );
+            setMessages((current) =>
+              current.filter(
+                (message) =>
+                  message.id === "1" ||
+                  message.status === "sending" ||
+                  message.status === "error"
+              )
+            );
+            setErrorMessage(null);
+            return;
+          }
           console.error("Error fetching support chat messages:", error);
           setErrorMessage("Could not refresh support replies.");
         }
@@ -132,10 +158,15 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
     setErrorMessage(null);
 
     try {
-      const result = await supportChatApi.sendMessage(
-        trimmedText,
-        conversationId
-      );
+      let result;
+      try {
+        result = await supportChatApi.sendMessage(trimmedText, conversationId);
+      } catch (error) {
+        if (!conversationId || !isMissingConversation(error)) throw error;
+        window.localStorage.removeItem(CONVERSATION_STORAGE_KEY);
+        setConversationId(null);
+        result = await supportChatApi.sendMessage(trimmedText);
+      }
 
       if (result.conversationId) {
         setConversationId(result.conversationId);

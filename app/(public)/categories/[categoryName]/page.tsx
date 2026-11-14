@@ -6,22 +6,32 @@ import { Product } from "@/types/product.type";
 import { ProductsList } from "@/components/ProductsList";
 import { useParams } from "next/navigation";
 
+function decodeCategory(value: string) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 export default function ProductsByCategoryPage() {
   const { t } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { categoryName } = useParams();
-  const normalizedCategoryName = String(categoryName || "").replace(/-/g, " ");
-  const titleCategoryName = normalizedCategoryName.replace(/\b\w/g, (char) =>
-    char.toUpperCase()
-  );
+  const name = typeof categoryName === "string" ? decodeCategory(categoryName) : "";
+  const titleCategoryName = name.split("/").at(-1)?.trim();
 
   useEffect(() => {
     async function getProducts() {
+      if (!name) {
+        setLoading(false);
+        return;
+      }
       try {
         setLoading(true);
         const productsData = await productsApi.getByCategory(
-          categoryName as string
+          name
         );
         setProducts(productsData);
       } catch (error) {
@@ -31,7 +41,7 @@ export default function ProductsByCategoryPage() {
       }
     }
     getProducts();
-  }, [categoryName]);
+  }, [name]);
 
   return (
     <div className="min-h-screen bg-[#d9d6d1] px-4 py-32 sm:px-6 lg:px-8">

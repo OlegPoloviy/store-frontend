@@ -11,12 +11,17 @@ export const httpClient = axios.create({
 });
 
 httpClient.interceptors.request.use(async (config) => {
-  const session = await getBrowserSession();
+  const publicSupportRequest =
+    config.url === "/support-chat/messages" ||
+    /^\/support-chat\/conversations\/[^/]+\/messages$/.test(config.url ?? "");
 
-  const token = session?.access_token;
-  if (token) {
-    config.headers = config.headers ?? {};
-    config.headers.Authorization = `Bearer ${token}`;
+  if (!publicSupportRequest) {
+    const session = await getBrowserSession();
+    const token = session?.access_token;
+    if (token) {
+      config.headers = config.headers ?? {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
 
   if (config.data instanceof FormData) {

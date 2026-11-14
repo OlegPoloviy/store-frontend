@@ -1,276 +1,159 @@
-import { getServerTranslation } from "@/lib/i18n/server";
-import { productsApiServer } from "@/lib/api/productApi.server";
-import { Badge } from "@/components/ui/badge";
-import {
-  Star,
-  Truck,
-  Shield,
-  Award,
-  Palette,
-  Ruler,
-  Package,
-} from "lucide-react";
 import Link from "next/link";
-import { ProductImageGallery } from "@/components/ProductImageGallery";
+import { ArrowLeft, Award, Check, MessageCircle } from "lucide-react";
 import { ProductActions } from "@/components/ProductActions";
+import { ProductImageGallery } from "@/components/ProductImageGallery";
+import { SupportLink } from "@/components/chat/SupportLink";
+import { productsApiServer } from "@/lib/api/productApi.server";
+import { getServerTranslation } from "@/lib/i18n/server";
+import { ProductDescription, productDescriptionText } from "@/lib/util/productDescription";
 
-interface ProductPageProps {
-  params: Promise<{ productId: string }>;
+type Detail = [label: string, value: string | number | string[] | null | undefined];
+
+function present([, value]: Detail) {
+  return Array.isArray(value) ? value.some((item) => item.trim()) : value != null && String(value).trim() !== "";
 }
 
-export default async function ProductPage({
-  params: pageParams,
-}: ProductPageProps) {
+export default async function ProductPage({ params }: { params: Promise<{ productId: string }> }) {
   const { t, locale } = await getServerTranslation();
-  const { productId } = await pageParams;
+  const { productId } = await params;
   const product = await productsApiServer.getById(productId);
+  const category = product.category?.name;
+  const categoryLabel = category?.split("/").at(-1)?.trim() || category;
+  const categoryHref = category ? `/categories/${encodeURIComponent(category)}` : "/products";
+  const price = new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: product.currency,
+  }).format(Number(product.price));
+  const description = productDescriptionText(product.description);
+  const dimension = (value?: string | null) => value ? `${value} ${product.unitOfMeasure ?? "cm"}` : null;
+  const assembly = product.assemblyRequired;
 
-  const formatPrice = (price: string, currency: string) => {
-    return new Intl.NumberFormat(locale === "de" ? "de-DE" : "en-US", {
-      style: "currency",
-      currency: currency,
-    }).format(parseInt(price));
-  };
+  const summary: Detail[] = [
+    ["Primary Material", product.primaryMaterial || product.material],
+    ["Color", product.color],
+    ["Finish", product.finish],
+    ["SKU", product.sku || product.uniqueIdentifier],
+  ];
+  const specifications: Detail[] = [
+    ["Width", dimension(product.width)],
+    ["Height", dimension(product.height)],
+    ["Depth", dimension(product.depth)],
+    ["Weight", product.weight ? `${product.weight} ${product.weightUnit ?? "kg"}` : null],
+    ["Secondary Materials", product.secondaryMaterials],
+    ["Style", product.style],
+    ["Texture", product.texture],
+    ["Pattern", product.pattern],
+  ];
+  const additional: Detail[] = [
+    ["Designer", product.designer],
+    ["Origin of Material", product.originOfMaterial],
+    ["Wood Treatment", product.woodTreatment],
+    ["Assembly Required", assembly == null || assembly === "" ? null : t(String(assembly) === "true" ? "Yes" : "No")],
+    ["Seating Capacity", product.seatingCapacity],
+    ["Storage Capacity", product.storageCapacity],
+    ["Warranty", product.warranty],
+    ["Care Instructions", product.careInstructions],
+  ];
+  const summaryRows = summary.filter(present);
+  const groups = [
+    { title: "Specifications", rows: specifications.filter(present) },
+    { title: "Additional Information", rows: additional.filter(present) },
+  ].filter(({ rows }) => rows.length);
+  const features = product.features?.filter((value) => value.trim()) ?? [];
+  const notes = [
+    { title: "The Story", value: product.story },
+    { title: "Design Inspiration", value: product.designInspiration },
+  ].filter(({ value }) => value?.trim());
 
-  const renderSpecification = (
-    label: string,
-    value: string | string[] | null | undefined,
-    icon?: React.ReactNode
-  ) => {
-    if (!value || (Array.isArray(value) && value.length === 0)) return null;
-
-    return (
-      <div className="flex items-start space-x-3 py-2">
-        {icon && <div className="text-gray-500 mt-1">{icon}</div>}
-        <div className="flex-1">
-          <dt className="text-sm font-medium text-gray-900">{t(label)}</dt>
-          <dd className="text-sm text-gray-600">
-            {Array.isArray(value) ? value.join(", ") : value}
-          </dd>
-        </div>
+  function renderDetails(rows: Detail[]) {
+    return rows.map(([label, value]) => (
+      <div key={label} className="min-w-0">
+        <dt className="text-xs font-medium text-muted-foreground">{t(label)}</dt>
+        <dd className="mt-1 break-words text-sm font-medium">{Array.isArray(value) ? value.join(", ") : value}</dd>
       </div>
-    );
-  };
+    ));
+  }
 
   return (
-    <div className="bg-[#FAFAFA] min-h-screen">
-      <div className="pt-20">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          {/* Breadcrumb */}
-          <div className="flex items-center space-x-2 text-sm text-gray-500 mb-8">
-            <Link href="/" className="hover:text-gray-700">{t("Home")}</Link>
-            <span>/</span>
-            <Link href="/products" className="hover:text-gray-700">{t("Products")}</Link>
-            <span>/</span>
-            <Link
-              href={`/categories/${product.category.name.toLowerCase()}`}
-              className="hover:text-gray-700"
-            >
-              {product.category.name}
-            </Link>
-            <span>/</span>
-            <span className="text-gray-900">{product.title}</span>
-          </div>
+    <main className="min-h-screen bg-background px-4 pb-24 pt-28 text-foreground sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <nav aria-label={t("Breadcrumb")} className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
+          <Link href="/products" className="inline-flex items-center gap-2 hover:text-foreground">
+            <ArrowLeft aria-hidden="true" className="size-4" />{t("Products")}
+          </Link>
+          {categoryLabel && <>
+            <span aria-hidden="true">/</span>
+            <Link href={categoryHref} className="hover:text-foreground">{categoryLabel}</Link>
+          </>}
+        </nav>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
-            {/* Product Images */}
-            <ProductImageGallery
-              images={product.images || []}
-              productTitle={product.title}
-            />
+        <div className="grid items-start gap-5 lg:grid-cols-[1.12fr_1fr] lg:gap-8">
+          <ProductImageGallery key={product.id} images={product.images ?? []} productTitle={product.title} />
 
-            {/* Product Info */}
-            <div className="space-y-6">
-              {/* Category Badge */}
-              <Badge variant="secondary" className="text-sm px-3 py-1">
-                {product.category.name}
-              </Badge>
-
-              {/* Title */}
-              <h1 className="text-4xl font-bold text-gray-900 leading-tight">
-                {product.title}
-              </h1>
-
-              {/* Description */}
-              <div className="text-lg leading-relaxed">
-                {product.description ? (
-                  <p className="text-gray-600">{product.description}</p>
-                ) : (
-                  <p className="text-gray-400 italic">{t("No description available yet. Please contact us for more details.")}</p>
-                )}
+          <section aria-labelledby="product-title" className="min-w-0 rounded-[28px] border border-border bg-card p-5 text-card-foreground sm:p-8">
+            {product.handmade && (
+              <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
+                <Award aria-hidden="true" className="size-3.5" />{t("Handmade")}
+              </span>
+            )}
+            <h1 id="product-title" className="text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">{product.title}</h1>
+            {description && (
+              <div className="mt-4 text-base leading-relaxed">
+                <ProductDescription description={product.description} fallback={null} />
               </div>
+            )}
+            {summaryRows.length > 0 && (
+              <dl className="my-5 grid grid-cols-2 gap-x-5 gap-y-4 rounded-2xl bg-muted/55 px-4 py-4">
+                {renderDetails(summaryRows)}
+              </dl>
+            )}
 
-              {/* Price */}
-              <div className="flex items-baseline space-x-2">
-                <span className="text-4xl font-bold text-gray-900">
-                  {formatPrice(product.price, product.currency)}
-                </span>
-                {product.handmade && (
-                  <Badge
-                    variant="outline"
-                    className="text-amber-600 border-amber-600"
-                  >
-                    <Award className="w-3 h-3 mr-1" />{t("Handmade")}</Badge>
-                )}
-              </div>
-
-              {/* Action Buttons */}
-              <ProductActions
-                productId={productId}
-                initialIsFavorite={product.isFavorite}
-              />
-
-              {/* Features */}
-              <div className="grid grid-cols-2 gap-4 pt-6 border-t">
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <Truck className="w-4 h-4" />
-                  <span>{t("Free Shipping")}</span>
-                </div>
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <Shield className="w-4 h-4" />
-                  <span>{t("Secure Payment")}</span>
-                </div>
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <Package className="w-4 h-4" />
-                  <span>{t("Careful Packaging")}</span>
-                </div>
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <Award className="w-4 h-4" />
-                  <span>{t("Quality Guarantee")}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Product Details Tabs */}
-          <div className="bg-white rounded-2xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">{t("Product Details")}</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Specifications */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <Ruler className="w-5 h-5 mr-2" />{t("Specifications")}</h3>
-                <dl className="space-y-1">
-                  {renderSpecification(
-                    "Dimensions",
-                    [product.width, product.height, product.depth]
-                      .filter(Boolean)
-                      .join(" × "),
-                    <Ruler className="w-4 h-4" />
-                  )}
-                  {renderSpecification(
-                    "Weight",
-                    product.weight
-                      ? `${product.weight} ${product.weightUnit || "kg"}`
-                      : null,
-                    <Package className="w-4 h-4" />
-                  )}
-                  {renderSpecification(
-                    "Primary Material",
-                    product.primaryMaterial,
-                    <Palette className="w-4 h-4" />
-                  )}
-                  {renderSpecification(
-                    "Secondary Materials",
-                    product.secondaryMaterials,
-                    <Palette className="w-4 h-4" />
-                  )}
-                  {renderSpecification(
-                    "Color",
-                    product.color,
-                    <Palette className="w-4 h-4" />
-                  )}
-                  {renderSpecification(
-                    "Finish",
-                    product.finish,
-                    <Palette className="w-4 h-4" />
-                  )}
-                  {renderSpecification(
-                    "Style",
-                    product.style,
-                    <Palette className="w-4 h-4" />
-                  )}
-                  {renderSpecification(
-                    "Texture",
-                    product.texture,
-                    <Palette className="w-4 h-4" />
-                  )}
-                  {renderSpecification(
-                    "Pattern",
-                    product.pattern,
-                    <Palette className="w-4 h-4" />
-                  )}
-                </dl>
-              </div>
-
-              {/* Additional Info */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("Additional Information")}</h3>
-                <dl className="space-y-1">
-                  {renderSpecification("Designer", product.designer)}
-                  {renderSpecification(
-                    "Origin of Material",
-                    product.originOfMaterial
-                  )}
-                  {renderSpecification("Wood Treatment", product.woodTreatment)}
-                  {renderSpecification(
-                    "Assembly Required",
-                    product.assemblyRequired
-                  )}
-                  {renderSpecification(
-                    "Seating Capacity",
-                    product.seatingCapacity
-                  )}
-                  {renderSpecification(
-                    "Storage Capacity",
-                    product.storageCapacity
-                  )}
-                  {renderSpecification("Warranty", product.warranty)}
-                  {renderSpecification(
-                    "Care Instructions",
-                    product.careInstructions
-                  )}
-                </dl>
-              </div>
+            <div className="mt-6 space-y-4 border-t border-border pt-5">
+              <p className="text-3xl font-semibold tracking-tight">{price}</p>
+              <ProductActions productId={product.id} initialIsFavorite={product.isFavorite} />
             </div>
 
-            {/* Features and Story */}
-            {product.features && product.features.length > 0 && (
-              <div className="mt-8 pt-8 border-t">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("Features")}</h3>
-                <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {product.features.map((feature, index) => (
-                    <li
-                      key={index}
-                      className="flex items-center space-x-2 text-gray-600"
-                    >
-                      <Star className="w-4 h-4 text-amber-500" />
-                      <span>{feature}</span>
-                    </li>
+            <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border pt-4">
+              <p className="text-sm text-muted-foreground">{t("Questions about this product?")}</p>
+              <SupportLink className="inline-flex items-center gap-2 text-sm font-semibold text-foreground underline-offset-4 hover:underline">
+                <MessageCircle aria-hidden="true" className="size-4" />{t("Ask our team")}
+              </SupportLink>
+            </div>
+          </section>
+        </div>
+
+        {(groups.length > 0 || features.length > 0 || notes.length > 0) && (
+          <section aria-labelledby="product-details" className="mt-7 space-y-6 rounded-[28px] border border-border bg-card p-5 sm:p-8 lg:mt-9">
+            <h2 id="product-details" className="text-2xl font-semibold tracking-tight">{t("Product Details")}</h2>
+            {groups.length > 0 && (
+              <div className={groups.length > 1 ? "grid gap-6 lg:grid-cols-2" : "grid gap-6"}>
+                {groups.map(({ title, rows }) => (
+                  <div key={title} className="rounded-2xl border border-border p-4 sm:p-5">
+                    <h3 className="mb-4 font-semibold">{t(title)}</h3>
+                    <dl className="grid grid-cols-2 gap-4">{renderDetails(rows)}</dl>
+                  </div>
+                ))}
+              </div>
+            )}
+            {features.length > 0 && (
+              <div>
+                <h3 className="mb-3 font-semibold">{t("Features")}</h3>
+                <ul className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+                  {features.map((feature, index) => (
+                    <li key={index} className="flex gap-2"><Check aria-hidden="true" className="mt-0.5 size-4 shrink-0" />{feature}</li>
                   ))}
                 </ul>
               </div>
             )}
-
-            {product.story && (
-              <div className="mt-8 pt-8 border-t">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("The Story")}</h3>
-                <p className="text-gray-600 leading-relaxed">{product.story}</p>
+            {notes.map(({ title, value }) => (
+              <div key={title}>
+                <h3 className="mb-2 font-semibold">{t(title)}</h3>
+                <ProductDescription description={value} fallback={null} />
               </div>
-            )}
-
-            {product.designInspiration && (
-              <div className="mt-8 pt-8 border-t">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("Design Inspiration")}</h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {product.designInspiration}
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+            ))}
+          </section>
+        )}
       </div>
-    </div>
+    </main>
   );
 }
