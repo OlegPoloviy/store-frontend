@@ -17,8 +17,8 @@ import { Input } from "@/components/ui/input";
 import { productsApi, type ProductImportProgress, type ProductImportReport } from "@/lib/api/productApi";
 
 const MAX_BYTES = 5 * 1024 * 1024;
-const MAX_PRODUCTS = 500;
-const FILE_TOO_LARGE = "The JSON file and request must fit within 5 MiB.";
+const FILE_TOO_LARGE = "The file must fit within 5 MiB.";
+const CATALOG_CSV = "sku,title,description,price,currency,category,images\r\nKM-001,Oak bench,Made from oak.,179.90,EUR,Benches,https://example.com/bench.jpg\r\n";
 const IMPORT_STEPS = [
   { phase: "validating", label: "Validate", icon: FileCheck },
   { phase: "writing", label: "Prepare products", icon: PackagePlus },
@@ -29,11 +29,15 @@ export function ProductImportDialog({ onImported }: { onImported: () => void }) 
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [format, setFormat] = useState("auto");
+  const [locale, setLocale] = useState("en-GB");
   const [report, setReport] = useState<ProductImportReport | null>(null);
   const [error, setError] = useState("");
   const [pending, setPending] = useState<"validate" | "import" | null>(null);
   const [progress, setProgress] = useState<ProductImportProgress | null>(null);
 
+  const isJson = file?.name.toLowerCase().endsWith(".json");
+  const canValidate = Boolean(file && (isJson || locale.trim()));
   const canImport = report?.dryRun && report.valid === report.total && !report.errors.length;
 
   function handleOpenChange(nextOpen: boolean) {
@@ -47,45 +51,21 @@ export function ProductImportDialog({ onImported }: { onImported: () => void }) 
   }
 
   async function submit(dryRun: boolean) {
-    if (!file || pending || (!dryRun && !canImport)) return;
+    if (!file || !canValidate || pending || (!dryRun && !canImport)) return;
     setError("");
     if (dryRun) setReport(null);
     setProgress(null);
     setPending(dryRun ? "validate" : "import");
 
     try {
-      let payload: unknown;
-      try {
-        const contents = new TextDecoder("utf-8", { fatal: true }).decode(await file.arrayBuffer());
-        payload = JSON.parse(contents, (_key, value: unknown) => {
-          if (typeof value === "number" && !Number.isFinite(value)) {
-            throw new Error("Non-finite JSON number");
-          }
-          return value;
-        });
-      } catch {
-        setError(t("Choose a valid UTF-8 JSON file with finite numbers."));
-        return;
+      const form = new FormData();
+      form.set("file", file);
+      const query = new URLSearchParams({ dryRun: String(dryRun) });
+      if (!isJson) {
+        query.set("format", format);
+        query.set("locale", locale.trim());
       }
-
-      if (!payload || typeof payload !== "object" || !("products" in payload)) {
-        setError(t("Use a JSON object containing a products array."));
-        return;
-      }
-
-      const { products } = payload;
-      if (!Array.isArray(products) || products.length < 1 || products.length > MAX_PRODUCTS) {
-        setError(t("The products array must contain 1 to 500 entries."));
-        return;
-      }
-
-      const body = JSON.stringify({ ...payload, dryRun });
-      if (new TextEncoder().encode(body).byteLength > MAX_BYTES) {
-        setError(t(FILE_TOO_LARGE));
-        return;
-      }
-
-      const result = await productsApi.importProducts(body, setProgress);
+      const result = await productsApi.importProducts(form, query, setProgress);
       setReport(result);
       if (!result.dryRun && result.imported > 0) onImported();
     } catch (err) {
@@ -107,18 +87,18 @@ export function ProductImportDialog({ onImported }: { onImported: () => void }) 
         <DialogHeader>
           <DialogTitle>{t("Batch import")}</DialogTitle>
           <DialogDescription>
-            {t("Upload a UTF-8 JSON file with up to 500 products and a maximum size of 5 MiB.")}
+            {t("Upload Excel (.xlsx), CSV, TSV, XML or JSON. Each file can contain up to 500 products and be up to 5 MiB.")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2">
           <label htmlFor="product-import-file" className="text-sm font-medium">
-            {t("Product JSON file")}
+            {t("Product file")}
           </label>
           <Input
             id="product-import-file"
             type="file"
-            accept=".json,application/json"
+            accept=".xlsx,.csv,.tsv,.xml,.json"
             disabled={Boolean(pending)}
             onChange={(event) => {
               const selected = event.target.files?.[0] ?? null;
@@ -130,9 +110,59 @@ export function ProductImportDialog({ onImported }: { onImported: () => void }) 
             }}
           />
           <p className="text-sm text-stone-600">
-            {t("Include format (catalog, horoshop or google-shopping), locale and products. Keep SKUs and GTINs as strings.")}
+            {t("For spreadsheets, use the first row for column names. Format SKUs and GTINs as text to preserve leading zeroes.")}
           </p>
+          <a
+            href={`data:text/csv;charset=utf-8,${encodeURIComponent(CATALOG_CSV)}`}
+            download="products-template.csv"
+            className="inline-block text-sm font-medium underline underline-offset-4"
+          >
+            {t("Download CSV template")}
+          </a>
         </div>
+
+        {file && !isJson && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-2">
+              <label htmlFor="product-import-format" className="text-sm font-medium">
+                {t("Catalog format")}
+              </label>
+              <select
+                id="product-import-format"
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs"
+                value={format}
+                disabled={Boolean(pending)}
+                onChange={(event) => {
+                  setFormat(event.target.value);
+                  setReport(null);
+                  setError("");
+                }}
+              >
+                <option value="auto">{t("Detect automatically")}</option>
+                <option value="catalog">{t("Catalog")}</option>
+                <option value="horoshop">Horoshop</option>
+                <option value="google-shopping">Google Shopping</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="product-import-locale" className="text-sm font-medium">
+                {t("Product language")}
+              </label>
+              <Input
+                id="product-import-locale"
+                placeholder="uk, en-GB, de"
+                value={locale}
+                required
+                disabled={Boolean(pending)}
+                onChange={(event) => {
+                  setLocale(event.target.value);
+                  setReport(null);
+                  setError("");
+                }}
+              />
+            </div>
+          </div>
+        )}
 
         {error && <p role="alert" className="break-words text-sm text-red-800">{error}</p>}
 
@@ -161,7 +191,7 @@ export function ProductImportDialog({ onImported }: { onImported: () => void }) 
         )}
 
         <DialogFooter className="gap-2">
-          <Button type="button" variant="outline" disabled={!file || Boolean(pending)} onClick={() => void submit(true)}>
+          <Button type="button" variant="outline" disabled={!canValidate || Boolean(pending)} onClick={() => void submit(true)}>
             {pending === "validate" ? t("Validating…") : t("Validate file")}
           </Button>
           <Button type="button" disabled={!canImport || Boolean(pending)} onClick={() => void submit(false)}>

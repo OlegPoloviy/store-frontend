@@ -34,16 +34,16 @@ const importEventSchema = z.discriminatedUnion("type", [
 ]);
 
 async function importProducts(
-  body: string,
+  body: FormData,
+  query: URLSearchParams,
   onProgress: (progress: ProductImportProgress) => void,
 ): Promise<ProductImportReport> {
   const session = await getBrowserSession();
   const headers = new Headers({
-    "Content-Type": "application/json",
     Accept: "application/x-ndjson",
   });
   if (session?.access_token) headers.set("Authorization", `Bearer ${session.access_token}`);
-  const response = await fetch("/api/backend/products/import", { method: "POST", headers, body });
+  const response = await fetch(`/api/backend/products/import?${query}`, { method: "POST", headers, body });
   const contentType = response.headers.get("Content-Type") ?? "";
   if (!contentType.includes("application/x-ndjson") || !response.ok) {
     const data: unknown = await response.json().catch(() => null);
