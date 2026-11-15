@@ -8,6 +8,7 @@ import { ChevronDown, ImageOff, PackagePlus, Pencil, Search, SlidersHorizontal, 
 import { productsApi } from "@/lib/api/productApi";
 import { categoryApi } from "@/lib/api/category.api";
 import { ProductImportDialog } from "@/components/ProductImportDialog";
+import { ProductExportDialog } from "@/components/ProductExportDialog";
 import { productDescriptionEditorText, productDescriptionText } from "@/lib/util/productDescription";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -68,6 +69,7 @@ export default function ProductsManagmentPage() {
         <p className="mt-2 text-sm leading-6 text-stone-500 sm:text-base">{t("Keep your catalog clear, current, and ready for customers.")}</p>
       </div>
       <div className="flex shrink-0 flex-wrap gap-2">
+        <ProductExportDialog />
         <ProductImportDialog onImported={() => void getAllProducts()} />
         <Button asChild className="rounded-full bg-stone-950 px-5 text-white hover:bg-stone-800">
           <Link href="/products-managment/create"><PackagePlus />{t("Add product")}</Link>
