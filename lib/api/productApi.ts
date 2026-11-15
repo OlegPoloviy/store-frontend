@@ -1,3 +1,4 @@
+import { isAxiosError } from "axios";
 import { httpClient } from "./httpClient";
 import { Product } from "@/types/product.type";
 import { z } from "zod";
@@ -87,7 +88,25 @@ async function importProducts(
   }
 }
 
+export type ProductExportFormat = "json" | "csv" | "xlsx";
+
+async function exportProducts(format: ProductExportFormat): Promise<Blob> {
+  try {
+    const response = await httpClient.get<Blob>("/products/export", {
+      params: { format },
+      responseType: "blob",
+    });
+    return response.data;
+  } catch (error) {
+    if (isAxiosError(error) && error.response?.status === 422 && format === "xlsx") {
+      throw new Error("The catalog exceeds Excel limits. Export as JSON or CSV.");
+    }
+    throw new Error("The product export failed.");
+  }
+}
+
 export const productsApi = {
+  exportProducts,
   getAll: async (): Promise<Product[]> => {
     const response = await httpClient.get("/products");
     console.log(response.data);
