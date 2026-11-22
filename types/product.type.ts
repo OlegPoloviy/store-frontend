@@ -20,6 +20,16 @@ export interface Product {
   description: string;
   price: string;
   currency: string;
+  convertedPrices?: {
+    source: "NBU";
+    date: string;
+    baseAmount: string;
+    prices: Record<"USD" | "EUR", {
+      amount: string;
+      originalAmount: string | null;
+      rate: string;
+    }>;
+  } | null;
   material: string | null;
   createdAt: string;
   updatedAt: string;
@@ -27,6 +37,12 @@ export interface Product {
   category: ProductCategory;
   images: ProductImage[];
   isFavorite?: boolean;
+  availability?: "IN_STOCK" | "OUT_OF_STOCK" | "PREORDER" | "BACKORDER" | null;
+  isMadeToOrder?: boolean;
+  estimatedDispatch?: {
+    earliestDate: string;
+    latestDate: string;
+  } | null;
 
   // Additional detailed fields
   assemblyRequired?: string | null;

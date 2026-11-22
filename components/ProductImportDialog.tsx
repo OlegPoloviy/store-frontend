@@ -26,7 +26,8 @@ const IMPORT_STEPS = [
 ] as const;
 
 export function ProductImportDialog({ onImported }: { onImported: () => void }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [convertCurrency, setConvertCurrency] = useState(false);
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [format, setFormat] = useState("auto");
@@ -45,6 +46,7 @@ export function ProductImportDialog({ onImported }: { onImported: () => void }) 
     setOpen(nextOpen);
     if (!nextOpen) {
       setFile(null);
+      setConvertCurrency(false);
       setReport(null);
       setError("");
     }
@@ -65,10 +67,14 @@ export function ProductImportDialog({ onImported }: { onImported: () => void }) 
         query.set("format", format);
         query.set("locale", locale.trim());
       }
-      const result = await productsApi.importProducts(form, query, setProgress);
+      if (convertCurrency) query.set("convertCurrency", "true");
+      const result = await productsApi.importProducts(
+        form, query, setProgress, dryRun ? undefined : report?.conversion?.token
+      );
       setReport(result);
       if (!result.dryRun && result.imported > 0) onImported();
     } catch (err) {
+      if (convertCurrency) setReport(null);
       setError(t(err instanceof Error ? err.message : "The product import request failed."));
     } finally {
       setPending(null);
@@ -164,6 +170,26 @@ export function ProductImportDialog({ onImported }: { onImported: () => void }) 
           </div>
         )}
 
+        {file && (
+          <label className="flex items-start gap-3 rounded-xl border border-border p-3 text-sm">
+            <input
+              type="checkbox"
+              checked={convertCurrency}
+              disabled={Boolean(pending)}
+              className="mt-0.5 size-4 shrink-0 accent-emerald-700"
+              onChange={(event) => {
+                setConvertCurrency(event.target.checked);
+                setReport(null);
+                setError("");
+              }}
+            />
+            <span>
+              <span className="block font-medium">{t("Add USD and EUR prices for UAH products")}</span>
+              <span className="mt-1 block text-muted-foreground">{t("Uses the official NBU rate. The UAH price remains the checkout price.")}</span>
+            </span>
+          </label>
+        )}
+
         {error && <p role="alert" className="break-words text-sm text-red-800">{error}</p>}
 
         {pending && (
@@ -182,6 +208,11 @@ export function ProductImportDialog({ onImported }: { onImported: () => void }) 
                 {t("{{total}} total · {{valid}} valid · {{imported}} imported", report)}
               </p>
             </div>
+            {report.preview && <CatalogPreview preview={report.preview} />}
+            {report.conversion && <CurrencyPreview conversion={report.conversion} locale={i18n.language} />}
+            {convertCurrency && report.valid === report.total && !report.conversion && (
+              <p className="text-muted-foreground">{t("The file has no UAH products to convert.")}</p>
+            )}
             <ImportIssues label={t("Errors")} issues={report.errors} className="text-red-800" />
             <ImportIssues label={t("Warnings")} issues={report.warnings} className="text-amber-900" />
             {canImport && (
@@ -200,6 +231,125 @@ export function ProductImportDialog({ onImported }: { onImported: () => void }) 
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+const fieldLabels: Record<string, string> = {
+  price: "Price",
+  originalPrice: "Original price",
+  availability: "Availability",
+  isPublished: "Published",
+  isMadeToOrder: "Made to order",
+  convertedPrices: "Converted USD/EUR prices",
+  images: "Images",
+  translations: "Translations",
+};
+
+const availabilityLabels: Record<string, string> = {
+  IN_STOCK: "In stock",
+  OUT_OF_STOCK: "Out of stock",
+  PREORDER: "Preorder",
+  BACKORDER: "Backorder",
+};
+
+function CatalogPreview({ preview }: {
+  preview: NonNullable<ProductImportReport["preview"]>;
+}) {
+  const { t, i18n } = useTranslation();
+  const stats = [
+    ["New products", preview.newCount],
+    ["Updated products", preview.updatedCount],
+    ["Unchanged products", preview.unchangedCount],
+  ] as const;
+  const formatValue = (value: string | number | boolean | null, field: string) => {
+    if (value === null) return "—";
+    if (typeof value === "boolean") return t(value ? "Yes" : "No");
+    if (field === "availability") return t(availabilityLabels[value] ?? String(value));
+    return String(value);
+  };
+
+  return (
+    <>
+      <dl className="grid grid-cols-3 gap-2 rounded-lg bg-muted/60 p-3">
+        {stats.map(([label, count]) => (
+          <div key={label} className="min-w-0">
+            <dt className="break-words text-xs text-muted-foreground">{t(label)}</dt>
+            <dd className="mt-1 text-lg font-semibold tabular-nums">{count.toLocaleString(i18n.language)}</dd>
+          </div>
+        ))}
+      </dl>
+      {preview.updates.length > 0 && (
+        <details className="rounded-lg border border-border p-3">
+          <summary className="cursor-pointer font-medium">{t("Changes by product")}</summary>
+          <ol className="mt-2 max-h-64 divide-y divide-border overflow-y-auto pr-2">
+            {preview.updates.map(({ row, sku, title, changes }) => (
+              <li key={row} className="space-y-1.5 py-2 first:pt-0">
+                <p className="break-words font-medium">
+                  {title} <span className="font-normal text-muted-foreground">· {t("Row {{row}}", { row })}{sku && ` · ${sku}`}</span>
+                </p>
+                <ul className="space-y-1 text-xs text-muted-foreground">
+                  {changes.map(({ field, before, after }) => {
+                    const label = fieldLabels[field] ?? field.replace(/([A-Z])/g, " $1").replace(/^./, (first) => first.toUpperCase());
+                    return (
+                      <li key={field} className="break-words">
+                        {before === null && after === null ? t("{{field}} changed", { field: t(label) }) : (
+                          <>
+                            <span className="font-medium text-foreground">{t(label)}</span>
+                            <span>{` · ${formatValue(before, field)} → ${formatValue(after, field)}`}</span>
+                          </>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
+    </>
+  );
+}
+
+function CurrencyPreview({ conversion, locale }: {
+  conversion: NonNullable<ProductImportReport["conversion"]>;
+  locale: string;
+}) {
+  const { t } = useTranslation();
+  const rateDate = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "UTC" })
+    .format(new Date(conversion.rates.date));
+  const formatPrice = (amount: string, currency: "UAH" | "USD" | "EUR") =>
+    new Intl.NumberFormat(locale, { style: "currency", currency }).format(Number(amount));
+
+  return (
+    <section aria-label={t("Currency conversion")} className="space-y-2 rounded-lg bg-muted/60 p-3">
+      <p className="font-medium">{t("Currency conversion")}</p>
+      <p className="text-muted-foreground">
+        {t("NBU rate on {{date}} · {{count}} UAH products", { date: rateDate, count: conversion.count })}
+      </p>
+      <p className="text-muted-foreground tabular-nums">
+        1 USD = {conversion.rates.USD} UAH · 1 EUR = {conversion.rates.EUR} UAH
+      </p>
+      <ul className="divide-y divide-border">
+        {conversion.sample.map(({ row, title, baseAmount, originalAmount, prices }) => (
+          <li key={row} className="space-y-1 py-2">
+            <p className="break-words font-medium">{title}</p>
+            <p className="flex flex-wrap gap-x-2 tabular-nums">
+              <span>{formatPrice(baseAmount, "UAH")}</span>
+              <span aria-hidden="true">→</span>
+              <span>{formatPrice(prices.USD.amount, "USD")}</span>
+              <span>·</span>
+              <span>{formatPrice(prices.EUR.amount, "EUR")}</span>
+            </p>
+            {originalAmount && prices.USD.originalAmount && prices.EUR.originalAmount && (
+              <p className="text-xs text-muted-foreground tabular-nums">
+                {t("Original price")}: {formatPrice(originalAmount, "UAH")} → {formatPrice(prices.USD.originalAmount, "USD")} · {formatPrice(prices.EUR.originalAmount, "EUR")}
+              </p>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

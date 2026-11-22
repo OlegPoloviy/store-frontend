@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
 
     return [
       {
+        source: "/feeds/google-shopping.xml",
+        destination: `${apiUrl}/feeds/google-shopping.xml`,
+      },
+      {
         source: "/api/backend/:path*",
         destination: `${apiUrl}/:path*`,
       },
