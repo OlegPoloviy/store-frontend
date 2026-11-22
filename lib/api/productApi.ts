@@ -10,6 +10,12 @@ const importIssueSchema = z.object({
   message: z.string(),
 });
 
+const convertedAmountSchema = z.object({
+  amount: z.string(),
+  originalAmount: z.string().nullable(),
+  rate: z.string(),
+});
+
 const importReportSchema = z.object({
   total: z.number().int().nonnegative(),
   valid: z.number().int().nonnegative(),
@@ -17,6 +23,34 @@ const importReportSchema = z.object({
   dryRun: z.boolean(),
   errors: z.array(importIssueSchema),
   warnings: z.array(importIssueSchema),
+  preview: z.object({
+    newCount: z.number().int().nonnegative(),
+    updatedCount: z.number().int().nonnegative(),
+    unchangedCount: z.number().int().nonnegative(),
+    updates: z.array(z.object({
+      row: z.number().int().positive(),
+      sku: z.string().optional(),
+      title: z.string(),
+      changes: z.array(z.object({
+        field: z.string(),
+        before: z.union([z.string(), z.number(), z.boolean(), z.null()]),
+        after: z.union([z.string(), z.number(), z.boolean(), z.null()]),
+      })),
+    })),
+  }).optional(),
+  conversion: z.object({
+    count: z.number().int().positive(),
+    token: z.string().optional(),
+    rates: z.object({ date: z.string(), USD: z.string(), EUR: z.string() }),
+    sample: z.array(z.object({
+      row: z.number().int().positive(),
+      sku: z.string().optional(),
+      title: z.string(),
+      baseAmount: z.string(),
+      originalAmount: z.string().nullable(),
+      prices: z.object({ USD: convertedAmountSchema, EUR: convertedAmountSchema }),
+    })),
+  }).optional(),
 });
 
 export type ProductImportReport = z.infer<typeof importReportSchema>;
@@ -38,12 +72,14 @@ async function importProducts(
   body: FormData,
   query: URLSearchParams,
   onProgress: (progress: ProductImportProgress) => void,
+  conversionToken?: string,
 ): Promise<ProductImportReport> {
   const session = await getBrowserSession();
   const headers = new Headers({
     Accept: "application/x-ndjson",
   });
   if (session?.access_token) headers.set("Authorization", `Bearer ${session.access_token}`);
+  if (conversionToken) headers.set("X-Product-Conversion-Token", conversionToken);
   const response = await fetch(`/api/backend/products/import?${query}`, { method: "POST", headers, body });
   const contentType = response.headers.get("Content-Type") ?? "";
   if (!contentType.includes("application/x-ndjson") || !response.ok) {

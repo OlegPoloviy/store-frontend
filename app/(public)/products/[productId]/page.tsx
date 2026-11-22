@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Award, Check, MessageCircle } from "lucide-react";
+import { ArrowLeft, Award, Check, MessageCircle, Truck } from "lucide-react";
 import { ProductActions } from "@/components/ProductActions";
 import { ProductImageGallery } from "@/components/ProductImageGallery";
 import { SupportLink } from "@/components/chat/SupportLink";
@@ -24,6 +24,18 @@ export default async function ProductPage({ params }: { params: Promise<{ produc
     style: "currency",
     currency: product.currency,
   }).format(Number(product.price));
+  const convertedPrices = product.currency === "UAH" &&
+    Number(product.convertedPrices?.baseAmount) === Number(product.price)
+    ? product.convertedPrices?.prices
+    : null;
+  const displayPrice = (currency: "USD" | "EUR", amount: string) =>
+    new Intl.NumberFormat(locale, { style: "currency", currency }).format(Number(amount));
+  const madeToOrder = product.isMadeToOrder && product.availability !== "OUT_OF_STOCK";
+  const dispatch = madeToOrder ? product.estimatedDispatch : null;
+  const dispatchDate = dispatch
+    ? new Intl.DateTimeFormat(locale, { dateStyle: "long", timeZone: "UTC" })
+        .formatRange(new Date(dispatch.earliestDate), new Date(dispatch.latestDate))
+    : null;
   const description = productDescriptionText(product.description);
   const dimension = (value?: string | null) => value ? `${value} ${product.unitOfMeasure ?? "cm"}` : null;
   const assembly = product.assemblyRequired;
@@ -109,7 +121,28 @@ export default async function ProductPage({ params }: { params: Promise<{ produc
             )}
 
             <div className="mt-6 space-y-4 border-t border-border pt-5">
-              <p className="text-3xl font-semibold tracking-tight">{price}</p>
+              <div>
+                <p className="text-3xl font-semibold tracking-tight">{price}</p>
+                {convertedPrices && (
+                  <p className="mt-1 flex flex-wrap items-baseline gap-x-2 text-sm text-muted-foreground tabular-nums">
+                    <span>{t("Approximate prices")}</span>
+                    <span>{displayPrice("USD", convertedPrices.USD.amount)}</span>
+                    <span aria-hidden="true">·</span>
+                    <span>{displayPrice("EUR", convertedPrices.EUR.amount)}</span>
+                  </p>
+                )}
+              </div>
+              {madeToOrder && (
+                <div className="flex items-start gap-3 rounded-xl bg-muted/55 px-3 py-3 text-sm">
+                  <Truck aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium">{t("Made to order")}</p>
+                    {dispatchDate && (
+                      <p className="mt-1 text-muted-foreground">{t("Estimated dispatch")}: {dispatchDate}</p>
+                    )}
+                  </div>
+                </div>
+              )}
               <ProductActions productId={product.id} initialIsFavorite={product.isFavorite} />
             </div>
 
